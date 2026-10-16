@@ -40,3 +40,5 @@ SINGULYAR команда сама провела самоаудит v0.2 и ус
 
 | **0014-webrtc-adapter-as-tier2-dependency** | LIMITATIONS.md item 8 — no air-gapped P2P adapter; HTTPAdapter only covers REST. | ADR-0014 (Accepted, Gate-7) — WebRTCAdapter Python-порт of singulyar ·17 ЗАЛ; uses aiortc (Tier 2 optional). NotExecuted when aiortc absent (honest UNAVAILABLE per ADR-0006). | `docs/adr/0014-webrtc-adapter-as-tier2-dependency.md` |
 | **0015-real-llm-inference-in-ci** | LIMITATIONS.md item 9 — integration test exists but SKIPs in default CI; LLM inference never exercised automatically. | ADR-0015 (Proposed, Gate-7) — weekly CI job runs real Qwen2.5-0.5B on CPU runner; closes item 9 fully when implemented in v2.0. | `docs/adr/0015-real-llm-inference-in-ci.md` |
+
+| **0016-self-rewriting-adr-mechanism** | ADR-0001 bootstraps ADR pattern but doesn't specify how to amend it. | ADR-0016 (Accepted, Gate-7) — meta-ADR specifying ADR lifecycle (Proposed→Accepted→Deprecated→Superseded), addition/amendment/supersession process, recursive self-description. | `docs/adr/0016-self-rewriting-adr-mechanism.md` |
