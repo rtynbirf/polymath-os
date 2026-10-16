@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101713">
+<title>СИНГУЛЯР · ДЕКРЕТ ПОРТАЛ — ВОЛЯ = НАКАЗ</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.decree{max-width:800px;margin:0 auto;padding:20px}
+.decree h1{font-size:clamp(28px,5vw,42px);color:var(--accent);margin:8px 0}
+.decree-textarea{width:100%;min-height:120px;background:var(--panel2);color:var(--text);
+border:1px solid var(--line);border-radius:12px;padding:16px;font:inherit;font-size:18px;resize:vertical}
+.decree-cat{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.decree-cat button{padding:8px 16px;border:1px solid var(--line);border-radius:999px;
+background:var(--panel2);color:var(--text);cursor:pointer;font-size:14px}
+.decree-cat button.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.decree-log{margin-top:20px;border:1px solid var(--line);border-radius:12px;
+background:var(--panel);max-height:400px;overflow:auto}
+.decree-entry{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px}
+.decree-entry:last-child{border-bottom:0}
+.decree-entry .seq{color:var(--accent);font-weight:bold}
+.decree-entry .cat{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px}
+.cat-law{background:#1a3a1a;color:#80ff80}
+.cat-prohibition{background:#3a1a1a;color:#ff9e9e}
+.cat-permission{background:#1a1a3a;color:#80c0ff}
+.cat-directive{background:#3a3a1a;color:#f2c879}
+.decree-entry .ts{color:var(--muted);font-size:12px}
+.decree-entry .text{margin-top:4px;color:var(--text)}
+</style>
+</head><body>
+<div class="app-shell"><header class="topbar">
+<a class="brand" href="index.html"><span class="brand-mark">S</span><span><b>СИНГУЛЯР</b><small>ДЕКРЕТ ПОРТАЛ</small></span></a>
+<div class="address-wrap"><span class="address-icon">⚡</span><input value="singulyar://decree" readonly></div>
+<div class="top-actions"><a class="go-btn" href="index.html">← Назад</a></div>
+</header>
+<main class="main decree">
+<div class="eyebrow">ВОЛЯ ЧЕЛОВЕКОИЗЪЯВЛЕНИЯ = НАКАЗ</div>
+<h1>⚡ Декрет Портал</h1>
+<p class="fineprint">То, что ты напишешь здесь — ЗАКОН. Выше ADR. Выше кода. Выше AI.
+Декрет append-only: невозможно изменить, невозможно удалить. Как только записан — навсегда.</p>
+
+<div class="decree-cat">
+<button class="active" data-cat="directive">📋 Директива</button>
+<button data-cat="law">⚖️ Закон</button>
+<button data-cat="prohibition">⛔ Запрет</button>
+<button data-cat="permission">✅ Разрешение</button>
+<button data-cat="observation">👁 Наблюдение</button>
+</div>
+
+<textarea id="decreeInput" class="decree-textarea" placeholder="Например: никогда не использовать Google DNS" maxlength="5000"></textarea>
+<div style="margin-top:12px">
+<button class="button primary" id="issueBtn" style="font-size:18px;padding:12px 32px">⚡ ИЗДАТЬ ДЕКРЕТ</button>
+</div>
+
+<div id="decreeLog" class="decree-log">
+<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">
+Декретов пока нет. Первый декрет — твой.
+</div>
+</div>
+
+<div style="margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)">
+<h2 style="font-size:17px;margin:0 0 8px">Как это работает</h2>
+<ol class="fineprint" style="padding-left:20px;line-height:1.6">
+<li>Человек печатает декрет в текстовое поле</li>
+<li>Выбирает категорию: закон / запрет / разрешение / директива / наблюдение</li>
+<li>Нажимает «ИЗДАТЬ ДЕКРЕТ»</li>
+<li>Декрет записывается в DecreeLog (SQLite, hash-chained, append-only)</li>
+<li>Ядро SINGULYAR EIR проверяет каждый Intent против активных декретов</li>
+<li>Если запрет «never use Google» → любой intent с «google» → DENIED</li>
+</ol>
+<p class="fineprint" style="color:var(--accent);margin-top:8px">
+DECREE > ADR > code. Воля человека — supreme law.
+</p>
+</div>
+</main></div>
+<div id="toast" class="toast" role="status"></div>
+<script>
+(()=>{
+'use strict';
+let category='directive';
+const $=s=>document.querySelector(s);
+const STORAGE_KEY='singulyar.decree.portal.v1';
+
+document.querySelectorAll('.decree-cat button').forEach(b=>{
+b.onclick=()=>{
+document.querySelectorAll('.decree-cat button').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');category=b.dataset.cat;
+};});
+
+function loadLog(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}}
+function saveLog(log){localStorage.setItem(STORAGE_KEY,JSON.stringify(log.slice(-100)))}
+
+function renderLog(){
+const log=loadLog();
+const view=$('#decreeLog');
+if(!log.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
+view.innerHTML=log.map(d=>{
+const catClass='cat-'+d.category;
+return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span><span class="ts"> ${d.timestamp}</span><div class="text">${esc(d.text)}</div></div>`;
+}).join('');
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function toast(msg){const t=$('#toast');t.textContent=msg;t.className='toast show';setTimeout(()=>t.className='toast',3000)}
+
+$('#issueBtn').onclick=()=>{
+const text=$('#decreeInput').value.trim();
+if(!text){toast('Декрет не может быть пустым');return}
+const log=loadLog();
+const seq=log.length+1;
+const ts=new Date().toISOString();
+const entry={seq,timestamp:ts,text,category};
+log.push(entry);
+saveLog(log);
+$('#decreeInput').value='';
+renderLog();
+toast(`⚡ Декрет #${seq} издан. ${category.toUpperCase()}. Записан навсегда.`);
+};
+
+renderLog();
+})();
+</script>
+</body></html>

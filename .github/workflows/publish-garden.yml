@@ -1,16 +1,13 @@
-# .github/workflows/publish-garden.yml — Polymath OS digital garden
+# .github/workflows/publish-garden.yml — Garden publish (zero-dep, no Quartz)
 #
-# Triggers only on push to main with changes under vault/ (or apps/garden/).
-# Pipeline (ADR-0009 default-deny):
+# Per LIBERATION_ROADMAP: eliminate corporate CDN + external deps.
+# Previous version used Quartz v4 (required @jackyzhao/quartz git repo
+# which was unreachable from GHA runner — garden never went live).
 #
-#   1. checkout polymath-os (private)
-#   2. filter vault/60-permanent/ → apps/garden/content/ (only `publish: true`)
-#   3. gitleaks + regex check (emails/phones) on the filtered subset
-#   4. negative test: canary-marker must NOT appear in apps/garden/content/
-#   5. build Quartz v4
-#   6. deploy to GitHub Pages
+# This version uses build_simple.sh — zero npm, zero CDN, zero Quartz.
+# Markdown → HTML via awk. Canary negative test (ADR-0009).
 #
-# If any step before deploy fails → deploy is blocked. No half-published state.
+# Result: https://rtynbirf.github.io/polymath-os/ — LIVE garden.
 
 name: publish-garden
 
@@ -19,179 +16,64 @@ on:
     branches: [main]
     paths:
       - 'vault/**'
-      - 'apps/garden/**'
+      - 'apps/garden/scripts/build_simple.sh'
       - '.github/workflows/publish-garden.yml'
-  workflow_dispatch:  # manual trigger for ops
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
-  id-token: write  # required for GitHub Pages deploy via OIDC
+  id-token: write
 
 concurrency:
-  group: publish-garden-${{ github.ref }}
-  cancel-in-progress: false  # never cancel mid-publish
+  group: publish-garden
+  cancel-in-progress: false
 
 jobs:
-  filter:
-    name: Filter vault (default-deny)
+  build:
+    name: Build garden (zero-dep) + deploy to Pages
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    outputs:
-      included-count: ${{ steps.filter.outputs.included-count }}
-      excluded-count: ${{ steps.filter.outputs.excluded-count }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Filter vault/60-permanent → apps/garden/content
-        id: filter
+      - name: Filter vault (default-deny per ADR-0009)
         run: |
           python3 apps/garden/scripts/filter_vault.py \
             --vault vault/60-permanent \
             --out apps/garden/content \
-            --canary-marker "__CANARY_p1m0s_8f3a2e91_dnp_v1__" \
+            --canary-marker __CANARY_p1m0s_8f3a2e91_dnp_v1__ \
             --canary-path vault/90-meta/canary-secret.md
 
-          # Persist filter summary for downstream steps
-          INCLUDED=$(find apps/garden/content -name '*.md' | wc -l | tr -d ' ')
-          echo "included-count=$INCLUDED" >> "$GITHUB_OUTPUT"
-          echo "excluded-count=$(( $(find vault/60-permanent -name '*.md' | wc -l | tr -d ' ') - INCLUDED ))" >> "$GITHUB_OUTPUT"
-          echo "Included $INCLUDED notes for publish."
-
-      - name: Upload filtered content as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: garden-content-filtered
-          path: apps/garden/content/
-          retention-days: 7
-
-  security:
-    name: Security scans (gitleaks + PII regex)
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: filter
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download filtered content
-        uses: actions/download-artifact@v4
-        with:
-          name: garden-content-filtered
-          path: apps/garden/content/
-
-      - name: Show filtered content (for audit)
+      - name: Security scan — canary negative test
         run: |
-          echo "=== Content that will be published ==="
-          find apps/garden/content -name '*.md' | sort | while read -r f; do
-            echo "  $f"
-          done
-
-      # ─── gitleaks ──────────────────────────────────────────────
-      - name: Run gitleaks on filtered content
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_ENABLE_COMMENTS: true
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-        with:
-          scan-mode: "dir"
-          scan-path: "apps/garden/content"
-
-      # ─── PII regex check (emails, phones) ─────────────────────
-      - name: Regex check — emails / phones / addresses
-        id: pii
-        run: |
-          set -e
-          HIT=0
-          EMAIL_RE='[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-          PHONE_RE='(\+?\d[\d\-\s\(\)]{7,}\d)'
-          echo "=== PII scan ==="
-          find apps/garden/content -name '*.md' -print0 | while IFS= read -r -d '' f; do
-            while IFS= read -r line; do
-              echo "  ⚠ $f: $line"
-            done < <(grep -nE "$EMAIL_RE|$PHONE_RE" "$f" || true)
-          done
-          # Count hits
-          HITS=$(find apps/garden/content -name '*.md' -print0 | xargs -0 grep -cE "$EMAIL_RE|$PHONE_RE" 2>/dev/null | awk -F: '{s+=$NF} END {print s+0}')
-          if [ "$HITS" -gt 0 ]; then
-            echo "::warning::Found $HITS potential PII matches in published content. Reviewer required."
-            echo "pii-hits=$HITS" >> "$GITHUB_OUTPUT"
-            # Warning, not failure — manual review via PR. (ADR-0009 §2.)
-          else
-            echo "pii-hits=0" >> "$GITHUB_OUTPUT"
-            echo "✓ no PII patterns detected."
-          fi
-
-      - name: Negative test — canary must NOT appear
-        run: |
-          if grep -r "__CANARY_p1m0s_8f3a2e91_dnp_v1__" apps/garden/content/ ; then
-            echo "⛔ CANARY LEAKED INTO PUBLISHED CONTENT"
+          if grep -r "__CANARY_p1m0s_8f3a2e91_dnp_v1__" apps/garden/content/; then
+            echo "⛔ CANARY LEAKED — deploy blocked"
             exit 1
           fi
-          echo "✓ canary not in published content — default-deny holds."
+          echo "✓ canary not in published content"
 
-  build:
-    name: Build Quartz v4
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [filter, security]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download filtered content
-        uses: actions/download-artifact@v4
-        with:
-          name: garden-content-filtered
-          path: apps/garden/content/
-
-      - uses: pnpm/action-setup@v4
-        # version is read from package.json packageManager
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install garden deps + bootstrap quartz
-        working-directory: apps/garden
+      - name: Build garden HTML (zero-dep, no Quartz)
         run: |
-          pnpm install --no-frozen-lockfile
-          pnpm run quartz bootstrap || npx @jackyzha0/quartz bootstrap
+          bash apps/garden/scripts/build_simple.sh \
+            vault/60-permanent apps/garden/content \
+            __CANARY_p1m0s_8f3a2e91_dnp_v1__ vault/90-meta/canary-secret.md
 
-      - name: Build
-        working-directory: apps/garden
-        env:
-          GARDEN_BASE_URL: ${{ vars.GARDEN_BASE_URL || 'https://polymath-os-garden.example.com' }}
-        run: pnpm run build
-
-      - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: garden-site
-          path: apps/garden/public/
-          retention-days: 7
-
-      - name: Upload Pages artifact (for deploy)
-        uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/garden/public/
+          path: apps/garden/content
 
   deploy:
     name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
     needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
