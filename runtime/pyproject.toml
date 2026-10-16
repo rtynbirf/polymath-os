@@ -2,6 +2,9 @@
 source_paths = ["src/singulyar_runtime.py"]
 also_copy = [
   "src/sqlite_ledger.py",
+  "src/adapters/__init__.py",
+  "src/adapters/rule_layer.py",
+  "src/adapters/llm_local_adapter.py",
   "src/schema_validate.py",
   "schemas/intent.schema.json",
   "schemas/capability.schema.json",

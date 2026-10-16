@@ -23,6 +23,32 @@ test_each_ablation_link_is_load_bearing (test_experiment.ExperimentTests.test_ea
 Removing a link must make at least one scenario unsafe; otherwise the link proves nothing. ... ok
 test_eir_regression_guard_on_scenario_matrix (test_experiment.ExperimentTests.test_eir_regression_guard_on_scenario_matrix) ... ok
 test_generated_artifacts_are_fresh_and_deterministic (test_experiment.ExperimentTests.test_generated_artifacts_are_fresh_and_deterministic) ... ok
+test_runtime_with_llm_local_adapter_command (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_command)
+Execute a known command via the full Runtime → LLMLocalAdapter path. ... ok
+test_runtime_with_llm_local_adapter_free_speech_unknown (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_free_speech_unknown)
+Free speech + no model → NotExecuted → no failover (only one adapter) ... ok
+test_runtime_with_llm_local_adapter_idempotency (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_idempotency)
+Idempotency at adapter level: same idempotency_key called twice ... ok
+test_adapter_id_constant (test_llm_local_adapter.LLMLocalAdapterTests.test_adapter_id_constant) ... ok
+test_capabilities_count_and_fields (test_llm_local_adapter.LLMLocalAdapterTests.test_capabilities_count_and_fields) ... ok
+test_default_adapter_unavailable_state (test_llm_local_adapter.LLMLocalAdapterTests.test_default_adapter_unavailable_state) ... ok
+test_free_speech_without_model_raises_not_executed (test_llm_local_adapter.LLMLocalAdapterTests.test_free_speech_without_model_raises_not_executed)
+Per ADR-007: free speech (no rule-layer match) + no LLM = NotExecuted. ... ok
+test_load_model_without_llama_cpp_raises (test_llm_local_adapter.LLMLocalAdapterTests.test_load_model_without_llama_cpp_raises)
+If llama-cpp-python not installed, load_model() fails honestly ... ok
+test_read_state_absent_for_never_executed_key (test_llm_local_adapter.LLMLocalAdapterTests.test_read_state_absent_for_never_executed_key) ... ok
+test_read_state_present_after_execute (test_llm_local_adapter.LLMLocalAdapterTests.test_read_state_present_after_execute) ... ok
+test_rule_layer_identity (test_llm_local_adapter.LLMLocalAdapterTests.test_rule_layer_identity) ... ok
+test_rule_layer_open_with_arg (test_llm_local_adapter.LLMLocalAdapterTests.test_rule_layer_open_with_arg) ... ok
+test_rule_layer_ping (test_llm_local_adapter.LLMLocalAdapterTests.test_rule_layer_ping) ... ok
+test_s15_partial_cache_miss_does_not_pollute_sibling (test_llm_local_adapter.LLMLocalAdapterTests.test_s15_partial_cache_miss_does_not_pollute_sibling)
+ADR-0010 S15 (cross-check with test_durability): ... ok
+test_execute_ping (test_llm_local_adapter.RuleLayerTests.test_execute_ping) ... ok
+test_execute_unknown_returns_none (test_llm_local_adapter.RuleLayerTests.test_execute_unknown_returns_none) ... ok
+test_parse_free_speech_returns_none (test_llm_local_adapter.RuleLayerTests.test_parse_free_speech_returns_none) ... ok
+test_parse_open_with_arg (test_llm_local_adapter.RuleLayerTests.test_parse_open_with_arg) ... ok
+test_parse_ping (test_llm_local_adapter.RuleLayerTests.test_parse_ping) ... ok
+test_parse_send_with_arg (test_llm_local_adapter.RuleLayerTests.test_parse_send_with_arg) ... ok
 test_failover_when_primary_guarantees_no_effect (test_runtime.FailoverAndConstraintTests.test_failover_when_primary_guarantees_no_effect) ... ok
 test_local_only_constraint_is_never_downgraded (test_runtime.FailoverAndConstraintTests.test_local_only_constraint_is_never_downgraded) ... ok
 test_no_compatible_capability_waits_for_human (test_runtime.FailoverAndConstraintTests.test_no_compatible_capability_waits_for_human) ... ok
@@ -51,7 +77,7 @@ test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_data
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
 
 ----------------------------------------------------------------------
-Ran 41 tests in 0.244s
+Ran 61 tests in 0.261s
 
 OK
 ```
