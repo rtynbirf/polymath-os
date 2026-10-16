@@ -3,9 +3,7 @@
   "projectOwner": "USER",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": [
-    "README.md"
-  ],
+  "files": ["README.md"],
   "imageSize": 100,
   "commit": "chore(docs): update all-contributors badge",
   "commitConvention": "conventional",

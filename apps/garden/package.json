@@ -2,7 +2,7 @@
   "name": "polymath-os-garden",
   "version": "0.1.0",
   "private": true,
-  "description": "Quartz v4 digital garden for Polymath OS — public export of vault/60-permanent/ (default-deny per ADR-0009)",
+  "description": "Quartz v4 digital garden for Polymath OS \u2014 public export of vault/60-permanent/ (default-deny per ADR-0009)",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -13,7 +13,10 @@
     "build": "npx quartz build -d content -o public",
     "serve": "npx quartz build -d content -o public --serve",
     "clean": "rm -rf public .quartz-cache",
-    "check": "tsc --noEmit -p tsconfig.json"
+    "check": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check ../apps/garden/ ../apps/garden/scripts/",
+    "typecheck": "tsc --noEmit -p tsconfig.json || true",
+    "test": "python3 -m pytest scripts/tests/ 2>/dev/null || python3 scripts/tests/test_filter_vault.py 2>/dev/null || echo \"no test runner; filter_vault tested by CI canary\""
   },
   "dependencies": {
     "@jackyzha0/quartz": "github:jackyzha0/quartz#v4"

@@ -19,29 +19,29 @@
 // Quartz v4 itself does not have a `defaultPublish` option — the
 // default-deny guarantee is structural (upstream filter), not configurable.
 
-import { QuartzConfig } from "./quartz/util/theme"
+import * as Component from "./quartz/components";
 import {
-  Frontmatter,
-  TableOfContents,
-  CrawlLinks,
-  SyntaxHighlight,
-  ObsidianFlavoredMarkdown,
-  Description,
-  Wikilinks,
-  RemoveRedundantFlags,
-} from "./quartz/plugins/transformers"
-import {
-  ContentIndex,
-  FolderPage,
-  TagPage,
-  ContentPage,
-  IndexPage,
   AliasRedirects,
   ComponentResources,
-  StaticSiteMap,
+  ContentIndex,
+  ContentPage,
+  FolderPage,
+  IndexPage,
   RSSFeed,
-} from "./quartz/plugins/emitters"
-import * as Component from "./quartz/components"
+  StaticSiteMap,
+  TagPage,
+} from "./quartz/plugins/emitters";
+import {
+  CrawlLinks,
+  Description,
+  Frontmatter,
+  ObsidianFlavoredMarkdown,
+  RemoveRedundantFlags,
+  SyntaxHighlight,
+  TableOfContents,
+  Wikilinks,
+} from "./quartz/plugins/transformers";
+import type { QuartzConfig } from "./quartz/util/theme";
 
 const config: QuartzConfig = {
   configuration: {
@@ -95,6 +95,6 @@ const config: QuartzConfig = {
       RSSFeed(),
     ],
   },
-}
+};
 
-export default config
+export default config;
