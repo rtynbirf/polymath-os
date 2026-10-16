@@ -17,15 +17,15 @@ description: "Negative-test canary. Must NEVER appear in apps/garden/content/. U
 ## Negative test
 
 CI-фильтр (`apps/garden/scripts/filter_vault.py`) перед deploy проверяет,
-что маркер `__CANARY__do_not_publish__` отсутствует в собранном контенте:
+что маркер `__CANARY_p1m0s_8f3a2e91_dnp_v1__` отсутствует в собранном контенте:
 
 ```bash
-grep -r "__CANARY__do_not_publish__" apps/garden/content/ \
+grep -r "__CANARY_p1m0s_8f3a2e91_dnp_v1__" apps/garden/content/ \
   && echo "CANARY LEAKED — default-deny broken" && exit 1 \
   || echo "canary absent — default-deny holds"
 ```
 
-Если ты видишь на готовом сайте строку `__CANARY__do_not_publish__` —
+Если ты видишь на готовом сайте строку `__CANARY_p1m0s_8f3a2e91_dnp_v1__` —
 default-deny сломан. Открой issue: github.com/USER/polymath-os/issues.
 
-__CANARY__do_not_publish__
+__CANARY_p1m0s_8f3a2e91_dnp_v1__

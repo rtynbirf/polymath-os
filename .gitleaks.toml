@@ -34,7 +34,7 @@ paths = [
 # Regex-based allowlist — these patterns are intentional, not leaks.
 regexes = [
   # Default-deny canary marker (ADR-0009) — must be present in source, absent in publish output
-  '''__CANARY__do_not_publish__''',
+  '''__CANARY_p1m0s_8f3a2e91_dnp_v1__''',
   # Placeholder age public key in .sops.yaml (always starts with age1...; real key fetched from 1Password at bootstrap)
   '''age1[a-z0-9]{1,58}''',
   # Placeholder values marked explicitly

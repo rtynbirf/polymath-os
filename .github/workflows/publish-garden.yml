@@ -54,7 +54,7 @@ jobs:
           python3 apps/garden/scripts/filter_vault.py \
             --vault vault/60-permanent \
             --out apps/garden/content \
-            --canary-marker "__CANARY__do_not_publish__" \
+            --canary-marker "__CANARY_p1m0s_8f3a2e91_dnp_v1__" \
             --canary-path vault/90-meta/canary-secret.md
 
           # Persist filter summary for downstream steps
@@ -129,7 +129,7 @@ jobs:
 
       - name: Negative test — canary must NOT appear
         run: |
-          if grep -r "__CANARY__do_not_publish__" apps/garden/content/ ; then
+          if grep -r "__CANARY_p1m0s_8f3a2e91_dnp_v1__" apps/garden/content/ ; then
             echo "⛔ CANARY LEAKED INTO PUBLISHED CONTENT"
             exit 1
           fi

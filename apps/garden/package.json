@@ -14,7 +14,7 @@
     "serve": "npx quartz build -d content -o public --serve",
     "clean": "rm -rf public .quartz-cache",
     "check": "tsc --noEmit -p tsconfig.json",
-    "lint": "biome check ../apps/garden/ ../apps/garden/scripts/",
+    "lint": "cd ../.. && biome check .",
     "typecheck": "tsc --noEmit -p tsconfig.json || true",
     "test": "python3 -m pytest scripts/tests/ 2>/dev/null || python3 scripts/tests/test_filter_vault.py 2>/dev/null || echo \"no test runner; filter_vault tested by CI canary\""
   },
