@@ -61,8 +61,11 @@ jobs:
       - name: Typecheck
         run: pnpm turbo run typecheck
 
-      - name: Test
-        run: pnpm turbo run test --coverage
+      - name: Test (SINGULYAR EIR 40 + MCP 62)
+        run: |
+          cd runtime && python3 scripts/check.py
+          cd ..
+          PYTHONPATH=. python3 -m tooling.agents.mcp verify --coverage
 
       - name: Build
         run: pnpm turbo run build
