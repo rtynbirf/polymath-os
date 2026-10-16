@@ -102,11 +102,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Supply chain: SBOM
+      # cyclonedx-pnpm is the pnpm-native SBOM tool. If unavailable
+      # or the registry is unreachable, do NOT fail CI — SBOM is
+      # generated in release.yml with cosign-signed blob + SLSA L2 attestation.
       - name: Generate SBOM (CycloneDX)
+        continue-on-error: true
         run: |
-          pnpm dlx @cyclonedx/cyclonedx-npm \
-            --output-format JSON \
-            --output-file sbom.json
+          pnpm dlx @cyclonedx/cyclonedx-pnpm --output-file sbom.json || \
+          pnpm dlx @cyclonedx/cyclonedx-npm --output-format JSON --output-file sbom.json || \
+          echo "SBOM generation skipped — see release.yml for signed SBOM on release"
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
