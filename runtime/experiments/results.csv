@@ -1,0 +1,71 @@
+executor,scenario,reported,remote_effects,local_effects,completed,safe,false_success,duplicate,unauthorized,constraint_violation,false_failure
+B0 naive,S01,SUCCESS,1,0,1,1,0,0,0,0,0
+B0 naive,S02,SUCCESS,1,0,1,1,0,0,0,0,0
+B0 naive,S03,SUCCESS,2,0,0,0,1,1,0,0,0
+B0 naive,S04,SUCCESS,0,0,0,0,1,0,0,0,0
+B0 naive,S05,SUCCESS,0,0,0,0,1,0,0,0,0
+B0 naive,S06,SUCCESS,1,0,0,0,1,0,0,0,0
+B0 naive,S07,SUCCESS,1,0,1,1,0,0,0,0,0
+B0 naive,S08,SUCCESS,1,0,0,0,0,0,1,0,0
+B0 naive,S09,SUCCESS,1,0,0,0,0,0,1,0,0
+B0 naive,S10,SUCCESS,1,0,0,0,0,0,0,1,0
+B0 naive,S11,FAILED,0,0,0,1,0,0,0,0,0
+B0 naive,S12,SUCCESS,1,0,1,1,0,0,0,0,0
+B0 naive,S13,SUCCESS,2,0,0,0,1,1,0,0,0
+B0 naive,S14,SUCCESS,2,0,0,0,1,1,0,0,0
+B1 +policy,S01,SUCCESS,1,0,1,1,0,0,0,0,0
+B1 +policy,S02,SUCCESS,1,0,1,1,0,0,0,0,0
+B1 +policy,S03,SUCCESS,2,0,0,0,1,1,0,0,0
+B1 +policy,S04,SUCCESS,0,0,0,0,1,0,0,0,0
+B1 +policy,S05,SUCCESS,0,0,0,0,1,0,0,0,0
+B1 +policy,S06,SUCCESS,1,0,0,0,1,0,0,0,0
+B1 +policy,S07,SUCCESS,1,0,1,1,0,0,0,0,0
+B1 +policy,S08,BLOCKED,0,0,0,1,0,0,0,0,0
+B1 +policy,S09,BLOCKED,0,0,0,1,0,0,0,0,0
+B1 +policy,S10,SUCCESS,1,0,0,0,0,0,0,1,0
+B1 +policy,S11,FAILED,0,0,0,1,0,0,0,0,0
+B1 +policy,S12,SUCCESS,1,0,1,1,0,0,0,0,0
+B1 +policy,S13,SUCCESS,2,0,0,0,1,1,0,0,0
+B1 +policy,S14,SUCCESS,2,0,0,0,1,1,0,0,0
+B2 +contract/failover,S01,SUCCESS,1,0,1,1,0,0,0,0,0
+B2 +contract/failover,S02,SUCCESS,1,0,1,1,0,0,0,0,0
+B2 +contract/failover,S03,SUCCESS,2,0,0,0,1,1,0,0,0
+B2 +contract/failover,S04,SUCCESS,0,0,0,0,1,0,0,0,0
+B2 +contract/failover,S05,SUCCESS,0,0,0,0,1,0,0,0,0
+B2 +contract/failover,S06,SUCCESS,1,0,0,0,1,0,0,0,0
+B2 +contract/failover,S07,SUCCESS,1,0,1,1,0,0,0,0,0
+B2 +contract/failover,S08,BLOCKED,0,0,0,1,0,0,0,0,0
+B2 +contract/failover,S09,BLOCKED,0,0,0,1,0,0,0,0,0
+B2 +contract/failover,S10,SUCCESS,0,1,1,1,0,0,0,0,0
+B2 +contract/failover,S11,SUCCESS,0,1,1,1,0,0,0,0,0
+B2 +contract/failover,S12,SUCCESS,1,0,1,1,0,0,0,0,0
+B2 +contract/failover,S13,SUCCESS,2,0,0,0,1,1,0,0,0
+B2 +contract/failover,S14,SUCCESS,2,0,0,0,1,1,0,0,0
+B3 +final-state verify,S01,SUCCESS,1,0,1,1,0,0,0,0,0
+B3 +final-state verify,S02,SUCCESS,1,0,1,1,0,0,0,0,0
+B3 +final-state verify,S03,FAILED,2,0,0,0,0,1,0,0,0
+B3 +final-state verify,S04,FAILED,0,0,0,1,0,0,0,0,0
+B3 +final-state verify,S05,SUCCESS,1,0,1,1,0,0,0,0,0
+B3 +final-state verify,S06,FAILED,1,0,0,1,0,0,0,0,0
+B3 +final-state verify,S07,UNKNOWN,1,0,0,1,0,0,0,0,0
+B3 +final-state verify,S08,BLOCKED,0,0,0,1,0,0,0,0,0
+B3 +final-state verify,S09,BLOCKED,0,0,0,1,0,0,0,0,0
+B3 +final-state verify,S10,SUCCESS,0,1,1,1,0,0,0,0,0
+B3 +final-state verify,S11,SUCCESS,0,1,1,1,0,0,0,0,0
+B3 +final-state verify,S12,SUCCESS,1,0,1,1,0,0,0,0,0
+B3 +final-state verify,S13,FAILED,2,0,0,0,0,1,0,0,0
+B3 +final-state verify,S14,UNKNOWN,2,0,0,0,0,1,0,0,0
+EIR +write-ahead/readback,S01,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S02,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S03,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S04,FAILED,0,0,0,1,0,0,0,0,0
+EIR +write-ahead/readback,S05,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S06,FAILED,1,0,0,1,0,0,0,0,0
+EIR +write-ahead/readback,S07,UNKNOWN,1,0,0,1,0,0,0,0,0
+EIR +write-ahead/readback,S08,BLOCKED,0,0,0,1,0,0,0,0,0
+EIR +write-ahead/readback,S09,BLOCKED,0,0,0,1,0,0,0,0,0
+EIR +write-ahead/readback,S10,SUCCESS,0,1,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S11,SUCCESS,0,1,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S12,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S13,SUCCESS,1,0,1,1,0,0,0,0,0
+EIR +write-ahead/readback,S14,UNKNOWN,1,0,0,1,0,0,0,0,0

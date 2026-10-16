@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SINGULYAR · Воспроизведение реальных прогонов ядра</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f7f9;--panel:#fff;--line:#c9d1da;--text:#14202b;--muted:#4b5b6b;--ok:#0b6b4f;--warn:#8a5a00;--bad:#a1262e;--acc:#0b5cab}
+@media (prefers-color-scheme:dark){:root{--bg:#10141b;--panel:#1a222e;--line:#344456;--text:#edf3f8;--muted:#aab8c6;--ok:#7fd8b5;--warn:#f4cb80;--bad:#ff9aa2;--acc:#8fc2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif}
+main{max-width:980px;margin:auto;padding:20px}h1{font-size:1.5rem;line-height:1.2}h2{font-size:1.1rem;margin:.2rem 0 .6rem}
+p,small{color:var(--muted)}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+label{display:block;font-weight:600;margin-bottom:4px}select,button{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+button{cursor:pointer;margin:6px 6px 0 0}button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+select{width:100%}.row{display:flex;gap:16px;flex-wrap:wrap}.row>div{flex:1 1 280px}
+#state{font-size:1.4rem;font-weight:800}.CONFIRMED{color:var(--ok)}.UNKNOWN,.WAITING_FOR_HUMAN,.RECOVERING{color:var(--warn)}.FAILED,.CANCELLED{color:var(--bad)}
+ol{padding-left:1.3rem;margin:0}li{padding:4px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}li.now{font-weight:700}li.future{opacity:.35}
+.restart{border-left:4px solid var(--warn);padding-left:8px;color:var(--warn)}code{font-family:ui-monospace,monospace;font-size:.9em}
+</style></head>
+<body><main>
+<h1>SINGULYAR · воспроизведение реальных прогонов ядра</h1>
+<p>Здесь нет имитации: страница показывает журнал событий, записанный настоящим ядром (<code>src/singulyar_runtime.py</code>) в 14 сценариях сбоев. Данные генерирует <code>python experiments/ablation.py</code>; тесты проверяют, что файл не устарел. Страница ничего не исполняет и ничего не отправляет.</p>
+<section class="card"><label for="sc">Сценарий</label><select id="sc"></select>
+<div><button id="prev">← Шаг назад</button><button id="next">Шаг вперёд →</button><button id="all">Показать всё</button></div></section>
+<div class="row">
+<section class="card"><h2>Текущее состояние задачи</h2><div id="state" aria-live="polite">—</div><p id="detail"></p></section>
+<section class="card"><h2>Итог (истина о мире)</h2><div id="world"></div><small>Число реальных эффектов на удалённом (remote) и локальном (local) адаптере. Ровно один корректный эффект — единственный настоящий успех.</small></section>
+</div>
+<section class="card"><h2>Журнал событий</h2><ol id="log"></ol></section>
+<section class="card"><small>Журнал хранит отпечатки (HMAC) и ключи, а не значения полезной нагрузки. Хэш-цепочка показывает искажение, но не заменяет внешнюю контрольную точку.</small></section>
+</main>
+<script src="replay_data.js"></script>
+<script>
+const $=id=>document.getElementById(id);let cur=0,step=0;
+REPLAY.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.id+' — '+r.title;$('sc').appendChild(o)});
+function line(e){return e.type==='STATE_TRANSITION'?e.from+' → '+e.to+(e.detail?' — '+e.detail:''):e.type+(e.detail?' — '+e.detail:'')}
+function render(){
+ const r=REPLAY[cur],t=r.trace;$('log').replaceChildren();let st='—',det='';
+ t.forEach((e,i)=>{const li=document.createElement('li');
+  if(i===r.restart_at){const m=document.createElement('li');m.className='restart'+(i>step?' future':'');m.textContent='⚡ процесс умер и перезапущен: состояние «в работе» стало UNKNOWN';$('log').appendChild(m)}
+  li.textContent=String(i+1).padStart(2,'0')+' · '+line(e);if(i>step)li.className='future';if(i===step)li.className='now';$('log').appendChild(li);
+  if(i<=step&&e.type==='STATE_TRANSITION'){st=e.to;det=e.detail||''}});
+ $('state').textContent=st;$('state').className=st;$('detail').textContent=det;
+ const done=step>=t.length-1;
+ $('world').textContent=done?('отчёт: '+r.reported+' · remote: '+r.remote+' · local: '+r.local):'выполните все шаги, чтобы увидеть итог';
+}
+$('sc').onchange=e=>{cur=+e.target.value;step=0;render()};
+$('next').onclick=()=>{step=Math.min(step+1,REPLAY[cur].trace.length-1);render()};
+$('prev').onclick=()=>{step=Math.max(step-1,0);render()};
+$('all').onclick=()=>{step=REPLAY[cur].trace.length-1;render()};
+render();
+</script></body></html>

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Singulyar Capability",
+  "type": "object",
+  "required": ["capability_id", "operation", "adapter_id", "risk_ceiling", "offline", "idempotent", "local_only", "priority"],
+  "properties": {
+    "capability_id": {"type": "string", "minLength": 1},
+    "operation": {"type": "string", "minLength": 1},
+    "adapter_id": {"type": "string", "minLength": 1},
+    "risk_ceiling": {"enum": ["low", "medium", "high"]},
+    "offline": {"type": "boolean"},
+    "idempotent": {"type": "boolean"},
+    "local_only": {"type": "boolean"},
+    "priority": {"type": "integer", "minimum": 0}
+  },
+  "additionalProperties": false
+}

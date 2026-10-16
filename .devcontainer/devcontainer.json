@@ -1,0 +1,34 @@
+// .devcontainer/devcontainer.json — Polymath OS
+// Works in: GitHub Codespaces, DevPod, VS Code, Cursor
+{
+  "name": "Polymath OS Dev",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers-contrib/features/pnpm:1": {},
+    "ghcr.io/devcontainers-contrib/features/tilt:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "make bootstrap",
+  "forwardPorts": [3000, 8080, 5432, 4317],
+  "remoteEnv": {
+    "DATABASE_URL": "postgres://dev:dev@localhost/app",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "runem.lit-element-intellisense"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  }
+}
