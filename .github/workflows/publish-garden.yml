@@ -156,7 +156,7 @@ jobs:
         with:
           node-version: '20'
           cache: pnpm
-          cache-dependency-path: apps/garden/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install garden deps + bootstrap quartz
         working-directory: apps/garden
