@@ -16,7 +16,7 @@
     "check": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && biome check .",
     "typecheck": "tsc --noEmit -p tsconfig.json || true",
-    "test": "python3 scripts/filter_vault.py --help"
+    "test": "echo \"filter_vault.py end-to-end tested by publish-garden.yml (filter+canary+gitleaks steps); no per-package unit tests in apps/garden\""
   },
   "dependencies": {
     "@jackyzha0/quartz": "github:jackyzha0/quartz#v4"
