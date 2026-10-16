@@ -16,6 +16,28 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from schema_validate import SchemaError, load_schema, validate
 
+# ─── Observability: structured traces (ADR-0019, no external deps) ───
+import json as _json_trace, sys as _sys_trace, time as _time_trace, uuid as _uuid_trace
+
+def _emit_trace(event, **attrs):
+    """Emit a structured trace event to stderr. One JSON line per event.
+    OTel-compatible attribute names. Zero external deps (ADR-0002 Tier 1).
+    Grep-able: python3 demo.py 2>&1 | grep '"event"'
+    """
+    try:
+        trace = {
+            'ts': _time_trace.strftime('%Y-%m-%dT%H:%M:%SZ', _time_trace.gmtime()),
+            'trace_id': str(_uuid_trace.uuid4()),
+            'event': event,
+            'kernel_version': 'v0.3',
+            **attrs,
+        }
+        _sys_trace.stderr.write(_json_trace.dumps(trace, ensure_ascii=False) + chr(10))
+        _sys_trace.stderr.flush()
+    except Exception:
+        pass  # traces must never break the kernel
+
+
 
 class State(str, Enum):
     CREATED = "CREATED"

@@ -98,6 +98,20 @@ test_unreadable_state_stays_unknown_and_never_retries (test_runtime.KernelTests.
 test_wrong_final_state_fails_verification (test_runtime.KernelTests.test_wrong_final_state_fails_verification) ... ok
 test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_dataclasses) ... ok
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
+test_oneshot_free_speech_returns_failed_or_waiting (test_subprocess_bridge.SubprocessBridgeOneshotTests.test_oneshot_free_speech_returns_failed_or_waiting)
+Free speech without LLM → FAILED or WAITING_FOR_HUMAN (never CONFIRMED). ... ok
+test_oneshot_invalid_json_returns_error (test_subprocess_bridge.SubprocessBridgeOneshotTests.test_oneshot_invalid_json_returns_error)
+Invalid JSON input → error, not crash. ... ok
+test_oneshot_ping_returns_confirmed (test_subprocess_bridge.SubprocessBridgeOneshotTests.test_oneshot_ping_returns_confirmed)
+Rule-layer 'пинг' → CONFIRMED. ... ok
+test_server_invalid_json_doesnt_crash (test_subprocess_bridge.SubprocessBridgeServerTests.test_server_invalid_json_doesnt_crash)
+Invalid JSON line → error message, server continues. ... ok
+test_server_multiple_intents (test_subprocess_bridge.SubprocessBridgeServerTests.test_server_multiple_intents)
+Server processes multiple Intents, one per line. ... ok
+test_server_ping_pong (test_subprocess_bridge.SubprocessBridgeServerTests.test_server_ping_pong)
+Server responds to ping with pong. ... ok
+test_server_ready_signal (test_subprocess_bridge.SubprocessBridgeServerTests.test_server_ready_signal)
+Server sends 'ready' signal on stdout before processing. ... ok
 test_runtime_with_webrtc_adapter_send (test_webrtc_adapter.IntegrationWithRuntimeTests.test_runtime_with_webrtc_adapter_send)
 Runtime with WebRTCAdapter — execute a send via kernel. ... ok
 test_adapter_id_constant (test_webrtc_adapter.WebRTCAdapterTests.test_adapter_id_constant) ... ok
@@ -116,7 +130,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 86 tests in 5.523s
+Ran 93 tests in 5.782s
 
 OK (skipped=4)
 ```
