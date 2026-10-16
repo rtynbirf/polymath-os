@@ -1,0 +1,13 @@
+# Sovereign browser engine slot — first existing path wins. '#' = comment.
+# No Chrome. No Firefox. No Edge. No Safari. No corporate engine.
+# Candidates (independent engines, NOT verified in all environments):
+# Linux/Mac:     /usr/bin/netsurf /usr/bin/servo /usr/bin/ladybird
+# Windows:       C:\Tools\Engines\netsurf.exe C:\Tools\Engines\servo.exe
+# WinPE (H-PE11): X:\Tools\Engines\netsurf.exe X:\Tools\Engines\servo.exe X:\Tools\Engines\ladybird.exe
+# Any engine:    put your binary here and add the path.
+/usr/bin/netsurf
+/usr/bin/servo
+/usr/bin/ladybird
+C:\Tools\Engines\netsurf.exe
+C:\Tools\Engines\servo.exe
+C:\Tools\Engines\ladybird.exe

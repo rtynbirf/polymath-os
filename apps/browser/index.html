@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101713"><meta name="description" content="СИНГУЛЯР — прототип браузерной среды под контролем человека.">
+<title>СИНГУЛЯР — среда человека</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="СИНГУЛЯР — главная"><span class="brand-mark">S</span><span><b>СИНГУЛЯР</b><small>СРЕДА ЧЕЛОВЕКА</small></span></a>
+    <div class="address-wrap"><span class="address-icon" aria-hidden="true">⌕</span><input id="address" aria-label="Адрес или намерение" placeholder="Адрес, запрос или намерение…" autocomplete="off"><button id="goBtn" class="go-btn" title="Открыть адрес или поиск">Перейти ↵</button></div>
+    <div class="top-actions"><button class="icon-btn" id="privacyBtn" title="Панель контроля" aria-label="Панель контроля">◈</button><button class="icon-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">◐</button></div>
+  </header>
+  <div class="tabsbar"><div id="tabs" class="tabs" role="tablist" aria-label="Рабочие вкладки"></div><button id="newTab" class="new-tab" aria-label="Новая вкладка" title="Новая вкладка">＋</button><div class="tab-spacer"></div><span class="status-pill"><i></i> Локальное ядро</span></div>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Основная навигация">
+      <div class="side-label">МОЁ ПРОСТРАНСТВО</div>
+      <button class="nav-item active" data-view="home"><span>⌂</span> Обзор</button>
+      <button class="nav-item" data-view="saved"><span>☆</span> Сохранённое</button>
+      <button class="nav-item" data-view="notes"><span>▤</span> Моя память</button>
+      <button class="nav-item" data-view="connections"><span>⌘</span> Связи</button>
+      <button class="nav-item" data-view="tools"><span>◇</span> Инструменты</button>
+      <a class="nav-item" href="intent-lab.html" style="text-decoration:none"><span>◎</span> Лаборатория намерений ↗</a>
+      <div class="side-divider"></div><div class="side-label">УПРАВЛЕНИЕ</div>
+      <button class="nav-item" data-view="privacy"><span>◈</span> Контроль и данные</button>
+      <button class="nav-item" data-view="settings"><span>⚙</span> Настройки</button>
+      <div class="sidebar-bottom"><div class="local-indicator"><span class="pulse"></span><div><b>Ваши данные</b><small>Хранятся в этом браузере</small></div></div><button class="text-button" id="exportBtn">Экспортировать мои данные ↗</button></div>
+    </aside>
+    <main id="main" class="main" tabindex="-1" aria-live="polite"></main>
+  </div>
+  <footer class="footer"><span>СИНГУЛЯР · ПРОТОТИП 0.2</span><span>Человек задаёт направление. Система показывает, что делает.</span><span id="clockLabel">Локальный режим</span></footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<dialog id="confirmDialog" class="dialog"><form method="dialog"><div class="dialog-mark">!</div><h2 id="dialogTitle">Подтверждение</h2><p id="dialogText"></p><div class="dialog-actions"><button class="button quiet" value="cancel">Отмена</button><button class="button primary" id="dialogConfirm" value="ok">Продолжить</button></div></form></dialog>
+<script src="app.js"></script>
+</body></html>
