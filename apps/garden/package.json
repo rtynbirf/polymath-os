@@ -19,6 +19,6 @@
     "@jackyzha0/quartz": "github:jackyzha0/quartz#v4"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "typescript": "^7.0.2"
   }
 }
