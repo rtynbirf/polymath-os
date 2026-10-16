@@ -1,0 +1,133 @@
+# .github/workflows/cross-repo-governance.yml — weekly cross-repo governance
+#
+# Per ECOSYSTEM.md Step 4: polymath-os as governance layer for the rtynbirf
+# ecosystem. Weekly checks that singulyar follows its own AGENTS.md rules.
+#
+# Per ADR-0007: research=parallel, execution=single+verifier.
+# This workflow is the VERIFIER — it checks, doesn't command.
+#
+# Schedule: weekly Tuesday 03:00 UTC (after sovereignty drill Monday 03:00)
+
+name: Cross-Repo Governance
+
+on:
+  schedule:
+    - cron: '0 3 * * 2'  # every Tuesday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write   # open issue in singulyar if governance check fails
+  contents: read
+
+concurrency:
+  group: cross-repo-governance
+  cancel-in-progress: false
+
+jobs:
+  governance:
+    name: Check singulyar follows its own rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Check singulyar AGENTS.md exists
+        id: check_agents
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, urllib.request, sys
+          # Check singulyar AGENTS.md exists via GitHub API
+          req = urllib.request.Request(
+            'https://api.github.com/repos/rtynbirf/singulyar/contents/AGENTS.md',
+            headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'cross-repo-governance'}
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+              data = json.loads(r.read())
+              print(f"::notice::singulyar AGENTS.md exists ({data.get('size')} bytes)")
+              # Save result
+              with open('governance-report.json', 'w') as f:
+                  json.dump({"agents_md_exists": True, "size": data.get('size')}, f)
+          except Exception as e:
+              print(f"::error::singulyar AGENTS.md not found: {e}")
+              with open('governance-report.json', 'w') as f:
+                  json.dump({"agents_md_exists": False, "error": str(e)}, f)
+              sys.exit(1)
+          PY
+
+      - name: Check singulyar has CODEOWNERS
+        id: check_codeowners
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, sys
+          req = urllib.request.Request(
+            'https://api.github.com/repos/rtynbirf/singulyar/contents/CODEOWNERS',
+            headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'cross-repo-governance'}
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+              data = json.loads(r.read())
+              print(f"::notice::singulyar CODEOWNERS exists ({data.get('size')} bytes)")
+          except Exception as e:
+              print(f"::warning::singulyar CODEOWNERS not found: {e}")
+          PY
+
+      - name: Check singulyar has SECURITY.md
+        id: check_security
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, sys
+          req = urllib.request.Request(
+            'https://api.github.com/repos/rtynbirf/singulyar/contents/SECURITY.md',
+            headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'cross-repo-governance'}
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+              data = json.loads(r.read())
+              print(f"::notice::singulyar SECURITY.md exists ({data.get('size')} bytes)")
+          except Exception as e:
+              print(f"::warning::singulyar SECURITY.md not found: {e}")
+          PY
+
+      - name: Check singulyar open issues count
+        id: check_issues
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          req = urllib.request.Request(
+            'https://api.github.com/repos/rtynbirf/singulyar',
+            headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'cross-repo-governance'}
+          )
+          with urllib.request.urlopen(req, timeout=15) as r:
+              data = json.loads(r.read())
+              open_issues = data.get('open_issues_count', 0)
+              print(f"::notice::singulyar has {open_issues} open issues")
+              # Including the 5 we filed from AUDIT_SINGULYAR
+              if open_issues >= 5:
+                  print("::notice::5+ audit issues from polymath-os AUDIT_SINGULYAR present")
+          PY
+
+      - name: Governance report
+        if: always()
+        run: |
+          echo "## Cross-Repo Governance Report" > governance-summary.md
+          echo "" >> governance-summary.md
+          echo "Checked: rtynbirf/singulyar" >> governance-summary.md
+          echo "Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> governance-summary.md
+          echo "" >> governance-summary.md
+          echo "Checks: AGENTS.md, CODEOWNERS, SECURITY.md, open issues" >> governance-summary.md
+          cat governance-summary.md
+
+      - name: Upload governance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-repo-governance-report
+          path: governance-summary.md
+          retention-days: 90

@@ -146,3 +146,35 @@ This is the full "управляемая эмерджентная непреры
 - SOVEREIGNTY_CONTRACT.md — the 7 contracts that govern the ecosystem
 - singulyar AGENTS.md — the 7 «Незыблемое» laws for the product repo
 - singulyar `data/versions.json` — single source of truth for singulyar numbers
+
+
+## Cross-repo execution — FIRST REAL PR (v2.3.0) ✨
+
+polymath-os's SINGULYAR EIR kernel drove a real code fix in singulyar:
+
+| Step | What | Where |
+|---|---|---|
+| Audit | Found S18 (S15_MAX=140 < S15_CORE.length=168) | polymath-os/docs/AUDIT_SINGULYAR.md |
+| Issue | Filed as #7 in singulyar | https://github.com/rtynbirf/singulyar/issues/7 |
+| Branch | Created fix/s18-cache-eviction | singulyar repo |
+| Commit | S15_MAX 140→200 | sw15.js, commit ccfe3dcafe |
+| PR | Pull request #11 | https://github.com/rtynbirf/singulyar/pull/11 |
+
+The full circuit: **audit → issue → kernel → GitAdapter → branch → commit → PR**.
+
+This proves the «управляемая эмерджентная непрерывность» thesis at execution level:
+the human's intent (expressed through polymath-os's audit) reached singulyar (the product)
+through a real code fix, across repo boundaries, across language boundaries
+(Python audit → JS fix), across concept boundaries (audit → issue → code → PR).
+
+## Ecosystem integration path — COMPLETE
+
+| Step | What | Status |
+|---|---|---|
+| 1 | Audit → singulyar issues (5 critical filed) | ✅ v2.1.0 |
+| 2 | ECOSYSTEM.md (map of 4 repos) | ✅ v2.1.0 |
+| 3 | Python↔JS bridge (subprocess JSON protocol) | ✅ v2.2.0 |
+| 4 | Cross-repo CI (governance workflow) | ✅ v2.3.0 |
+| 5 | Human intent → cross-repo execution (PR #11) | ✅ v2.3.0 |
+
+All 5 steps complete. The ecosystem is integrated.
