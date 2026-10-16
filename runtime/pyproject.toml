@@ -1,0 +1,14 @@
+[tool.mutmut]
+source_paths = ["src/singulyar_runtime.py"]
+also_copy = [
+  "src/sqlite_ledger.py",
+  "src/schema_validate.py",
+  "schemas/intent.schema.json",
+  "schemas/capability.schema.json",
+  "schemas/evidence.schema.json",
+  "tests/_helpers.py"
+]
+test_command = "python -m pytest tests/test_runtime.py tests/test_durability.py -x -q"
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]

@@ -56,9 +56,9 @@ class ContractError(RuntimeErrorBase): pass
 class UnknownOutcome(RuntimeErrorBase): pass
 class NotExecuted(Exception):
     """Raised by an adapter that GUARANTEES no effect occurred (safe to fail over)."""
-class InjectedFault(Exception):
+class InjectedFault(Exception):  # pragma: no mutate  — test fault injection helper — not production (per ADR-0010)
     """Test fault that behaves like an ordinary adapter-side failure."""
-class SimulatedCrash(BaseException):
+class SimulatedCrash(BaseException):  # pragma: no mutate  — test exception class — not production (per ADR-0010)
     """Simulates process death: deliberately not an Exception, so nothing catches it."""
 
 
@@ -175,7 +175,7 @@ class Adapter:
     def read_state(self, intent: Intent, idempotency_key: str) -> Observation: raise NotImplementedError
 
 
-class _EffectAdapter(Adapter):
+class _EffectAdapter(Adapter):  # pragma: no mutate  — test scaffolding base — not production (per ADR-0010)
     """Shared behaviour + fault knobs for simulated effect stores."""
     def __init__(self, *, dedup: bool = True, adapter_id: Optional[str] = None):
         if adapter_id:
@@ -218,7 +218,7 @@ class _EffectAdapter(Adapter):
         return Observation(PRESENT, items[-1], len(items))
 
 
-class MemoryAdapter(_EffectAdapter):
+class MemoryAdapter(_EffectAdapter):  # pragma: no mutate  — test scaffolding adapter — not production (per ADR-0010)
     adapter_id = "memory"
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -233,7 +233,7 @@ class SimulatedRemoteAdapter(MemoryAdapter):
     adapter_id = "simulated-remote"
 
 
-class SQLiteEffectAdapter(_EffectAdapter):
+class SQLiteEffectAdapter(_EffectAdapter):  # pragma: no mutate  — test scaffolding adapter — not production (per ADR-0010)
     """Simulated 'remote world' that survives process death (used by restart tests)."""
     adapter_id = "sqlite-remote"
     def __init__(self, path, **kw):

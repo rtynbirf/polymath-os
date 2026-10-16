@@ -15,6 +15,8 @@ test_consent_is_not_restored_after_restart_fail_closed (test_durability.RestartT
 test_crash_before_effect_recovers_by_safe_retry (test_durability.RestartTests.test_crash_before_effect_recovers_by_safe_retry) ... ok
 test_in_process_crash_then_rehydrate_and_recover_without_duplicate (test_durability.RestartTests.test_in_process_crash_then_rehydrate_and_recover_without_duplicate) ... ok
 test_real_process_death_between_effect_and_ledger_record (test_durability.RestartTests.test_real_process_death_between_effect_and_ledger_record) ... ok
+test_s15_partial_cache_miss_does_not_false_confirm (test_durability.RestartTests.test_s15_partial_cache_miss_does_not_false_confirm)
+ADR-0010 S15: read_state for an absent key MUST return ABSENT, ... ok
 test_wrong_redaction_key_cannot_bind_to_existing_task (test_durability.RestartTests.test_wrong_redaction_key_cannot_bind_to_existing_task) ... ok
 test_required_documents_exist (test_experiment.DocsTests.test_required_documents_exist) ... ok
 test_each_ablation_link_is_load_bearing (test_experiment.ExperimentTests.test_each_ablation_link_is_load_bearing)
@@ -49,7 +51,7 @@ test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_data
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
 
 ----------------------------------------------------------------------
-Ran 40 tests in 0.241s
+Ran 41 tests in 0.244s
 
 OK
 ```

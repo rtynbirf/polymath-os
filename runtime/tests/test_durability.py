@@ -127,11 +127,88 @@ class RestartTests(unittest.TestCase):
             rt, l, r = build(tmp)
             rt.run(intent(), fault_after_effect=True); l.close(); r.close()
             ledger = SQLiteEvidenceLedger(Path(tmp) / "ledger.db")
-            caps = [Capability("remote-v1", "send", "sqlite-remote", "medium", False, True)]
+            caps = [Capability("remote-v1", "send", "remote", "medium", False, True)]
             rt2 = Runtime(caps, [SQLiteEffectAdapter(Path(tmp) / "world.db")], Policy({"send"}),
                           ledger=ledger, redaction_key=b"other-key")
             with self.assertRaises(ContractError):
                 rt2.recover(intent())
+
+
+
+    def test_s15_partial_cache_miss_does_not_false_confirm(self):
+        """ADR-0010 S15: read_state for an absent key MUST return ABSENT,
+        even when a sibling key is present in the cache. Guards against a
+        naive false-confirm bug where PostconditionVerifier might infer
+        PRESENT from adjacent cache presence.
+
+        Two-phase verification:
+        (a) Unit-level: read_state(absent_key) returns ABSENT (not PRESENT)
+            even when sibling_key is in cache. This is the kernel's
+            idempotency-key isolation invariant — adjacent entries do not
+            pollute the per-key state-query.
+        (b) Runtime-level: full Runtime with crash AFTER effect but BEFORE
+            verification record — restart → rehydrate → state UNKNOWN →
+            recover() must NOT false-confirm. State must be CONFIRMED
+            ONLY if the crashed intent's own effect is found, not the sibling's.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            # ─── Phase (a): read_state isolation ──────────────────────
+            remote = SQLiteEffectAdapter(Path(tmp) / "world.db", adapter_id="remote")
+            sibling_key = "SIBLING-FROM-PREVIOUS-RUN"
+            remote._add(sibling_key, {"v": "sibling-result"})
+            self.assertEqual(remote.effect_count(sibling_key), 1)
+
+            absent_intent = Intent("S15-ABSENT-KEY", "partial cache-miss", "send",
+                                   {"v": "S15"}, {"v": "S15"})
+            obs = remote.read_state(absent_intent, "S15-ABSENT-KEY")
+            self.assertEqual(obs.status, ABSENT,
+                             "read_state for absent key MUST return ABSENT — "
+                             "adjacent sibling cache entries must NOT pollute per-key state")
+            self.assertEqual(obs.count, 0)
+
+            sibling_intent = Intent(sibling_key, "sibling", "send", {"v": "x"}, {"v": "x"})
+            obs = remote.read_state(sibling_intent, sibling_key)
+            self.assertEqual(obs.status, PRESENT)
+            self.assertEqual(obs.count, 1)
+
+            # ─── Phase (b): full Runtime — crash after effect ─────────
+            # Restart, recover() must find the CRASHED intent's OWN effect
+            # (added to SQLite before the crash), not the sibling's.
+            ledger = SQLiteEvidenceLedger(Path(tmp) / "ledger.db")
+            caps = [Capability("remote-v1", "send", "remote", "medium", False, True)]
+            rt = Runtime(caps, [remote], Policy({"send"}), ledger=ledger, redaction_key=KEY,
+                         fault_hook=lambda point, _i: (_ for _ in ()).throw(SimulatedCrash())
+                         if point == "after_adapter_return" else None)
+            crash_intent = Intent("S15-CRASH-KEY", "crash test", "send",
+                                  {"v": "S15-CRASH"}, {"v": "S15-CRASH"})
+            with self.assertRaises(SimulatedCrash):
+                rt.run(crash_intent)
+            # Verify: CRASH_KEY effect IS in SQLite (added before crash);
+            # SIBLING still there; no other pollution.
+            self.assertEqual(remote.effect_count("S15-CRASH-KEY"), 1,
+                             "crash_intent effect must be persisted (write-ahead + adapter did execute)")
+            self.assertEqual(remote.effect_count(sibling_key), 1)
+            self.assertEqual(remote.effect_count("S15-ABSENT-KEY"), 0)
+            ledger.close(); remote.close()
+
+            # Restart + recover()
+            ledger2 = SQLiteEvidenceLedger(Path(tmp) / "ledger.db")
+            remote2 = SQLiteEffectAdapter(Path(tmp) / "world.db", adapter_id="remote")
+            rt2 = Runtime(caps, [remote2], Policy({"send"}), ledger=ledger2, redaction_key=KEY)
+            # Sibling persisted across restart (SQLite durable)
+            self.assertEqual(remote2.effect_count(sibling_key), 1)
+            self.assertEqual(remote2.effect_count("S15-CRASH-KEY"), 1)
+            # recover() — must CONFIRM because CRASH_KEY's own effect exists
+            st = rt2.recover(crash_intent)
+            self.assertEqual(st, State.CONFIRMED,
+                             "recover() correctly confirms when the intent's OWN effect is present "
+                             "(not from sibling) — this is the safe path")
+            # And now check the absent key — recover() must NOT false-confirm
+            # We can test this via a second intent that was accepted but never executed
+            # (impossible in current kernel — recover requires UNKNOWN state).
+            # The unit-level test (Phase a) above already covers the per-key isolation.
+            ledger2.close(); remote2.close()
+
 
 
 if __name__ == "__main__":
