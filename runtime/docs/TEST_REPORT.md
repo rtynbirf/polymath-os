@@ -6,6 +6,19 @@ Run: 2026-10-16 · Python 3.12.15 · Linux
 Exit code: 0
 
 ```text
+test_append_only_cannot_amend (test_decree_log.DecreeLogTests.test_append_only_cannot_amend)
+Decrees are immutable. Can't UPDATE text directly. ... ok
+test_check_compliance_no_decrees_allows_all (test_decree_log.DecreeLogTests.test_check_compliance_no_decrees_allows_all)
+Empty decree log → everything compliant (no prohibitions). ... ok
+test_check_compliance_prohibition_blocks (test_decree_log.DecreeLogTests.test_check_compliance_prohibition_blocks)
+A prohibition decree blocks matching intents. ... ok
+test_decree_count (test_decree_log.DecreeLogTests.test_decree_count) ... ok
+test_decrees_survive_restart (test_decree_log.DecreeLogTests.test_decrees_survive_restart)
+Decrees persist in SQLite across restart. ... ok
+test_hash_chain_verification_on_open (test_decree_log.DecreeLogTests.test_hash_chain_verification_on_open)
+Opening a log with a broken chain → DecreeIntegrityError. ... ok
+test_issue_first_decree (test_decree_log.DecreeLogTests.test_issue_first_decree) ... ok
+test_issue_multiple_decrees_chain (test_decree_log.DecreeLogTests.test_issue_multiple_decrees_chain) ... ok
 test_lead_acquire_expired_lease_released (test_durability.LeadLeaseTests.test_lead_acquire_expired_lease_released)
 Lease with very short TTL: after expiry, another Runtime can acquire ... ok
 test_lead_acquire_then_block_second (test_durability.LeadLeaseTests.test_lead_acquire_then_block_second)
@@ -130,7 +143,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 93 tests in 5.950s
+Ran 101 tests in 5.853s
 
 OK (skipped=4)
 ```
