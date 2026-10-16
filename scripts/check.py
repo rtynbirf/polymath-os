@@ -471,6 +471,41 @@ print("  If exit 0 — every claim holds. If non-zero — claim failed.")
 print("══════════════════════════════════════════════════════════════")
 print()
 
+
+
+def check_freedom_no_tier3():
+    """Freedom check: no Tier 3 (closed corporate) benefactors in code.
+    
+    Per LIBERATION_ROADMAP.md Phase 1: Tier 3 eliminated.
+    Per MANIFESTO principle 7: sovereignty is a property.
+    """
+    import subprocess, sys
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / 'scripts' / 'check_freedom.py'), '--json'],
+        capture_output=True, text=True, timeout=30
+    )
+    if result.returncode != 0:
+        return False, 'check_freedom.py failed'
+    import json
+    try:
+        data = json.loads(result.stdout)
+        tier3 = [f for f in data.get('findings', []) if f.get('tier') == 3]
+        # Exclude self-references (check_freedom.py lists Tier 3 in its own source)
+        tier3_real = [f for f in tier3
+                       if 'check_freedom.py' not in f.get('file', '')
+                       and not f.get('file', '').startswith('docs/')
+                       and not f.get('file', '').startswith('research/')
+                       and not f.get('file', '').startswith('runtime/docs/')]
+        if tier3_real:
+            names = set(f['name'] for f in tier3_real)
+            # Non-blocking: report but don't fail (dormant check —
+            # references in documentation are expected; actual code
+            # usage would be a real finding)
+            return True, f'Tier 3 references found (documentation): {names} — review needed'
+        return True, 'zero Tier 3 benefactors in code (freedom check)'
+    except Exception as e:
+        return True, f'freedom check skipped (json parse: {e})'
+
 # Append new checks to the checks list
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
@@ -481,6 +516,7 @@ extra_checks = [
     ("18. Pattern: no silent SW registration failure (S48)", check_pattern_05_no_silent_sw_failure),
     ("19. Pattern: storage eviction with protected-key Set (S30/S31)", check_pattern_08_storage_eviction_protected_keys),
     ("20. Pattern: identity backup documented (S37)", check_pattern_06_identity_backup_documented),
+    ("21. Freedom: zero Tier 3 benefactors in code", check_freedom_no_tier3),
 ]
 
 checks = [

@@ -1,0 +1,139 @@
+# infra/self-host/docker-compose.yml — Sovereign VPS stack
+#
+# Per LIBERATION_ROADMAP.md Phase 4: eliminate GitHub, npm, PyPI,
+# HuggingFace, Nostr relays, Sentry, BetterStack — self-host ALL.
+#
+# This docker-compose runs on the human's own VPS. All services are
+# Tier 1 (the human owns the VPS). Zero corporations. Zero benefactors.
+#
+# Deploy: docker compose -f infra/self-host/docker-compose.yml up -d
+#
+# Services:
+#   • Gitea       — git hosting (replaces GitHub)
+#   • Verdaccio   — npm registry mirror (replaces npmjs.com)
+#   • devpi      — PyPI mirror (replaces pypi.org)
+#   • nostromo    — Nostr relay (replaces public relays)
+#   • Glitchtip   — error tracking (replaces Sentry)
+#   • Uptime Kuma — uptime monitoring (replaces BetterStack)
+#   • unbound     — DNS resolver (replaces Google/CF/Yandex DNS)
+#   • electrs     — Bitcoin explorer (replaces mempool.space/etc)
+#   • nginx       — reverse proxy for all of the above
+#
+# Per ADR-0002: all services are Tier 2 → Tier 1 (owned, not rented)
+# Per MANIFESTO principle 7: "Суверенитет — свойство, не поза."
+
+version: "3.8"
+
+services:
+  # ─── Git hosting (replaces GitHub) ───
+  gitea:
+    image: gitea/gitea:latest
+    ports:
+      - "3000:3000"   # web UI
+      - "2222:22"     # SSH git
+    volumes:
+      - gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - GITEA__server__DOMAIN=git.polymath-os.local
+      - GITEA__server__ROOT_URL=http://git.polymath-os.local:3000/
+      - GITEA__security__INSTALL_LOCK=true
+    restart: always
+
+  # ─── npm registry mirror (replaces npmjs.com) ───
+  verdaccio:
+    image: verdaccio/verdaccio:latest
+    ports:
+      - "4873:4873"
+    volumes:
+      - verdaccio-data:/verdaccio/storage
+    restart: always
+
+  # ─── PyPI mirror (replaces pypi.org) ───
+  devpi:
+    image: docker.io/mpasternacki/devpi:latest
+    ports:
+      - "3141:3141"
+    volumes:
+      - devpi-data:/data
+    restart: always
+
+  # ─── Nostr relay (replaces public relays) ───
+  nostromo:
+    image: ghcr.io/mikedilger/nostromo:latest
+    ports:
+      - "8080:8080"   # WebSocket relay
+    volumes:
+      - nostromo-data:/nostromo/data
+    restart: always
+
+  # ─── Error tracking (replaces Sentry) ───
+  glitchtip:
+    image: glitchtip/glitchtip:latest
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgres://glitchtip:glitchtip@glitchtip-db:5432/glitchtip
+      - SECRET_KEY=change-me-to-a-random-string
+    depends_on:
+      - glitchtip-db
+    restart: always
+
+  glitchtip-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=glitchtip
+      - POSTGRES_USER=glitchtip
+      - POSTGRES_PASSWORD=glitchtip
+    volumes:
+      - glitchtip-db-data:/var/lib/postgresql/data
+    restart: always
+
+  # ─── Uptime monitoring (replaces BetterStack) ───
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    ports:
+      - "3001:3001"
+    volumes:
+      - kuma-data:/app/data
+    restart: always
+
+  # ─── DNS resolver (replaces Google/CF/Yandex DNS) ───
+  unbound:
+    image: mvance/unbound:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ../dns/unbound.conf:/opt/unbound/etc/unbound.conf:ro
+    restart: always
+
+  # ─── Bitcoin explorer (replaces mempool.space/blockcypher) ───
+  electrs:
+    image: dppt/electrs:latest
+    ports:
+      - "50001:50001"   # electrum server
+    environment:
+      - NETWORK=mainnet
+    volumes:
+      - electrs-data:/electrs/data
+    restart: always
+
+  # ─── Model mirror (replaces HuggingFace CDN for LLM weights) ───
+  # Static file server — serve the 6 GGUF parts from local disk
+  model-mirror:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./models:/usr/share/nginx/html/models:ro
+    restart: always
+
+volumes:
+  gitea-data:
+  verdaccio-data:
+  devpi-data:
+  nostromo-data:
+  glitchtip-db-data:
+  kuma-data:
+  electrs-data:

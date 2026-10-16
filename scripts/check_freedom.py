@@ -100,7 +100,7 @@ BENEFACTORS = {
 SKIP_PATTERNS = {
     'node_modules', '.git', '__pycache__', 'dist', '.turbo', '.next',
     'pnpm-lock.yaml', 'flake.lock', '.mutmut-cache', 'mutants',
-    'target', '*.pyc', '*.gguf', '*.bin',
+    'target', '*.pyc', '*.gguf', '*.bin', 'check_freedom.py',
 }
 
 def should_skip(path: Path) -> bool:
