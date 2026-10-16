@@ -1,0 +1,229 @@
+# .github/workflows/tofu.yml — Polymath OS Layer 4 (Infra CI)
+#
+# OpenTofu workflow. Per ADR-0002 §Tier 2: GitHub Actions — rented CI,
+# replaceable by Woodpecker CI / Forgejo Actions (offline fallback: `act`).
+#
+# Per docs/05-devex-ci.md §OIDC trust (zero long-lived secrets):
+#   - No AWS_ACCESS_KEY_ID in repo
+#   - AssumeRoleWithWebIdentity via OIDC, scoped to tfstate bucket + lock table
+#
+# Per ADR-0005 (separate rollback targets):
+#   - `tofu plan` on PR — non-destructive, always safe
+#   - `tofu apply` ONLY on manual dispatch with approval — never on `git push`
+#   - `tofu destroy` requires same dispatch + approval (no emergency bypass)
+#   - `prevent_destroy = true` on tfstate bucket — protects against accidental destroy
+
+name: tofu
+
+on:
+  pull_request:
+    paths:
+      - 'infra/tofu/**'
+      - '.github/workflows/tofu.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/tofu/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to apply (personal | staging | prod)'
+        required: true
+        default: 'personal'
+        type: choice
+        options: [personal, staging, prod]
+      action:
+        description: 'Action (plan | apply | destroy)'
+        required: true
+        default: 'plan'
+        type: choice
+        options: [plan, apply, destroy]
+
+# OIDC trust — required for AssumeRoleWithWebIdentity
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write   # to post plan output as PR comment
+
+concurrency:
+  group: tofu-${{ github.event.inputs.environment || 'pr' }}-${{ github.ref }}
+  cancel-in-progress: false   # never cancel an in-flight apply (ADR-0005)
+
+jobs:
+
+  # ── fmt-check + validate — on every PR (no creds needed for validate) ──
+  fmt-validate:
+    name: tofu fmt -check + tofu validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenTofu (1.6+)
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.8.0'
+          tofu_wrapper: false
+
+      - name: tofu fmt -check -recursive
+        working-directory: infra/tofu
+        run: |
+          set -euo pipefail
+          tofu fmt -check -recursive
+          echo "✓ HCL format clean"
+
+      - name: tofu validate (each environment)
+        working-directory: infra/tofu
+        run: |
+          set -euo pipefail
+          # Validate each module + each environment root.
+          # Environments need init -backend=false for validate (no real creds).
+          for env in personal shared; do
+            if [ -d "environments/$env" ]; then
+              echo "→ validate environments/$env"
+              pushd "environments/$env" >/dev/null
+              tofu init -backend=false -reconfigure
+              tofu validate
+              popd >/dev/null
+              echo "✓ environments/$env valid"
+            fi
+          done
+
+  # ── plan — on PR (with OIDC trust, no static creds) ─────────────────────
+  plan:
+    name: tofu plan (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: fmt-validate
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [personal, shared]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.8.0'
+          tofu_wrapper: false
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_PLACEHOLDER }}:role/polymath-gha-deploy
+          aws-region: eu-central-1
+          # Short-lived session — no static access key in repo.
+
+      - name: tofu init
+        working-directory: infra/tofu/environments/${{ matrix.environment }}
+        run: tofu init -reconfigure
+
+      - name: Decrypt secrets (SOPS + age)
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}   # age private key from 1Password CI
+        run: |
+          set -euo pipefail
+          echo "$SOPS_AGE_KEY" > /tmp/age-key.txt
+          chmod 600 /tmp/age-key.txt
+          sops -d --age-key-file /tmp/age-key.txt \
+            "infra/tofu/environments/${{ matrix.environment }}/secrets.sops.yaml" \
+            > /tmp/secrets.yaml
+          chmod 600 /tmp/secrets.yaml
+
+      - name: tofu plan
+        working-directory: infra/tofu/environments/${{ matrix.environment }}
+        run: |
+          set -euo pipefail
+          tofu plan -var-file=/tmp/secrets.yaml -out=tfplan -input=false
+          tofu show -json tfplan > /tmp/tfplan.json
+
+      - name: Post plan as PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const planJson = JSON.parse(fs.readFileSync('/tmp/tfplan.json', 'utf8'));
+            const summary = planJson.format_version
+              ? `Tofu plan summary:\n` +
+                `+ create: ${planJson.resource_changes?.filter(c => c.change.actions.includes('create')).length || 0}\n` +
+                `~ update: ${planJson.resource_changes?.filter(c => c.change.actions.includes('update')).length || 0}\n` +
+                `- destroy: ${planJson.resource_changes?.filter(c => c.change.actions.includes('delete')).length || 0}\n`
+              : 'Plan generated';
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### \`tofu plan\` — \`${{ matrix.environment }}\`\n\n\`\`\`\n${summary}\n\`\`\``
+            });
+
+      - name: Cleanup secrets
+        if: always()
+        run: |
+          shred -u /tmp/secrets.yaml /tmp/age-key.txt 2>/dev/null || rm -f /tmp/secrets.yaml /tmp/age-key.txt
+
+  # ── apply — ONLY on manual dispatch with approval ───────────────────────
+  apply:
+    name: tofu ${{ github.event.inputs.action }} (${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      # require approval via GitHub Environments protection rule
+      # prod env: 2 approvers (CODEOWNERS + extra)
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.8.0'
+          tofu_wrapper: false
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_PLACEHOLDER }}:role/polymath-gha-deploy
+          aws-region: eu-central-1
+
+      - name: tofu init
+        working-directory: infra/tofu/environments/${{ github.event.inputs.environment }}
+        run: tofu init -reconfigure
+
+      - name: Decrypt secrets (SOPS + age)
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          set -euo pipefail
+          echo "$SOPS_AGE_KEY" > /tmp/age-key.txt
+          chmod 600 /tmp/age-key.txt
+          sops -d --age-key-file /tmp/age-key.txt \
+            "infra/tofu/environments/${{ github.event.inputs.environment }}/secrets.sops.yaml" \
+            > /tmp/secrets.yaml
+          chmod 600 /tmp/secrets.yaml
+
+      - name: tofu plan (refresh before action)
+        working-directory: infra/tofu/environments/${{ github.event.inputs.environment }}
+        run: tofu plan -var-file=/tmp/secrets.yaml -out=tfplan -input=false
+
+      - name: tofu apply (or destroy)
+        working-directory: infra/tofu/environments/${{ github.event.inputs.environment }}
+        # ADR-0005 ⛔: destroy is destructive. require explicit opt-in via action input.
+        run: |
+          if [ "${{ github.event.inputs.action }}" = "destroy" ]; then
+            echo "⛔ IRREVERSIBLE: tofu destroy on ${{ github.event.inputs.environment }}"
+            echo "⛔ Proceeding because workflow_dispatch was approved by CODEOWNERS."
+            tofu destroy -var-file=/tmp/secrets.yaml -auto-approve
+          else
+            tofu apply tfplan -input=false
+          fi
+
+      - name: Cleanup secrets
+        if: always()
+        run: |
+          shred -u /tmp/secrets.yaml /tmp/age-key.txt 2>/dev/null || rm -f /tmp/secrets.yaml /tmp/age-key.txt

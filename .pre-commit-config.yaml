@@ -1,0 +1,96 @@
+# .pre-commit-config.yaml — Polymath OS
+# https://pre-commit.com
+#
+# Установка:
+#   pip install pre-commit
+#   pre-commit install          # ставит git hook в .git/hooks/pre-commit
+#   pre-commit install --hook-type commit-msg    # для commitizen (commit-msg stage)
+#   pre-commit install --hook-type pre-push      # на push — самая дорогая проверка
+#
+# Запуск на всех файлах (валидация репо в целом):
+#   pre-commit run --all-files
+#
+# Обновление версий hooks:
+#   pre-commit autoupdate
+#
+# Все hooks локальные — `pre-commit` скачивает их в своё кэш-окружение,
+# не засоряя repo dependencies.
+
+minimum_pre_commit_version: "3.0.0"
+
+default_language_version:
+  python: python3.10
+
+repos:
+  # ── Secret scanning — главный security hook ──────────────────────────────
+  # Gitleaks на pre-commit ловит утечки ДО push (CI уже не нужен).
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+        name: gitleaks (no secrets in commit)
+        # На pre-commit проверяем staged файлы; полный scan — в CI (`.github/workflows/ci.yml`).
+
+  # ── Standard hygiene hooks (pre-commit-hooks) ────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext, "md"]
+      - id: end-of-file-fixer
+        # Markdown fixer is off — markdown has soft wraps; final newline enforced separately.
+        exclude: ^docs/adr/template\.md$
+      - id: check-yaml
+        args: [--allow-multiple-documents, --unsafe]   # `--unsafe` для !!str anchors
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: requirements-txt-fixer
+      - id: fix-encoding-pragma
+        args: [--remove]
+
+  # ── Conventional commits (commitizen) ────────────────────────────────────
+  # Проверяет commit message на соответствие Conventional Commits:
+  #   feat(scope): ... / fix(scope): ... / docs(adr): ... / chore(deps): ...
+  # См. CONTRIBUTING.md § Branch & Commit.
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.30.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+        # Bump на release — через `cz bump` (ручками; не автоматом в pre-commit).
+
+  # ── Markdown lint — sync with .markdownlint.yaml ─────────────────────────
+  # `igorshilin/markdownlint-cli2` — самый активный pre-commit wrapper
+  # поверх `DavidAnson/markdownlint-cli2`. DavidAnson/markdownlint — основная либа.
+  - repo: https://github.com/igorshilin/markdownlint-cli2
+    rev: v0.14.1
+    hooks:
+      - id: markdownlint-cli2
+        args: [--config, .markdownlint.yaml]
+
+  # ── Python (runtime/src/ + scripts/) ─────────────────────────────────────
+  # ruff: fast linter + formatter (drop-in для flake8 + black + isort).
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # ── YAML formatting (CI configs, .github/*) ─────────────────────────────
+  - repo: https://github.com/scop/pre-commit-prettier
+    rev: v3.1.2
+    hooks:
+      - id: prettier
+        # Only YAML files — markdown handled by markdownlint, JS/TS by Biome in CI.
+        files: \.(yaml|yml)$
+        args: [--prose-wrap=preserve]

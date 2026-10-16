@@ -1,0 +1,51 @@
+# CODEOWNERS — Polymath OS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Это соло-проект: @USER владеет всем репозиторием (звезда `* @USER` ниже —
+# единый requisite-approval на каждый PR). Когда появится команда — раскомментируй
+# секции ниже и замени `@team-*` на реальные GitHub team-slug'и.
+# Каждая секция закрепляет owner за одним из 5 слоёв + cross-cutting.
+#
+# Правило CODEOWNERS: последний matching-паттерн выигрывает,
+# поэтому порядок — от общего к частному, частное в конце переопределяет общее.
+
+# ── Layer 1: Repository structure (pnpm + Turborepo + Changesets) ───────────
+# /package.json             @USER @team-release-eng
+# /pnpm-workspace.yaml      @USER @team-release-eng
+# /turbo.json               @USER @team-release-eng
+# /.changeset/              @USER @team-release-eng
+
+# ── Layer 2: AI Workflows (MCP-native, Claude Code + Aider + Cursor) ────────
+# /tooling/agents/          @USER @team-ai-platform
+# /docs/03-ai-workflows.md  @USER @team-ai-platform
+
+# ── Layer 3: Second Brain (markdown-first, git-synced) ─────────────────────
+# /vault/                   @USER @team-knowledge-eng
+# /apps/garden/             @USER @team-knowledge-eng
+# /docs/04-second-brain.md  @USER @team-knowledge-eng
+
+# ── Layer 4: DevEx / CI / IaC / Observability ──────────────────────────────
+# /.github/workflows/       @USER @team-devex-eng
+# /.devcontainer/           @USER @team-devex-eng
+# /Makefile                 @USER @team-devex-eng
+# /infra/                   @USER @team-devex-eng
+# /docs/05-devex-ci.md      @USER @team-devex-eng
+
+# ── Layer 5: SINGULYAR EIR (execution kernel) ──────────────────────────────
+# /runtime/src/             @USER @team-runtime-eng
+# /runtime/schemas/         @USER @team-runtime-eng
+# /runtime/tests/           @USER @team-runtime-eng
+# /runtime/docs/            @USER @team-runtime-eng
+
+# ── Cross-cutting: ADRs, security, runbook ─────────────────────────────────
+# /docs/adr/                @USER @team-arch-council      # архитектурные решения — особый review
+# /SECURITY.md              @USER @team-security-eng
+# /docs/runbook/            @USER @team-sre-eng
+# /docs/AUDIT_RESPONSE.md   @USER @team-arch-council @team-security-eng
+
+# ── Highest review bar: release + codeql (production security surface) ─────
+# /.github/workflows/release.yml   @USER @team-security-eng @team-release-eng
+# /.github/workflows/codeql.yml    @USER @team-security-eng
+
+# ── Default: solo owner covers every path not listed above ──────────────────
+*                         @USER

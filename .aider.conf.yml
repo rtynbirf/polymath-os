@@ -1,0 +1,64 @@
+# .aider.conf.yml — Aider configuration for Polymath OS
+#
+# См. https://aider.chat/docs/config/aider_conf.html
+# Personal overrides: separate ~/.aider.conf.yml (User scope, not project).
+
+# ── Auto-commit + auto-test ─────────────────────────────────────────────
+# Принцип 6 (automation over discipline): каждый change, который Aider
+# помогает написать, автоматически коммитится и прогоняет `make test`.
+# Если `make test` падает — откат происходит автоматически (--auto-test +
+# --test-cmd с non-zero exit).
+auto-commits: true
+auto-test: true
+test-cmd: make test
+
+# ── Model: из env (AIDER_MODEL), иначе default ─────────────────────────
+# Не фиксируем модель в репо — у каждого разработчика свой провайдер.
+# Tier 2 Sovereignty Registry (ADR-0002): OpenRouter → Ollama / vLLM fallback.
+# Пример env override: `export AIDER_MODEL=claude-3-5-sonnet-20241022`
+# Локальный fallback: `export AIDER_MODEL=ollama/llama3.1:70b`
+# (Aider поддерживает LiteLLM prefix syntax для локальных моделей.)
+model:
+
+# ── Editor: dark mode (терминал Polymath OS dev shell) ─────────────────
+dark-mode: true
+
+# ── Code style: respect repo conventions ────────────────────────────────
+# Для Python — Ruff (см. CONTRIBUTING.md). Aider использует tree-sitter
+# для repo-map, что работает без проекта-специфичных настроек.
+show-diff: true
+auto-lint: true
+
+# ── Git: conventional commits ──────────────────────────────────────────
+# Aider `auto-commits` создаёт коммит с префиксом по умолчанию `style: ...`.
+# Чтобы соответствовать CONTRIBUTING.md (Conventional Commits), каждый commit
+# должен начинаться с `feat:` / `fix:` / `docs:` / `chore(deps):`.
+# Aider позволяет префикс через --commit-prefix, оставляем дефолт и
+# редактируем в interactive режиме.
+commit-prefix: "ai(aider):"
+
+# ── Files: read-only context for Aider ──────────────────────────────────
+# Эти файлы Aider читает для контекста, но не меняет без явного запроса.
+# Список можно расширять через `--read` в командной строке или тут.
+read:
+  - CONTRIBUTING.md
+  - ARCHITECTURE.md
+  - docs/01-principles.md
+  - docs/adr/0002-sovereignty-registry.md
+  - docs/adr/0011-container-runtime.md
+  - docs/adr/0006-falsifiable-self-properties.md
+  - docs/adr/0012-singulyar-eir-as-layer-5.md
+
+# ── Files: never touch (secrets, lockfiles, generated) ──────────────────
+# Принцип 6 + Принцип 1 (Repo-as-Everything): генерируемые файлы и секреты
+# вне зоны ответственности AI.
+file-ignore:
+  - .env
+  - .env.local
+  - .env.*.local
+  - "*.age"
+  - age-identity.txt
+  - pnpm-lock.yaml
+  - flake.lock
+  - runtime/SHA256SUMS.txt
+  - runtime/experiments/results.csv

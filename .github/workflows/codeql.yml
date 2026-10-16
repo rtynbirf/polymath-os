@@ -1,0 +1,67 @@
+# .github/workflows/codeql.yml — Polymath OS
+# CodeQL: бесплатный SAST для публичных репозиториев.
+# Запускается на push/PR в main + еженедельно по расписанию (catch supply-chain drift).
+# https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Every Monday 06:00 UTC — после Dependabot/Renovate (которые тоже в понедельник 06:00 UTC).
+    # Если упадёт на schedule, увидим в Security tab и проинвестируем на следующей неделе.
+    - cron: "0 6 * * 1"
+
+# Allow push (not PR) to override: cancel-in-progress on PR, finish on push.
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  security-events: write   # upload CodeQL results to Security → Code Scanning Alerts
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false   # один язык не должен валить остальные
+      matrix:
+        # JavaScript/TypeScript — для root + packages/* + apps/* (Layer 1).
+        # Python — для runtime/src/ + scripts/ (Layer 5 + cross-cutting).
+        # Go/Ruby/Java отсутствуют в репо — не добавляем (CodeQL ругается на empty language).
+        language:
+          - javascript-typescript
+          - python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # `+security-and-quality` — расширенный pack (по умолчанию только security).
+          queries: +security-and-quality
+          # Не fail-fast на setup error, чтобы не блокировать PR на временных пиках GitHub.
+          config: |
+            paths-ignore:
+              - node_modules
+              - '**/dist/**'
+              - '**/.turbo/**'
+              - '**/__pycache__/**'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          # Upload SARIF even on failure — partial results > no results.
+          upload: always

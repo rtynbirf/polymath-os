@@ -1,0 +1,144 @@
+# bug_report.yml — Polymath OS
+# GitHub Issue Form (не .md-шаблон): структурированные поля с валидацией.
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms
+name: 🐛 Bug report
+description: Что-то работает не так, как заявлено в README / ADR / RUNBOOK.
+title: "[bug] "
+labels: ["type:bug", "status:needs-triage"]
+assignees:
+  - USER
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за репорт! Перед отправкой — пожалуйста, проверь:
+
+        1. Баг воспроизводится на свежем `main` (`git pull && make verify`).
+        2. Похожего issue ещё нет (поиск по `type:bug`).
+        3. Это **не** security vulnerability — для security см. `SECURITY.md` (private disclosure).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Опиши, что произошло — что заявлено и что фактически.
+      placeholder: "Проверка X в `make verify` упала с ..., хотя README говорит ✓."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Точные команды. Минимальный repro — баг фиксят быстрее.
+      placeholder: |
+        1. git clone git@github.com:USER/polymath-os.git
+        2. cd polymath-os
+        3. make verify
+        4. ...
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: Что должно было произойти по README / ADR / RUNBOOK (укажи документ).
+      placeholder: "По README §claims check N, должно быть ✓. По ADR-NNNN, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Что произошло фактически.
+      placeholder: "Выход с кодом N, в stderr: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: verify-output
+    attributes:
+      label: '`make verify` output'
+      description: |
+        Вставь полный вывод `make verify` (или вывод конкретного check'а).
+        Не сокращай — нужна последняя строка с `Result: N passed, M failed`.
+      placeholder: |
+        ══════════════════════════════════════════════════════════════
+          Polymath OS — make verify
+        ══════════════════════════════════════════════════════════════
+        ...
+          Result: 11 passed, 1 failed (of 12 claims)
+        ...
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Affected layer
+      description: Какой слой Polymath OS затронут (см. ARCHITECTURE.md).
+      options:
+        - Layer 1 — Repository structure (pnpm/turbo/changesets/CODEOWNERS)
+        - Layer 2 — AI Workflows (MCP, Claude Code, Aider, Cursor)
+        - Layer 3 — Second Brain (vault, PKM, Quartz)
+        - Layer 4 — DevEx / CI / IaC / Observability
+        - Layer 5 — SINGULYAR EIR (runtime, execution kernel)
+        - Cross-cutting — Security / OTel / git
+        - Не уверен
+      default: 6
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: Операционная система.
+      placeholder: "macOS 14.5 / Ubuntu 24.04 / Windows 11 (WSL2 Ubuntu 22.04)"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: SINGULYAR EIR требует Python 3.10+. Вывод `python3 --version`.
+      placeholder: "Python 3.10.12"
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      description: Layer 1-4 требуют Node 20+. Вывод `node --version` (или `n/a`, если не использовалось).
+      placeholder: "v20.17.0 / n/a"
+    validations:
+      required: false
+
+  - type: input
+    id: git-commit
+    attributes:
+      label: Git commit
+      description: На каком коммите баг? `git rev-parse --short HEAD`.
+      placeholder: "1dc7fb1"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: Воспроизводится на свежем `main` (`git pull && make verify`)
+          required: true
+        - label: Не security vulnerability (для security см. SECURITY.md)
+          required: true
+        - label: Похожего issue нет в поиске по `type:bug`
+          required: true

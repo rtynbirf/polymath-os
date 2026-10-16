@@ -1,0 +1,30 @@
+# infra/.gitignore — Polymath OS Layer 4 (Infra)
+#
+# Per ADR-0002 §Tier 1: state files, lock files, plan files — NEVER committed.
+# Only SOPS-encrypted secrets (with age) are committed; the age private key
+# is fetched at bootstrap from 1Password CLI (Tier 2).
+
+# ── OpenTofu / Terraform runtime ────────────────────────────────────────
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+*.tfplan.bin
+
+# ── Terragrunt cache ────────────────────────────────────────────────────
+.terragrunt-cache/
+
+# ── SOPS decrypted outputs (NEVER committed) ───────────────────────────
+# Decrypted secrets go to /tmp, never next to source.
+secrets.decrypted.yaml
+secrets.plaintext.yaml
+secrets.yaml
+backend.tfvars   # contains creds → decrypt at apply time, do not commit plaintext
+
+# ── Tilt / local dev artifacts ──────────────────────────────────────────
+.tiltignore
+
+# ── k8s kubeconfig (downloaded from VPS at bootstrap) ───────────────────
+kubeconfig
+*.kubeconfig

@@ -1,0 +1,121 @@
+# feature_request.yml — Polymath OS
+# GitHub Issue Form для предложений новых возможностей.
+name: ✨ Feature request
+description: Предложение новой возможности / enhancement.
+title: "[feat] "
+labels: ["type:feature", "status:needs-triage"]
+assignees:
+  - USER
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что нашёл время предложить улучшение!
+
+        Помни про философию репо: **каждый новый claim в README требует нового check
+        в `scripts/check.py`**. Если фича — это новый архитектурный слой или меняет
+        поведение runtime — потребуется ADR (см. `docs/adr/template.md`).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: |
+        Какую проблему решает фича? Сначала проблема, потом решение
+        (как в ADR: Context → Decision).
+      placeholder: |
+        Когда я ..., мне приходится ..., что болезненно потому что ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: |
+        Что должно появиться в репозитории. Конкретно — какие файлы, команды,
+        проверки. Если есть mockup / пример команды — приложи.
+      placeholder: |
+        Добавить в `scripts/check.py` проверку N+1, которая ...
+        В `README.md` добавить строку в таблицу claims ...
+        В `Makefile` цель `make <target>` ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        Какие другие способы решения рассматривал — и почему они хуже?
+        (Это секция "Alternatives" из ADR template.)
+      placeholder: |
+        1. Использовать готовый инструмент X — но он нарушает Tier-1 суверенитета
+           (ADR-0002), поскольку требует аккаунт.
+        2. Сделать отдельный репо — но ломает single-repo contract.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Target layer
+      description: Какой слой Polymath OS затронут.
+      options:
+        - Layer 1 — Repository structure
+        - Layer 2 — AI Workflows
+        - Layer 3 — Second Brain
+        - Layer 4 — DevEx / CI / IaC
+        - Layer 5 — SINGULYAR EIR
+        - Cross-cutting (security / OTel / git)
+        - Новый слой (требует ADR + правки ARCHITECTURE.md)
+      default: 6
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: adr
+    attributes:
+      label: ADR needed?
+      description: |
+        Меняет ли фича архитектуру? Если да — в PR потребуется ADR
+        (`docs/adr/NNNN-<slug>.md`). См. CONTRIBUTING.md.
+      options:
+        - label: Эта фича меняет архитектуру → нужен новый ADR (0001-0012 уже заняты, следующий 0013+)
+          required: false
+        - label: Эта фича обновляет существующий ADR (укажи какой в комментарии выше)
+          required: false
+        - label: Не меняет архитектуру — чисто имплементация
+          required: false
+
+  - type: checkboxes
+    id: verify-impact
+    attributes:
+      label: '`make verify` impact'
+      description: |
+        Каждый новый claim в README требует нового check'а в `scripts/check.py`.
+        Это open-source contract — без check'а claim не считается доказанным.
+      options:
+        - label: Фича добавляет новый verifiable claim в README → нужен новый check в `scripts/check.py`
+          required: false
+        - label: Фича не добавляет новый claim (дорабатывает существующий)
+          required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Скриншоты, ссылки на связанные issue/PR/ADR, mockup команды.
+      placeholder: "См. ADR-NNNN, связанный issue #N, ..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: Похожего feature request нет в поиске по `type:feature`
+          required: true
+        - label: Я готов либо реализовать это сам (PR), либо обсудить дизайн в обсуждении
+          required: true

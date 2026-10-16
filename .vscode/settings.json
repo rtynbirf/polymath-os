@@ -1,0 +1,61 @@
+{
+  "//": "Polymath OS — shared editor settings. Committed (.gitignore exception). Personal overrides: User settings, not workspace.",
+
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true,
+    "**/pnpm-lock.yaml": true,
+    "**/.local-state": true,
+    "**/__pycache__": true
+  },
+
+  "files.associations": {
+    "*.nix": "nix",
+    "Tiltfile": "python",
+    "flake.lock": "jsonc"
+  },
+
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.trimAutoWhitespace": false
+  },
+
+  "[python]": {
+    "editor.defaultFormatter": null
+  },
+
+  "[nix]": {
+    "editor.defaultFormatter": null,
+    "editor.tabSize": 2
+  },
+
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml",
+    "https://turbo.build/schema.json": "turbo.json"
+  },
+
+  "nix.formatterPath": "nixpkgs-fmt",
+  "nix.enableLanguageServer": true
+}

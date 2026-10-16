@@ -49,7 +49,7 @@ test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_data
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
 
 ----------------------------------------------------------------------
-Ran 40 tests in 0.257s
+Ran 40 tests in 0.242s
 
 OK
 ```

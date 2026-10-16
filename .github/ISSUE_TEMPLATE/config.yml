@@ -1,0 +1,37 @@
+# config.yml — Polymath OS
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+#
+# blank_issues_enabled: false — пользователи не могут открывать free-form issue,
+# только через bug_report / feature_request формы. Это снижает шум и повышает
+# качество входных данных (особенно `make verify` output и env-секцию).
+# Если нужен free-form issue — открой его через `gh issue create --body` или
+# попроси maintainer'а.
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📦 PUSH — как выложить репо на GitHub
+    url: https://github.com/USER/polymath-os/blob/main/PUSH.md
+    about: |
+      Инструкция для fork'a: копирование репо из agent-окружения на твою машину,
+      `gh repo create`, push, проверка зелёного CI. Не вопрос, а step-by-step.
+  - name: 🛡️ AUDIT_RESPONSE — аудит → ADR mapping
+    url: https://github.com/USER/polymath-os/blob/main/docs/AUDIT_RESPONSE.md
+    about: |
+      11 замечаний аудита (A1-A11) + 11 к RUNBOOK (R1-R11) → каждое замаплено
+      на ADR + action. Если хочешь обсудить решение аудита — это документ.
+  - name: 📒 RUNBOOK — hardened operations
+    url: https://github.com/USER/polymath-os/blob/main/docs/runbook/RUNBOOK.md
+    about: |
+      Процедуры ops с шаблоном ПРЕДУСЛОВИЯ → ПРЕДПРОСМОТР → ДЕЙСТВИЕ ⛔ → ПРОВЕРКА →
+      ЕСЛИ УПАЛО → СЛЕД. Если вопрос по эксплуатации, а не по коду — начни здесь.
+  - name: 💬 Discussions — открытые вопросы и дизайн
+    url: https://github.com/USER/polymath-os/discussions
+    about: |
+      Для обсуждения архитектуры, RFC, идей без конкретного бага.
+      Bug/feature → issue; обсуждение → discussion.
+  - name: 🔐 Security advisory — private disclosure
+    url: https://github.com/USER/polymath-os/security/advisories/new
+    about: |
+      Нашёл vulnerability? НЕ открывай public issue. См. SECURITY.md:
+      координированный disclosure, ответ ≤72 ч, credit по желанию.

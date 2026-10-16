@@ -1,0 +1,82 @@
+# .markdownlint.yaml — Polymath OS
+# Config для markdownlint-cli2 (используется pre-commit hook + docs CI).
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+#
+# Философия: Russian prose + English для tool/code/URL — long lines неизбежны.
+# Линт толерантен к long lines, но строг к структуре (headings, code blocks, lists).
+
+# Default state for all rules — включено, переопределения ниже.
+default: true
+
+# MD013 — line length.
+# Выключено глобально: длинные строки в code blocks, таблицах, URL — норма
+# для bilingual prose. Editor soft-wrap включён (см. .editorconfig: max_line_length=off).
+MD013: false
+
+# MD024 — multiple headings with the same content.
+# Allow siblings_only: одно и то же имя в разных родительских секциях — OK.
+# Так работают `## Added` / `## Fixed` в каждой секции [version] CHANGELOG.md.
+MD024:
+  siblings_only: true
+
+# MD025 — multiple top-level headings in one document.
+# Off — позволяем ## в начале + # Appendix в конце (см. CHANGELOG).
+MD025: false
+
+# MD033 — inline HTML. Tolerate для <details>/<kbd>/<sub>/<sup>/<img>/<a>.
+MD033:
+  allowed_elements: [details, summary, sub, sup, kbd, br, a, img]
+
+# MD041 — first line in a file should be a top-level heading.
+# Enforced: каждый .md начинается с `# Title — Polymath OS`.
+MD041: true
+
+# MD036 — emphasize used instead of a heading. Off — bold one-liners норма.
+MD036: false
+
+# MD012 — multiple consecutive blank lines. Max 1 (matches .editorconfig).
+MD012:
+  maximum: 1
+
+# MD040 — fenced code blocks should have a language specified.
+# Enforced — каждый ``` блок должен иметь lang (```bash, ```python, ```yaml).
+MD040: true
+
+# MD007 — unordered list indentation. 2 spaces (matches .editorconfig indent_size=2).
+MD007:
+  indent: 2
+
+# MD029 — ordered list item prefix. Ascending (1., 2., 3.).
+MD029:
+  style: ordered
+
+# MD031 — fences/backticks should be surrounded by blank lines.
+# Enforced — иначе парсинг ломается на bilingual prose.
+MD031: true
+
+# MD032 — lists should be surrounded by blank lines.
+MD032: true
+
+# MD047 — file should end with a single newline character.
+# Enforced — matches .editorconfig insert_final_newline=true.
+MD047: true
+
+# MD026 — trailing punctuation in heading. Off — Russian headings часто оканчиваются на «.».
+MD026: false
+
+# MD009 — trailing whitespace. Off globally; .editorconfig handles per-extension.
+# (Markdown allows 2+ trailing spaces = line break — we use them in bilingual prose.)
+MD009:
+  list_item_empty_lines: false
+  strict: false
+
+# MD002 — heading levels should only increment by one level at a time.
+# Enforced — `# → ## → ###`, не `# → ###`.
+MD002: true
+
+# MD022 — headings should be surrounded by blank lines.
+MD022: true
+
+# MD046 — code block style. Consistent — always fenced, never indented.
+MD046:
+  style: fenced

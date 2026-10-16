@@ -1,0 +1,118 @@
+# labels.yml — Polymath OS
+# Каталог labels для triage. Импортируется в GitHub одной из:
+#   - https://github.com/marketplace/actions/issue-label-manager-action (endpointdev)
+#   - https://github.com/marketplace/actions/github-labeler (iucc)
+#   - одноразовым скриптом: rg -A2 "name:" .github/labels.yml | gh label create ...
+#
+# Формат каждой записи: name / color (hex без #) / description.
+# Структура — namespaces: type/* priority/* status/* layer/* adr/*.
+# Синхронизировано с .github/labeler.yml (path → layer/* rules).
+
+# ── type/* — класс изменения (mirror conventional-commit types) ─────────────
+- name: type:bug
+  color: "d73a4a"
+  description: Что-то не работает как заявлено (`make verify` падает / runtime не green)
+- name: type:feature
+  color: "a2eeef"
+  description: Новая возможность или enhancement
+- name: type:docs
+  color: "0075ca"
+  description: Только документация / ADR / RFC
+- name: type:refactor
+  color: "c5def5"
+  description: Изменение кода без изменения поведения
+- name: type:perf
+  color: "fbca04"
+  description: Улучшение производительности (требует бенчмарка в PR)
+- name: type:test
+  color: "0e8a16"
+  description: Добавление/правка тестов (включая мутационный контроль)
+- name: type:chore
+  color: "ededed"
+  description: deps, ci, meta-files — не влияет на runtime
+- name: type:question
+  color: "cc317c"
+  description: Вопрос / обсуждение (Discussion может подойти лучше)
+- name: type:security
+  color: "b60205"
+  description: Security-relevant (см. SECURITY.md — private disclosure предпочтительнее)
+
+# ── priority/* — срочность triage ──────────────────────────────────────────
+- name: priority:critical
+  color: "b60205"
+  description: Блокирует релиз / production-инцидент
+- name: priority:high
+  color: "d93f0b"
+  description: Нужно в текущем спринте
+- name: priority:medium
+  color: "fbca04"
+  description: Обычная очередь
+- name: priority:low
+  color: "0e8a16"
+  description: Бэклог, non-blocking
+
+# ── status/* — где находится тикет в pipeline ───────────────────────────────
+- name: status:needs-triage
+  color: "fbca04"
+  description: Новый тикет, ждёт owner
+- name: status:in-progress
+  color: "1d76db"
+  description: В работе
+- name: status:in-review
+  color: "5319e7"
+  description: PR открыт, ждёт review
+- name: status:blocked
+  color: "b60205"
+  description: Заблокирован внешней зависимостью (описать в комментарии)
+
+# ── layer/* — какой из 5 слоёв Polymath OS затронут ─────────────────────────
+# Mirror иерархии из ARCHITECTURE.md / README.md.
+- name: "layer/1-repo"
+  color: "c2e0c6"
+  description: Layer 1 — Repository structure (pnpm + Turborepo + Changesets + CODEOWNERS)
+- name: "layer/2-ai"
+  color: "c2e0c6"
+  description: Layer 2 — AI Workflows (MCP-native, Claude Code + Aider + Cursor)
+- name: "layer/3-second-brain"
+  color: "c2e0c6"
+  description: Layer 3 — Second Brain (PKM, markdown-first, git-synced)
+- name: "layer/4-devex"
+  color: "c2e0c6"
+  description: Layer 4 — DevEx / CI / IaC / Observability
+- name: "layer/5-runtime"
+  color: "c2e0c6"
+  description: Layer 5 — SINGULYAR EIR (execution kernel, preserves intent)
+- name: "layer/cross-cutting"
+  color: "d4c5f0"
+  description: Cross-cutting — Security / OTel / git / Sovereignty Registry
+
+# ── adr/* — связь тикета с архитектурными решениями ─────────────────────────
+- name: adr:needed
+  color: "fef2c0"
+  description: Требуется новый/обновлённый ADR (см. docs/adr/template.md)
+- name: adr:accepted
+  color: "0e8a16"
+  description: ADR принят — задача реализует зафиксированное решение
+- name: adr:superseded
+  color: "b60205"
+  description: ADR superseded — задача требует нового ADR взамен старого
+- name: adr:draft
+  color: "fbca04"
+  description: "ADR в работе (Status: Draft)"
+
+# ── meta labels ─────────────────────────────────────────────────────────────
+- name: "good first issue"
+  color: "7057ff"
+  description: Хорошая первая задача — изолированная, с явным acceptance criteria
+- name: "help wanted"
+  color: "008672"
+  description: Готов принять вклад со стороны
+- name: stale
+  color: "ededed"
+  description: Нет активности 30+ дней — закроется через 7 дней (stale bot)
+- name: duplicate
+  color: "cfd3d7"
+  description: Дубль другого issue/PR
+- name: wontfix
+  color: "ffffff"
+  description: Не будем делать (with reason в комментарии)

@@ -1,0 +1,10 @@
+{
+  "baseFontSize": 16,
+  "interfaceFontFamily": "",
+  "monospaceFontFamily": "IBM Plex Mono",
+  "textFontFamily": "Source Sans 3",
+  "viewMode": "source",
+  "theme": "obsidian",
+  "darkModeTheme": "Moonstone",
+  "lightModeTheme": "Stone"
+}

@@ -1,0 +1,91 @@
+# dependabot.yml — Polymath OS
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Еженедельный анализ обновлений для npm + GitHub Actions.
+# gomod / docker / pip отсутствуют: в репо нет go.mod, Dockerfile, requirements.txt
+# (runtime/ — pure-stdlib Python 3.10+, нулевые внешние зависимости).
+# Когда появится первый Go-модуль / Dockerfile / requirements — добавь секцию ниже.
+
+version: 2
+
+updates:
+  # ── npm (root package.json + workspaces) ─────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    open-pull-requests-limit: 5
+    assignees:
+      - USER
+    reviewers:
+      - USER
+    commit-message:
+      prefix: "chore(deps)"
+      include: scope
+    labels:
+      - "type:chore"
+      - "layer/1-repo"
+    groups:
+      # Minor + patch — одним сгруппированным PR (меньше шума).
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    # Major bumps открываются отдельно — каждый требует review.
+    ignore:
+      # Не трогаем packageManager-пиннинг (pnpm@9.12.0) — это intentionally pinned.
+      - dependency-name: "pnpm"
+      # Turborepo major bumps проходят через ADR (см. docs/adr/).
+      - dependency-name: "turbo"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions (workflows in .github/workflows/) ─────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: UTC
+    open-pull-requests-limit: 5
+    assignees:
+      - USER
+    reviewers:
+      - USER
+    commit-message:
+      prefix: "chore(ci-deps)"
+      include: scope
+    labels:
+      - "type:chore"
+      - "layer/4-devex"
+    groups:
+      # Все обновления actions/* в одном PR — иначе деп bee-hive из 20 маленьких PR.
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+          - "pnpm/*"
+          - "peaceiris/*"
+          - "sigstore/*"
+          - "softprops/*"
+          - "aquasecurity/*"
+          - "returntocorp/*"
+          - "gitleaks/*"
+
+  # ── pip (зарезервировано на будущее; runtime/ сейчас без зависимостей) ──
+  # Раскомментируй, когда появится runtime/requirements.txt или pyproject.toml.
+  #
+  # - package-ecosystem: pip
+  #   directory: /runtime
+  #   schedule:
+  #     interval: weekly
+  #     day: monday
+  #   assignees: [USER]
+  #   reviewers: [USER]
+  #   labels: ["type:chore", "layer/5-runtime"]
+  #   groups:
+  #     python-minor:
+  #       update-types: [minor, patch]

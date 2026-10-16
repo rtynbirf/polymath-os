@@ -20,3 +20,18 @@ indent_size = 2
 
 [*.{go,rs}]
 indent_size = 4
+
+# Nix — 2 spaces (community convention + nixpkgs-fmt default).
+# См. flake.nix (formatter = pkgs.nixpkgs-fmt).
+[*.nix]
+indent_style = space
+indent_size = 2
+
+# Shell scripts (scripts/bootstrap.sh etc.) — 2 spaces, не tabs.
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# JSON / JSONC (settings.json, extensions.json, turbo.json, tsconfig.json)
+[*.{json,jsonc}]
+indent_size = 2

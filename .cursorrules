@@ -1,0 +1,135 @@
+# .cursorrules — Polymath OS context for Cursor
+
+> Контекст для Cursor AI. Тот же материал, что в `.claude/CLAUDE.md`.
+
+## Кто мы
+
+**Polymath OS** — open-source LFS-style rebuild персональной операционной системы.
+Это не «отчёт», а рабочий reproducible код: 5 слоёв + cross-cutting concerns,
+всё в одном self-contained git-дереве. Лицензия: MIT (см. `LICENSE`).
+
+Слои:
+
+| Layer | Что | Где |
+|---|---|---|
+| **5** | Execution Kernel — SINGULYAR EIR v0.3 | `runtime/` |
+| **4** | DevEx / CI / IaC / Dotfiles / Observability | `Makefile`, `flake.nix`, `.github/workflows/` |
+| **3** | Second Brain (PKM) — markdown-first, git-synced | `vault/` (private, gitignored) |
+| **2** | AI Workflows — MCP-native, version-pinned | `tooling/agents/` (to be created) |
+| **1** | Repository Structure — pnpm + Turborepo + Changesets | repo root, `package.json` |
+| **cross-cutting** | Security (cosign/SLSA/SBOM) + OTel + git | everywhere |
+
+Философия: **человек = PID=1 = processor + сумма частей**. Любой инструмент —
+fork-exec от человека, заменяемый через ADR + migration plan (Принцип 18).
+LFS-этика буквально невыполнима, поэтому перестроена через Sovereignty Registry
+(ADR-0002): Tier 1 (суверенное ядро) + Tier 2 (арендуемые сервисы с offline
+fallback) + Tier 3 (закрытые форматы, миграция обязательна).
+
+## Главное правило: НЕ СЛОМАЙ `make verify`
+
+`make verify` — **open-source contract** (см. `README.md` §Quick start).
+
+```bash
+make verify   # запускает 12 проверок через scripts/check.py
+```
+
+Если `make verify` выходит ≠0 — что-то сломано. Каждый PR обязан проходить.
+Перед commit'ом — всегда проверяй. Если меняешь что-то в репо — `make verify`
+остаётся зелёным. Скрипт `scripts/check.py` сам по себе валидируется в check 12.
+
+`make verify` делает 12 проверок (см. `scripts/check.py`):
+
+1. SINGULYAR EIR — все 40 тестов в `runtime/` проходят
+2. JSON Schemas (Intent / Capability / Evidence) валидны
+3. ADRs 0001-0012 присутствуют
+4. ADRs следуют шаблону (Date/Status/Context/Decision/Consequences)
+5. `AUDIT_RESPONSE.md` cross-references все ADRs
+6. Sovereignty Registry покрывает каждую зависимость из `package.json`
+7. RUNBOOK hardened (ПРЕДУСЛОВИЯ + ПРОВЕРКА + ⛔ irreversible markers)
+8. LICENSE = MIT
+9. `ARCHITECTURE.md` описывает 5 слоёв + Sovereignty Registry + falsifiable self-*
+10. `runtime/src/*.py` компилируется (Python syntax)
+11. Нет `__pycache__` / `*.pyc` в tree (в `.gitignore`, не tracked)
+12. CI workflow (`.github/workflows/ci.yml`) запускает pnpm + turbo + gitleaks
+
+Если добавляешь новую зависимость в `package.json` → упомяни её в ADR-0002
+(check 06). Если добавляешь новое архитектурное решение → создай ADR. Если
+добавляешь новое заявление в `README.md` → добавь проверку в `scripts/check.py`.
+
+## ADRs — читать в этом порядке
+
+`docs/adr/` — 12 ADRs (0001-0012). Если времени мало, читай эти 4 первыми:
+
+1. **ADR-0002** Sovereignty Registry — Tier 1+2+3 реестр зависимостей. Основа
+   для всех решений «что добавить в flake.nix», «что взять в SaaS».
+2. **ADR-0011** Container runtime — colima (macOS) / podman (Linux) /
+   containerd+nerdctl (servers). Запрещает Docker Desktop.
+3. **ADR-0006** Falsifiable self-* properties — каждое self-* свойство имеет
+   отрицательный тест. Эмерджентность — гипотеза, не слоган.
+4. **ADR-0012** SINGULYAR EIR как Layer 5 — исполнительное ядро. Intent →
+   Capability → Adapter → Observation → Evidence.
+
+Остальные ADRs (по ситуации): 0003 (exit gates), 0004 (SLSA L2), 0005 (rollback
+3 цели), 0007 (multi-agent research vs execution), 0008 (MCP version pin),
+0009 (default-deny vault publish), 0010 (mutation testing critical paths).
+
+ADR — immutable после Accepted. Новые решения → superseding ADR со ссылкой на
+старый. Шаблон: `docs/adr/template.md`.
+
+## Файловые конвенции
+
+| Путь | Назначение |
+|---|---|
+| `runtime/` | Layer 5: SINGULYAR EIR v0.3. Python stdlib only, без deps. |
+| `scripts/check.py` | 12 проверок `make verify`. |
+| `Makefile` | Single entry point (`make verify`, `make bootstrap`, `make dev`). |
+| `flake.nix` | Reproducible dev-shell (Tier 1+2 tools, см. `docs/05-devex-ci.md`). |
+| `.envrc` | direnv hook (`use flake` + `.env.local`). |
+| `docs/adr/` | 12 ADRs + `template.md`. |
+| `docs/0N-*.md` | Документация по слоям (01-principles, 02-repo-structure, etc). |
+| `.github/workflows/ci.yml` | CI: verify → lint → typecheck → test → build → security. |
+| `.github/workflows/` | Reusable workflows. |
+| `apps/`, `packages/`, `tooling/` | pnpm workspace packages (to be created). |
+| `vault/` | Second Brain (gitignored, private). |
+| `infra/` | OpenTofu IaC (to be created). |
+
+**Не коммитить:**
+- `.env`, `.env.local` (secrets) → SOPS+age (ADR-0002 Tier 1) для git-ops.
+- `*.age` private keys, `age-identity.txt` (см. `.gitignore`).
+- `vault/.obsidian/workspace*` (mutable state).
+- `__pycache__/`, `*.pyc` (regenerated).
+- `node_modules/`, `dist/`, `.turbo/`, `.next/`.
+
+**Конвенции коммитов:** Conventional Commits (`feat:`, `fix:`, `docs:`,
+`chore(deps):`). Trunk-based, ≤24 ч на feature branch. Squash-merge.
+См. `CONTRIBUTING.md`.
+
+**Стиль комментариев:** Russian prose в комментариях, English для
+идентификаторов / URL / команд. Markdown — Prettier с `proseWrap: preserve`.
+
+## Команды
+
+```bash
+make help       # список целей
+make verify     # 12 проверок (open-source contract)
+make test       # verify + runtime tests
+make bootstrap  # nix develop --command true + pnpm install
+make dev        # tilt up (hot-reload, требует colima/podman)
+make lint       # pnpm turbo run lint
+make typecheck  # pnpm turbo run typecheck
+make build      # pnpm turbo run build
+make ci-local   # act -W .github/workflows/ci.yml -j ci
+make clean      # clean build artifacts
+```
+
+## Что ещё почитать
+
+- `ARCHITECTURE.md` — ментальная модель 5 слоёв
+- `ROADMAP.md` — фазы по exit gates (ADR-0003)
+- `TZ.md` — техническое задание
+- `docs/01-principles.md` — 18 принципов (конституция)
+- `docs/05-devex-ci.md` — Layer 4 детали (Nix, chezmoi, SOPS, cosign, Tilt)
+- `docs/AUDIT_RESPONSE.md` — audit findings A1-A11 → ADR mapping
+- `docs/runbook/RUNBOOK.md` — hardened operations runbook
+- `runtime/README.md` — SINGULYAR EIR v0.3
+- `runtime/docs/LIMITATIONS.md` — что НЕ доказано (честность)

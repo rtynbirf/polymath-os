@@ -1,0 +1,219 @@
+# infra/compose.observability.yaml — Polymath OS Layer 4 (Observability)
+#
+# Self-hosted Grafana LGTM stack + Sentry/Glitchtip alternative.
+# Run on a single personal VPS (Hetzner cpx21+) alongside k3s.
+#
+# Per ADR-0002 §Tier 2: Glitchtip replaces Sentry (self-host),
+# Grafana LGTM replaces BetterStack/datadog. Offline fallback: structured
+# logs in Loki only (no error tracking without Glitchtip).
+#
+# Per ADR-0011 (container runtime): Compose v2 compatible with
+# colima (macOS) + podman (Linux) + Docker (CI runner).
+#
+# Bring up:
+#   docker compose -f compose.observability.yaml up -d
+#
+# Verify:
+#   curl -sf http://localhost:3000/api/health   # Grafana
+#   curl -sf http://localhost:9090/-/ready      # Prometheus
+#
+# Tear down (KEEP DATA):
+#   docker compose -f compose.observability.yaml down
+#
+# Tear down (WIPE DATA — irreversible, ADR-0005 ⛔):
+#   docker compose -f compose.observability.yaml down -v
+
+name: polymath-observability
+
+networks:
+  obs-net:
+    driver: bridge
+    name: polymath-obs-net
+
+volumes:
+  grafana-data:          # dashboards, users, sessions
+  loki-data:             # log chunks + index
+  tempo-data:            # traces (blocks)
+  mimir-data:            # metrics blocks
+  prometheus-data:       # short-term metrics ( scrape → Mimir )
+  glitchtip-data:        # error events (postgres-backed)
+  postgres-glitchtip-data:  # glitchtip DB
+  otel-collector-data:  # spillover buffer
+
+services:
+
+  # ── Prometheus — short-term metrics scrape + remote_write to Mimir ────
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: polymath-prometheus
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - prometheus-data:/prometheus
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:9090:9090"   # bound to loopback — expose via ingress
+
+  # ── Loki — log aggregation (Grafana LGTM: L) ──────────────────────────
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: polymath-loki
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - loki-data:/loki
+      - ./configs/loki.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:3100:3100"
+
+  # ── Tempo — distributed tracing (Grafana LGTM: T) ────────────────────
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: polymath-tempo
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - tempo-data:/var/tempo
+      - ./configs/tempo.yml:/etc/tempo/tempo.yml:ro
+    command: -config.file=/etc/tempo/tempo.yml
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3200/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:3200:3200"      # tempo HTTP
+      - "127.0.0.1:4317:4317"      # OTLP gRPC (receive traces)
+
+  # ── Mimir — long-term metrics (Grafana LGTM: M) ──────────────────────
+  mimir:
+    image: grafana/mimir:2.4.0
+    container_name: polymath-mimir
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - mimir-data:/data
+      - ./configs/mimir.yml:/etc/mimir/mimir.yml:ro
+    command: -config.file=/etc/mimir/mimir.yml
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:8080:8080"      # Mimir HTTP
+      - "127.0.0.1:9095:9095"      # Prometheus remote_write compatible endpoint
+
+  # ── OpenTelemetry Collector — pipeline (recv → process → export) ──────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    container_name: polymath-otel-collector
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - otel-collector-data:/var/lib/otelcol
+      - ./configs/otel-collector.yml:/etc/otelcol/config.yaml:ro
+    command: --config=/etc/otelcol/config.yaml
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:13133/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      loki:    { condition: service_healthy }
+      tempo:   { condition: service_healthy }
+      mimir:   { condition: service_healthy }
+    ports:
+      - "127.0.0.1:4318:4318"      # OTLP HTTP (apps send traces here)
+      - "127.0.0.1:8888:8888"      # internal metrics
+
+  # ── Grafana — dashboards + explore UI ─────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: polymath-grafana
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_HTTP_PORT: "3000"
+    depends_on:
+      loki:    { condition: service_healthy }
+      tempo:   { condition: service_healthy }
+      mimir:   { condition: service_healthy }
+      prometheus: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    ports:
+      - "3000:3000"   # public — dashboard UI (in production: behind ingress + auth)
+
+  # ── Postgres for Glitchtip ────────────────────────────────────────────
+  postgres-glitchtip:
+    image: postgres:16-alpine
+    container_name: polymath-postgres-glitchtip
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - postgres-glitchtip-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: glitchtip
+      POSTGRES_USER: ${GLITCHTIP_DB_USER:-glitchtip}
+      POSTGRES_PASSWORD: ${GLITCHTIP_DB_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GLITCHTIP_DB_USER:-glitchtip} -d glitchtip"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Glitchtip — error tracking (Sentry alternative, self-host) ────────
+  glitchtip:
+    image: glitchtip/glitchtip:v3.4.0
+    container_name: polymath-glitchtip
+    restart: unless-stopped
+    networks: [obs-net]
+    volumes:
+      - glitchtip-data:/data
+    environment:
+      DATABASE_URL: postgres://${GLITCHTIP_DB_USER:-glitchtip}:${GLITCHTIP_DB_PASSWORD:-changeme}@postgres-glitchtip:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:-please-change-me-in-prod}
+      PORT: "8000"
+      DJANGO_SETTINGS_MODULE: glitchtip.settings
+    depends_on:
+      postgres-glitchtip: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/api/ || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "127.0.0.1:8001:8000"

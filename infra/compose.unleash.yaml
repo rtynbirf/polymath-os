@@ -1,0 +1,73 @@
+# infra/compose.unleash.yaml — Polymath OS Layer 4 (Feature flags)
+#
+# Self-hosted Unleash server. Run on personal VPS alongside observability stack.
+# Per docs/05-devex-ci.md §trunk-based + feature flags: trunk-based dev
+# requires feature flags; long-lived branches are anti-pattern (L1 ADR).
+#
+# Per ADR-0002 §Tier 2: Unleash — Apache-2.0, self-host, no SaaS.
+# Replacement: git-ops feature branches (Tier 1 offline fallback).
+#
+# Bring up:
+#   docker compose -f compose.unleash.yaml up -d
+#
+# Verify:
+#   curl -sf http://localhost:4242/health
+#
+# Tear down (KEEP DATA):
+#   docker compose -f compose.unleash.yaml down
+#
+# Tear down (WIPE DATA — irreversible, ADR-0005 ⛔):
+#   docker compose -f compose.unleash.yaml down -v
+
+name: polymath-unleash
+
+networks:
+  unleash-net:
+    driver: bridge
+    name: polymath-unleash-net
+
+volumes:
+  unleash-data:
+  postgres-unleash-data:
+
+services:
+
+  postgres-unleash:
+    image: postgres:16-alpine
+    container_name: polymath-postgres-unleash
+    restart: unless-stopped
+    networks: [unleash-net]
+    volumes:
+      - postgres-unleash-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: unleash
+      POSTGRES_USER: ${UNLEASH_DB_USER:-unleash}
+      POSTGRES_PASSWORD: ${UNLEASH_DB_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${UNLEASH_DB_USER:-unleash} -d unleash"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  unleash:
+    image: unleashorg/unleash-server:6.1.4
+    container_name: polymath-unleash
+    restart: unless-stopped
+    networks: [unleash-net]
+    volumes:
+      - unleash-data:/data
+    environment:
+      DATABASE_URL: postgres://${UNLEASH_DB_USER:-unleash}:${UNLEASH_DB_PASSWORD:-changeme}@postgres-unleash:5432/unleash
+      INIT_ADMIN_API_TOKENS: ${UNLEASH_INIT_TOKEN:-*.some-secret-key-change-me}
+      INIT_CLIENT_API_TOKENS: ${UNLEASH_CLIENT_TOKEN:-default-environment-token-change-me}
+    depends_on:
+      postgres-unleash: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:4242/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    ports:
+      - "4242:4242"   # public — SDKs + dashboard (behind ingress + auth in prod)

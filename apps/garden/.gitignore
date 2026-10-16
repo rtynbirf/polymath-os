@@ -1,0 +1,26 @@
+# apps/garden/.gitignore — Quartz v4 build artifacts
+# Keep config + content tracked, ignore generated build outputs.
+
+# Quartz build output
+public/
+
+# Quartz incremental cache
+.quartz-cache/
+
+# Quartz v4 bootstrap writes the `quartz/` tree from the @jackyzha0/quartz
+# package on first install. Override files (quartz/layout/Header.tsx) are
+# committed intentionally — don't ignore the whole tree.
+# (Quartz bootstrap warns on out-of-sync overrides; run `npx quartz sync`.)
+
+# Dependencies
+node_modules/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Local env overrides
+.env.local
+
+# Editor
+.DS_Store
+*.swp

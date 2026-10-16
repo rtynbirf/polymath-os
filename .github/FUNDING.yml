@@ -1,0 +1,20 @@
+# FUNDING.yml — Polymath OS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+# Платформы спонсирования НЕ настроены. Это MIT-licensed open-source ideal repo —
+# бери, используй, форкай без всяких условий. Кнопка "Sponsor" не появится на GitHub.
+#
+# Если появится спонсирование — добавь сюда записи (раскомментируй нужные).
+# GitHub автоматически соберёт из этого файла кнопку Sponsor на странице репо.
+#
+# github:           [USER]              # GitHub Sponsors
+# patreon:          USER                # Patreon
+# open_collective:  polymath-os         # Open Collective
+# ko_fi:            USER                # Ko-fi
+# tidelift:         npm/polymath-os     # Tidelift
+# community_bridge: USER                # Community Bridge
+# liberapay:        USER                # Liberapay
+# issuehunt:        USER                # IssueHunt
+# otechie:          USER                # Otechie
+# lfx_crowdfunding: USER                # LFX Crowdfunding
+# custom:           https://your-url.example/sponsor

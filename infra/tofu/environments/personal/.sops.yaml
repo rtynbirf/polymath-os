@@ -1,0 +1,26 @@
+# infra/tofu/environments/personal/.sops.yaml
+#
+# SOPS config for this environment. Specifies:
+#   - which files to encrypt
+#   - which age public key to encrypt them with
+#
+# The age PRIVATE key lives OUTSIDE the repo (per ADR-0002 §Tier 1:
+# age-encrypted files in git — private key NOT in git). The private key is
+# obtained at bootstrap time from 1Password CLI:
+#
+#     op item get "polymath-infra-age-identity" --field identity | \
+#       tee ~/.config/sops/age/keys.txt
+#     chmod 600 ~/.config/sops/age/keys.txt
+#
+# Then `sops -d secrets.sops.yaml` decrypts transparently.
+
+creation_rules:
+  # Encrypt everything matching this glob with the age key below.
+  - path_regex: secrets\.sops\.yaml$
+    # Real age public key — REPLACE with `age-keygen -o ... | head -1` output.
+    # Format: age1...
+    age: "age1ql3z7hjy54pw3hyzm5wp5v5o8h7qszu9x8z5v2ad6yq5wqz0pcqyg7hps"
+
+  # Anything else in this env that should be encrypted — extend here.
+  - path_regex: backend\.tfvars$
+    age: "age1ql3z7hjy54pw3hyzm5wp5v5o8h7qszu9x8z5v2ad6yq5wqz0pcqyg7hps"

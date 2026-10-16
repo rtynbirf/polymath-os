@@ -1,0 +1,86 @@
+# .gitattributes — Polymath OS
+# https://git-scm.com/docs/gitattributes
+#
+# Цели:
+#   1. Нормализация EOL → LF (consistency across macOS/Linux/Windows checkouts).
+#   2. Binary-файлы — не diff'ить, не merge'ить как текст, не нормализовать.
+#   3. Linguist overrides — язык статистики репо отражает реальный код, не сгенерированные artefacts.
+#   4. export-ignore — release tarball (zipball) содержит только то, что нужно потребителю.
+
+# ── 1. Default: text + auto EOL normalization → LF ────────────────────────
+# `text=auto` конвертирует CRLF → LF на commit, LF на checkout (Windows users get LF too).
+# See .editorconfig for editor-side enforcement (charset=utf-8, end_of_line=lf).
+* text=auto eol=lf
+
+# ── 2. Explicit per-type (overrides auto-detect mistakes) ──────────────────
+*.md     text eol=lf
+*.txt    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.json   text eol=lf
+*.toml   text eol=lf
+*.py     text eol=lf diff=python
+*.go     text eol=lf
+*.rs     text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.sh     text eol=lf
+*.sql    text eol=lf
+Makefile text eol=lf
+Dockerfile text eol=lf
+
+# ── 3. Binary file types — never diff, never merge, never normalize ──────
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.icns  binary
+*.pdf   binary
+*.zip   binary
+*.tar   binary
+*.gz    binary
+*.tgz   binary
+*.7z    binary
+*.pcap  binary
+*.mp4   binary
+*.mp3   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+
+# SOPS age-encrypted files — текстовые, но noise в diff; `binary` → no diff noise.
+*.age    binary
+# age public keys — текст, но disable diff (one-line keys generate useless diff).
+*.age.pub -diff
+
+# ── 4. Linguist overrides — language stats accuracy ────────────────────────
+# https://github.com/github-linguist/linguist#overrides
+# Generated files (don't count toward language bar):
+runtime/SHA256SUMS.txt              linguist-generated=true
+runtime/experiments/results.csv     linguist-generated=true
+runtime/prototype/replay_data.js    linguist-generated=true
+pnpm-lock.yaml                      linguist-vendored=true
+package-lock.json                   linguist-generated=true
+# Docs directory — markdown, not "Other":
+docs/                               linguist-documentation=true
+# Runtime is pure Python 3.10+ stdlib — mark explicitly so Linguist doesn't guess:
+runtime/src/                        linguist-language=Python
+
+# ── 5. export-ignore — exclude from `git archive` release tarball ─────────
+# Affects `gh release create` zipballs and `git archive` output.
+# Users who `git clone` still get these — only tarballs/zipballs skip them.
+.github/                   export-ignore
+.gitignore                 export-ignore
+.gitattributes             export-ignore
+.editorconfig              export-ignore
+.pre-commit-config.yaml    export-ignore
+.markdownlint.yaml         export-ignore
+.all-contributorsrc        export-ignore
+.vscode/                   export-ignore
+.devcontainer/             export-ignore
+.changeset/                export-ignore

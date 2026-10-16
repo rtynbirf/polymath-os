@@ -1,0 +1,89 @@
+# labeler.yml — Polymath OS
+# Конфиг для actions/labeler@v5 (см. .github/workflows/labels.yml).
+# Формат: имя label → список path-паттернов.
+# При открытии PR actions/labeler проходит по этому файлу и ставит label
+# на каждый match. `sync-labels: true` убирает label, когда паттерн перестал match.
+#
+# Catalog labels описаны в .github/labels.yml (name/color/description).
+# Держи эти два файла синхронизированными при добавлении нового слоя/пути.
+
+# ── layer/* по затронутым путям ─────────────────────────────────────────────
+"layer/1-repo":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-workspace.yaml"
+          - "turbo.json"
+          - ".changeset/**"
+          - "packages/**"
+
+"layer/2-ai":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tooling/agents/**"
+          - "docs/03-ai-workflows.md"
+          - "tooling/mcp/**"
+
+"layer/3-second-brain":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "vault/**"
+          - "apps/garden/**"
+          - "docs/04-second-brain.md"
+
+"layer/4-devex":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/**"
+          - ".devcontainer/**"
+          - "Makefile"
+          - "infra/**"
+          - "docs/05-devex-ci.md"
+          - ".pre-commit-config.yaml"
+          - ".markdownlint.yaml"
+
+"layer/5-runtime":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "runtime/**"
+
+"layer/cross-cutting":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "SECURITY.md"
+          - "docs/runbook/**"
+          - "docs/adr/**"
+          - "docs/AUDIT_RESPONSE.md"
+          - "ARCHITECTURE.md"
+
+# ── type/* по путям ────────────────────────────────────────────────────────
+"type:docs":
+  - changed-files:
+      - all-globs-to-all-files:
+          - "docs/**"
+          - "**/*.md"
+  # `all-globs-to-all-files` означает: каждый изменённый файл должен быть .md или в docs/
+
+"type:chore":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".gitignore"
+          - ".gitattributes"
+          - ".editorconfig"
+          - "LICENSE"
+          - "CODE_OF_CONDUCT.md"
+          - ".all-contributorsrc"
+          - ".github/FUNDING.yml"
+          - ".github/dependabot.yml"
+          - ".github/renovate.json"
+          - ".github/CODEOWNERS"
+
+"type:security":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "SECURITY.md"
+          - ".github/workflows/codeql.yml"
+          - ".github/workflows/release.yml"
+          - "**/*.age"
+          - "**/secrets/**"

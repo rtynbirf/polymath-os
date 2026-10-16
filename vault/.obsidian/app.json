@@ -1,0 +1,14 @@
+{
+  "attachmentFolderPath": "vault/90-meta/attachments",
+  "newFileLocation": "current",
+  "newFileFolderPath": "vault/00-daily",
+  "newLinkFormat": "shortest",
+  "useMarkdownLinks": false,
+  "alwaysUpdateLinks": true,
+  "showInlineTitle": true,
+  "showLineNumber": true,
+  "spellcheck": true,
+  "strictLineBreaks": false,
+  "showFrontmatter": true,
+  "defaultViewForNewTabs": "editing"
+}

@@ -1,0 +1,81 @@
+# .github/workflows/labels.yml — Polymath OS
+# Авто-проставление labels на PR по затронутым путям (mirror иерархии слоёв
+# из ARCHITECTURE.md). На push в main, затрагивающий .github/labels.yml — пересинхронизирует
+# catalog с GitHub (create/update only, без удаления — чтобы не потерять ручные labels).
+#
+# Path rules:   .github/labeler.yml (consumed by actions/labeler@v5)
+# Label catalog: .github/labels.yml (name / color / description — source of truth)
+
+name: Triage labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+    paths:
+      - ".github/labels.yml"
+
+permissions:
+  pull-requests: write   # actions/labeler добавляет/убирает labels на PR
+  issues: write           # gh label create/update на catalog-sync
+  contents: read
+
+# Labeler идемпотентен — race-condition между push и PR безопасна.
+concurrency:
+  group: labels-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  label-pr:
+    name: Apply layer/* and type/* labels to PR
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/labeler.yml
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true   # убирает label, когда паттерн перестал match
+
+  sync-catalog:
+    name: Sync .github/labels.yml catalog → GitHub
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync labels (create + update, never delete)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Inline parse of .github/labels.yml → `gh label create --force` per entry.
+          # Avoids 3rd-party action dependency — pure `gh` CLI.
+          python3 - <<'PY'
+          import json, subprocess, sys, re
+          text = open(".github/labels.yml", encoding="utf-8").read()
+          # Split into top-level `- name:` blocks.
+          blocks = re.split(r"\n(?=- name:)", text)
+          for b in blocks:
+              m_name = re.search(r"name:\s+\"?([^\"]+)\"?\s*$", b, re.M)
+              m_color = re.search(r"color:\s+\"?([0-9a-fA-F]{6})\"?", b, re.M)
+              m_desc  = re.search(r"description:\s+\"(.*)\"", b, re.M)
+              if not (m_name and m_color and m_desc):
+                  continue
+              name, color, desc = m_name.group(1), m_color.group(1), m_desc.group(1)
+              # `gh label create` with --force updates if exists.
+              r = subprocess.run(
+                  ["gh", "label", "create", name,
+                   "--color", color,
+                   "--description", desc,
+                   "--force"],
+                  capture_output=True, text=True,
+              )
+              if r.returncode == 0:
+                  print(f"  ✓ {name}")
+              else:
+                  print(f"  ⚠ {name}: {r.stderr.strip()}", file=sys.stderr)
+          PY
