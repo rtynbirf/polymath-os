@@ -333,6 +333,17 @@ class Runtime:
     def fp(self, obj) -> str:
         return hmac.new(self.key, _canonical(obj).encode("utf-8"), hashlib.sha256).hexdigest()
 
+    def fp_salt(self, obj, salt: bytes) -> str:
+        """HMAC-SHA-256 with per-entry salt prepended to canonical input.
+
+        Per REDACTION_AUDIT.md: low-entropy values (e.g. "ok", "true") have
+        small preimage space under plain HMAC. Prepending a 16-byte random
+        salt raises preimage space to 2^128 per entry — even with the
+        redaction_key + fingerprint, an attacker cannot recover the value
+        by dictionary attack.
+        """
+        return hmac.new(self.key, salt + _canonical(obj).encode("utf-8"), hashlib.sha256).hexdigest()
+
     def _fire(self, point: str, intent: Intent):
         if self.fault_hook:
             self.fault_hook(point, intent)
@@ -529,9 +540,17 @@ class Runtime:
             return self._conclude(intent, evidence)
 
     def _log_evidence(self, kind, ev: Evidence):
+        # Per REDACTION_AUDIT.md (Gate-2): add per-entry 16-byte random salt
+        # to HMAC input. Raises preimage space per entry to 2^128 even for
+        # low-entropy values (e.g. {"ok": true}, "1", "yes") — closes the
+        # brute-forceability gap documented in LIMITATIONS.md item 4.
+        salt = os.urandom(16)
         self.ledger.append(kind, {"intent_id": ev.intent_id, "verifier": ev.verifier, "verdict": ev.verdict,
-                                  "observed_status": ev.observed_status, "expected_fp": self.fp(ev.expected),
-                                  "observed_fp": self.fp(ev.observed) if ev.observed else "", "note": ev.note})
+                                  "observed_status": ev.observed_status,
+                                  "expected_fp": self.fp_salt(ev.expected, salt),
+                                  "observed_fp": self.fp_salt(ev.observed, salt) if ev.observed else "",
+                                  "salt": salt.hex(),
+                                  "note": ev.note})
 
     def _finish_verification(self, intent, adapter, cap, key, obs) -> State:
         evidence = self.verifier.verify(intent, obs)

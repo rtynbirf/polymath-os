@@ -6,6 +6,12 @@ Run: 2026-10-16 · Python 3.12.15 · Linux
 Exit code: 0
 
 ```text
+test_lead_acquire_expired_lease_released (test_durability.LeadLeaseTests.test_lead_acquire_expired_lease_released)
+Lease with very short TTL: after expiry, another Runtime can acquire ... ok
+test_lead_acquire_then_block_second (test_durability.LeadLeaseTests.test_lead_acquire_then_block_second)
+Two SQLiteEvidenceLedger handles on the same file: first acquires, ... ok
+test_lead_release_wrong_holder_no_op (test_durability.LeadLeaseTests.test_lead_release_wrong_holder_no_op)
+release() with wrong holder doesn't affect the lease. ... ok
 test_events_survive_reopen_and_chain_verifies (test_durability.LedgerTests.test_events_survive_reopen_and_chain_verifies) ... ok
 test_export_jsonl (test_durability.LedgerTests.test_export_jsonl) ... ok
 test_tail_truncation_needs_checkpoint (test_durability.LedgerTests.test_tail_truncation_needs_checkpoint) ... ok
@@ -23,6 +29,24 @@ test_each_ablation_link_is_load_bearing (test_experiment.ExperimentTests.test_ea
 Removing a link must make at least one scenario unsafe; otherwise the link proves nothing. ... ok
 test_eir_regression_guard_on_scenario_matrix (test_experiment.ExperimentTests.test_eir_regression_guard_on_scenario_matrix) ... ok
 test_generated_artifacts_are_fresh_and_deterministic (test_experiment.ExperimentTests.test_generated_artifacts_are_fresh_and_deterministic) ... ok
+test_real_http_4xx_raises_runtime_error (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_4xx_raises_runtime_error) ... ok
+test_real_http_5xx_get_raises_not_executed (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_5xx_get_raises_not_executed)
+5xx on idempotent GET → NotExecuted (safe to retry). ... ok
+test_real_http_get_returns_200 (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_get_returns_200) ... /home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/urllib/request.py:1330: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=27, family=2, type=1, proto=6>
+  headers.update({k: v for k, v in req.headers.items()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/urllib/request.py:1330: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=28, family=2, type=1, proto=6>
+  headers.update({k: v for k, v in req.headers.items()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_adapter_id_constant (test_http_adapter.HTTPAdapterTests.test_adapter_id_constant) ... ok
+test_capabilities_count_and_idempotency (test_http_adapter.HTTPAdapterTests.test_capabilities_count_and_idempotency) ... ok
+test_default_adapter_ready_state (test_http_adapter.HTTPAdapterTests.test_default_adapter_ready_state) ... ok
+test_read_state_absent_for_never_executed_key (test_http_adapter.HTTPAdapterTests.test_read_state_absent_for_never_executed_key) ... ok
+test_s15_partial_cache_miss_does_not_pollute_sibling (test_http_adapter.HTTPAdapterTests.test_s15_partial_cache_miss_does_not_pollute_sibling)
+ADR-0010 S15 cross-check for HTTPAdapter. ... ok
+test_runtime_with_http_adapter_get (test_http_adapter.IntegrationWithRuntimeTests.test_runtime_with_http_adapter_get)
+Runtime with HTTPAdapter — execute a GET via kernel. ... ok
 test_runtime_with_llm_local_adapter_command (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_command)
 Execute a known command via the full Runtime → LLMLocalAdapter path. ... ok
 test_runtime_with_llm_local_adapter_free_speech_unknown (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_free_speech_unknown)
@@ -49,6 +73,11 @@ test_parse_free_speech_returns_none (test_llm_local_adapter.RuleLayerTests.test_
 test_parse_open_with_arg (test_llm_local_adapter.RuleLayerTests.test_parse_open_with_arg) ... ok
 test_parse_ping (test_llm_local_adapter.RuleLayerTests.test_parse_ping) ... ok
 test_parse_send_with_arg (test_llm_local_adapter.RuleLayerTests.test_parse_send_with_arg) ... ok
+test_free_speech_gets_llm_response_not_not_executed (test_llm_local_adapter_integration.RealLLMIntegrationTests.test_free_speech_gets_llm_response_not_not_executed)
+Per ADR-0007: free speech + LLM loaded → real response (not NotExecuted). ... skipped 'LLM_MODEL_PATH env var not set or llama-cpp-python not installed'
+test_load_model_reaches_ready_state (test_llm_local_adapter_integration.RealLLMIntegrationTests.test_load_model_reaches_ready_state) ... skipped 'LLM_MODEL_PATH env var not set or llama-cpp-python not installed'
+test_rule_layer_command_still_works_alongside_llm (test_llm_local_adapter_integration.RealLLMIntegrationTests.test_rule_layer_command_still_works_alongside_llm)
+Rule-layer commands (ping) still work — they short-circuit before LLM. ... skipped 'LLM_MODEL_PATH env var not set or llama-cpp-python not installed'
 test_failover_when_primary_guarantees_no_effect (test_runtime.FailoverAndConstraintTests.test_failover_when_primary_guarantees_no_effect) ... ok
 test_local_only_constraint_is_never_downgraded (test_runtime.FailoverAndConstraintTests.test_local_only_constraint_is_never_downgraded) ... ok
 test_no_compatible_capability_waits_for_human (test_runtime.FailoverAndConstraintTests.test_no_compatible_capability_waits_for_human) ... ok
@@ -77,9 +106,9 @@ test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_data
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
 
 ----------------------------------------------------------------------
-Ran 61 tests in 0.261s
+Ran 76 tests in 5.917s
 
-OK
+OK (skipped=3)
 ```
 
 ## demo

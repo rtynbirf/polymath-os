@@ -35,3 +35,5 @@ SINGULYAR команда сама провела самоаудит v0.2 и ус
 Это — гипотеза, не утверждение. СINGULYAR EIR — её инженерная реализация в прототипе. Polymath OS — её контекст (окружение, в котором EIR живёт: репо, second brain, devex, AI-стек).
 
 Эмерджентность теперь **проверяема** через лестницу абляции B0→B3→EIR (`runtime/docs/EXPERIMENT_RESULTS.md`): каждое звено убирает конкретный класс отказа; тест `test_each_ablation_link_is_load_bearing` проверяет, что каждое звено несущее. Цена: в двух сценариях ядро честно отвечает UNKNOWN вместо «наверное получилось».
+
+| **0013-slsa-build-l3-target** | ADR-0004 v1.0 SLSA L2 — build platform can forge provenance (no hermetic isolation). | ADR-0013 (Proposed, Gate-6 candidate) — v2.0 target = SLSA L3 via `slsa-framework/slsa-github-generator` + hermetic builder (`--network=none`) + reproducible build + trusted builder separation. | `docs/adr/0013-slsa-build-l3-target.md` (Proposed) |

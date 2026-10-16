@@ -2,15 +2,54 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Singulyar Evidence (ledger form, values redacted)",
   "type": "object",
-  "required": ["intent_id", "verifier", "verdict", "observed_status", "expected_fp", "observed_fp", "note"],
+  "required": [
+    "intent_id",
+    "verifier",
+    "verdict",
+    "observed_status",
+    "expected_fp",
+    "observed_fp",
+    "salt",
+    "note"
+  ],
   "properties": {
-    "intent_id": {"type": "string", "minLength": 1},
-    "verifier": {"type": "string", "minLength": 1},
-    "verdict": {"enum": ["PASS", "FAIL", "INCONCLUSIVE"]},
-    "observed_status": {"enum": ["PRESENT", "ABSENT", "UNAVAILABLE"]},
-    "expected_fp": {"type": "string", "minLength": 1},
-    "observed_fp": {"type": "string"},
-    "note": {"type": "string"}
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "INCONCLUSIVE"
+      ]
+    },
+    "observed_status": {
+      "enum": [
+        "PRESENT",
+        "ABSENT",
+        "UNAVAILABLE"
+      ]
+    },
+    "expected_fp": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_fp": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "salt": {
+      "type": "string",
+      "minLength": 32,
+      "description": "hex-encoded 16-byte random salt for HMAC input (per REDACTION_AUDIT.md)"
+    }
   },
   "additionalProperties": false
 }

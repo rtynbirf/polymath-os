@@ -213,3 +213,63 @@ class RestartTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LeadLeaseTests(unittest.TestCase):
+    """Multi-writer lead/lease coordination per LIMITATIONS.md item 1 closure."""
+
+    def test_lead_acquire_then_block_second(self):
+        """Two SQLiteEvidenceLedger handles on the same file: first acquires,
+        second is blocked. After release, second can acquire."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ledger.db"
+            l1 = SQLiteEvidenceLedger(path)
+            self.assertTrue(l1.lead_acquire(holder="rt1", ttl_ms=5000))
+
+            l2 = SQLiteEvidenceLedger(path)
+            self.assertFalse(l2.lead_acquire(holder="rt2", ttl_ms=5000),
+                              "second Runtime MUST be blocked while first holds lead")
+
+            # Status check
+            st = l2.lead_status()
+            self.assertTrue(st["held"])
+            self.assertEqual(st["holder"], "rt1")
+
+            # Release
+            self.assertTrue(l1.lead_release(holder="rt1"))
+            self.assertFalse(l1.lead_release(holder="rt1"),  # already released
+                              "double-release must return False")
+
+            # Now second can acquire
+            self.assertTrue(l2.lead_acquire(holder="rt2", ttl_ms=5000))
+            self.assertEqual(l2.lead_status()["holder"], "rt2")
+            l1.close(); l2.close()
+
+    def test_lead_acquire_expired_lease_released(self):
+        """Lease with very short TTL: after expiry, another Runtime can acquire
+        without explicit release (auto-sweep on next acquire)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ledger.db"
+            l1 = SQLiteEvidenceLedger(path)
+            self.assertTrue(l1.lead_acquire(holder="rt1", ttl_ms=10))  # 10ms TTL
+
+            import time
+            time.sleep(0.05)  # 50ms — lease expired
+
+            l2 = SQLiteEvidenceLedger(path)
+            self.assertTrue(l2.lead_acquire(holder="rt2", ttl_ms=5000),
+                            "expired lease must auto-release on next acquire attempt")
+            l1.close(); l2.close()
+
+    def test_lead_release_wrong_holder_no_op(self):
+        """release() with wrong holder doesn't affect the lease."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ledger.db"
+            l1 = SQLiteEvidenceLedger(path)
+            l1.lead_acquire(holder="rt1", ttl_ms=5000)
+
+            l2 = SQLiteEvidenceLedger(path)
+            self.assertFalse(l2.lead_release(holder="rt-not-me"),
+                              "wrong holder release MUST be no-op")
+            self.assertTrue(l2.lead_status()["held"], "lease still held by rt1")
+            l1.close(); l2.close()
