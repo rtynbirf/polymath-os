@@ -16,7 +16,7 @@
     "check": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && biome check .",
     "typecheck": "tsc --noEmit -p tsconfig.json || true",
-    "test": "python3 scripts/filter_vault.py --help >/dev/null && echo \"filter_vault.py CLI sanity OK\""
+    "test": "python3 scripts/filter_vault.py --help"
   },
   "dependencies": {
     "@jackyzha0/quartz": "github:jackyzha0/quartz#v4"
