@@ -308,6 +308,30 @@ class LLMLocalAdapter(Adapter):
         self._reason = ""
         return {"state": "ready", "via": "llm.local", "model_path": path}
 
+    def verify_model_hash(self, path: str, expected_sha256: str) -> bool:
+        """Verify SHA-256 of model file at load time, not just at repo time.
+        
+        Per WIN_PE audit B1: singulyar-llm has MANIFEST.txt with SHA-256 but
+        the browser loader ignores it. Hash must be verified at USE time.
+        
+        If hash doesn't match → state stays UNAVAILABLE, model not loaded.
+        Per ADR-0006: honest failure, not silent accept.
+        """
+        import hashlib
+        if not os.path.exists(path):
+            return False
+        h = hashlib.sha256()
+        with open(path, 'rb') as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk: break
+                h.update(chunk)
+        actual = h.hexdigest()
+        if actual != expected_sha256:
+            self._reason = f'model hash mismatch: expected {expected_sha256[:16]}..., got {actual[:16]}...'
+            return False
+        return True
+
     def calls(self) -> int:
         """Number of execute() invocations — for testing."""
         return self._calls

@@ -130,7 +130,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 93 tests in 5.782s
+Ran 93 tests in 5.950s
 
 OK (skipped=4)
 ```
