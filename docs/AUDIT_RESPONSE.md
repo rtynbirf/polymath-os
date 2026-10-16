@@ -42,3 +42,5 @@ SINGULYAR команда сама провела самоаудит v0.2 и ус
 | **0015-real-llm-inference-in-ci** | LIMITATIONS.md item 9 — integration test exists but SKIPs in default CI; LLM inference never exercised automatically. | ADR-0015 (Proposed, Gate-7) — weekly CI job runs real Qwen2.5-0.5B on CPU runner; closes item 9 fully when implemented in v2.0. | `docs/adr/0015-real-llm-inference-in-ci.md` |
 
 | **0016-self-rewriting-adr-mechanism** | ADR-0001 bootstraps ADR pattern but doesn't specify how to amend it. | ADR-0016 (Accepted, Gate-7) — meta-ADR specifying ADR lifecycle (Proposed→Accepted→Deprecated→Superseded), addition/amendment/supersession process, recursive self-description. | `docs/adr/0016-self-rewriting-adr-mechanism.md` |
+
+| **0017-ecosystem-governance-protocol** | Cross-repo execution was ad-hoc (manual API calls). No formal protocol for audit → issue → PR → merge cycle. | ADR-0017 (Accepted, v2.5.0) — formalizes: audit cadence, cross-repo execution protocol (Intent→GitAdapter→PR→merge), governance workflow, issue lifecycle. All 5 critical findings MERGED. | `docs/adr/0017-ecosystem-governance-protocol.md` |

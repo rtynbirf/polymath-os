@@ -178,3 +178,15 @@ through a real code fix, across repo boundaries, across language boundaries
 | 5 | Human intent → cross-repo execution (PR #11) | ✅ v2.3.0 |
 
 All 5 steps complete. The ecosystem is integrated.
+
+## ALL 5 CRITICAL FINDINGS MERGED (v2.5.0) ✨
+
+| Finding | Issue | PR | Status |
+|---|---|---|---|
+| S18: S15_MAX fix | #7 | PR #11 | ✅ MERGED |
+| S1: honest tagline | #6 | PR #13 | ✅ MERGED |
+| S26: CSP Nostr allowlist | #8 | PR #14 | ✅ MERGED |
+| S27: innerHTML→textContent | #9 | PR #15 | ✅ MERGED |
+| S37: data-clearing warning | #10 | PR #16 | ✅ MERGED |
+
+All 5 critical findings from AUDIT_SINGULYAR.md are FIXED and LIVE in singulyar main.
