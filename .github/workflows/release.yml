@@ -58,10 +58,9 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Set up pnpm 9
+      - name: Set up pnpm (version from package.json)
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version is read from package.json packageManager field
 
       - name: Install + build (pnpm + turborepo)
         run: |

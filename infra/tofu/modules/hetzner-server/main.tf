@@ -81,8 +81,6 @@ resource "hcloud_server" "this" {
   # ADR-0005 (separate rollback targets): server replacement on image change
   # is allowed — но state модуля (data) lives in volumes/DB, не на root disk.
   # Backup/restore — separate concern (RPO/RTO target per ADR-0005).
-  public_net {
-    enable_ipv4 = true
-    enable_ipv6 = true
-  }
+  # public_net block omitted — hcloud 1.70+ assigns ipv4+ipv6 by default;
+  # use outputs.ipv4 (hcloud_server.this.ipv4_address) and .ipv6 to read.
 }

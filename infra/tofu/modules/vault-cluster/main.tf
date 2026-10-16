@@ -118,7 +118,8 @@ data "kubernetes_service" "vault" {
 # пересчитает output. Это **falsifiable** marker — перезапуск flag-a можно
 # проверять: `vault status | grep Initialized` должен совпадать.
 locals {
-  # helm_release.status — это list of objects. Берём первый.
-  release_status = length(helm_release.vault.status) > 0 ? helm_release.vault.status[0] : null
-  init_required  = local.release_status == null ? true : local.release_status.stage != "Deployed"
+  # helm_release.status — это STRING ('Deployed' | 'Failed' | 'Pending' | ...).
+  # The original code wrongly assumed it was a list of objects — broke `tofu validate`.
+  release_status = helm_release.vault.status
+  init_required  = local.release_status != "Deployed"
 }
