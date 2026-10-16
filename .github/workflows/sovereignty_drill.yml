@@ -1,0 +1,138 @@
+# .github/workflows/sovereignty_drill.yml — weekly sovereignty drill (9th pattern from AUDIT_SINGULYAR)
+#
+# Per ADR-0002 §verification: "ежеквартальное учение выхода" — disable one Tier 2
+# service, show that core+data work, record recovery time.
+#
+# Per Gate-7 pattern internalization: this is the 9th of 9 patterns from
+# AUDIT_SINGULYAR.md (Gate-5 third-level audit) turned into a CI claim.
+#
+# Schedule: weekly Monday 03:00 UTC (after Dependabot/Renovate Monday 06:00 UTC
+# — actually BEFORE so drill runs before deps update). Adjust as needed.
+# Manual trigger: workflow_dispatch with --service arg.
+
+name: Sovereignty Drill
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # every Monday 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Tier 2 service to disable (default: openrouter — least disruptive)'
+        required: false
+        default: 'openrouter'
+        type: choice
+        options:
+          - openrouter
+          - sentry
+          - 1password
+          - cloudflare
+          - hetzner
+          - github_pages
+          - github_actions
+          - github_repo
+          - obsidian
+          - quartz
+          - betterstack
+          - all_tier2
+
+permissions:
+  contents: read   # only need to read repo for drill
+  actions: read    # to query workflow status if needed
+  issues: write    # to open issue if drill fails (sovereignty regression)
+
+concurrency:
+  group: sovereignty-drill
+  cancel-in-progress: false  # never cancel mid-drill
+
+jobs:
+  drill:
+    name: Sovereignty drill — disable one Tier 2 service
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run sovereignty drill
+        id: drill
+        run: |
+          set -euo pipefail
+          SERVICE="${{ github.event.inputs.service || 'openrouter' }}"
+          echo "::notice::Running sovereignty drill — disabling $SERVICE"
+          python3 scripts/sovereignty_drill.py --service "$SERVICE" --output drill-report.json
+          # Read result for next step
+          python3 -c "
+          import json
+          r = json.load(open('drill-report.json'))
+          print(f\"verify_pass={r['verify_pass']}\")
+          print(f\"runtime_tests_pass={r['runtime_tests_pass']}\")
+          print(f\"recovery_time_ms={r['recovery_time_ms']}\")
+          "
+          # Exit non-zero if drill failed
+          python3 -c "
+          import json, sys
+          r = json.load(open('drill-report.json'))
+          sys.exit(0 if r['verify_pass'] and r['runtime_tests_pass'] else 1)
+          "
+
+      - name: Upload drill report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sovereignty-drill-report-${{ github.event.inputs.service || 'openrouter' }}
+          path: drill-report.json
+          retention-days: 90
+
+      - name: Open issue if drill failed
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('drill-report.json', 'utf8'));
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Sovereignty drill failed: ${report.service_disabled}`,
+              body: `## Drill failure report
+
+            **Service disabled**: \`${report.service_disabled}\`
+            **Description**: ${report.description}
+            **Expected fallback**: ${report.expected_fallback}
+            **Timestamp**: ${report.timestamp}
+
+            ### Results
+            - \`make verify\` pass: ${report.verify_pass} (exit ${report.verify_exit_code})
+            - \`runtime tests\` pass: ${report.runtime_tests_pass} (exit ${report.runtime_exit_code})
+            - Recovery time: ${report.recovery_time_ms} ms
+
+            ### Last verify line
+            \`\`\`
+            ${report.verify_last_line}
+            \`\`\`
+
+            ### Last runtime tests line
+            \`\`\`
+            ${report.runtime_last_line}
+            \`\`\`
+
+            ### Env vars blocked
+            ${report.env_block_keys.map(k => '- \`' + k + '\`').join('\n')}
+
+            ---
+
+            Per ADR-0002 §verification: "ежеквартальное учение выхода" — sovereignty
+            is a property, not a pose. This drill failure means the open-source
+            contract broke when a Tier 2 service was disabled. Investigate and
+            restore before closing this issue.
+
+            Per ADR-0006 (falsifiable self-*): this issue is the falsifiability
+            witness. Without this drill, "sovereignty" was just a label.
+            `,
+              labels: ['sovereignty', 'drill-failure', 'p0']
+            });

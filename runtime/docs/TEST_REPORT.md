@@ -32,13 +32,7 @@ test_generated_artifacts_are_fresh_and_deterministic (test_experiment.Experiment
 test_real_http_4xx_raises_runtime_error (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_4xx_raises_runtime_error) ... ok
 test_real_http_5xx_get_raises_not_executed (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_5xx_get_raises_not_executed)
 5xx on idempotent GET → NotExecuted (safe to retry). ... ok
-test_real_http_get_returns_200 (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_get_returns_200) ... /home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/urllib/request.py:1330: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=27, family=2, type=1, proto=6>
-  headers.update({k: v for k, v in req.headers.items()
-ResourceWarning: Enable tracemalloc to get the object allocation traceback
-/home/z/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/urllib/request.py:1330: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=28, family=2, type=1, proto=6>
-  headers.update({k: v for k, v in req.headers.items()
-ResourceWarning: Enable tracemalloc to get the object allocation traceback
-ok
+test_real_http_get_returns_200 (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_get_returns_200) ... ok
 test_adapter_id_constant (test_http_adapter.HTTPAdapterTests.test_adapter_id_constant) ... ok
 test_capabilities_count_and_idempotency (test_http_adapter.HTTPAdapterTests.test_capabilities_count_and_idempotency) ... ok
 test_default_adapter_ready_state (test_http_adapter.HTTPAdapterTests.test_default_adapter_ready_state) ... ok
@@ -104,11 +98,27 @@ test_unreadable_state_stays_unknown_and_never_retries (test_runtime.KernelTests.
 test_wrong_final_state_fails_verification (test_runtime.KernelTests.test_wrong_final_state_fails_verification) ... ok
 test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_dataclasses) ... ok
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
+test_runtime_with_webrtc_adapter_send (test_webrtc_adapter.IntegrationWithRuntimeTests.test_runtime_with_webrtc_adapter_send)
+Runtime with WebRTCAdapter — execute a send via kernel. ... ok
+test_adapter_id_constant (test_webrtc_adapter.WebRTCAdapterTests.test_adapter_id_constant) ... ok
+test_adapter_version_includes_python_port_note (test_webrtc_adapter.WebRTCAdapterTests.test_adapter_version_includes_python_port_note) ... ok
+test_capabilities_count_and_fields (test_webrtc_adapter.WebRTCAdapterTests.test_capabilities_count_and_fields) ... ok
+test_create_peer_connection_returns_sdp_offer_or_error (test_webrtc_adapter.WebRTCAdapterTests.test_create_peer_connection_returns_sdp_offer_or_error)
+create_peer_connection either returns SDP offer (aiortc installed) ... ok
+test_default_adapter_unavailable_state_when_no_aiortc (test_webrtc_adapter.WebRTCAdapterTests.test_default_adapter_unavailable_state_when_no_aiortc)
+Per ADR-0006: status() MUST return UNAVAILABLE with reason when aiortc absent. ... ok
+test_execute_raises_not_executed_when_no_aiortc (test_webrtc_adapter.WebRTCAdapterTests.test_execute_raises_not_executed_when_no_aiortc)
+Per ADR-0007: NotExecuted (no effect) when aiortc absent — kernel can failover. ... ok
+test_execute_raises_not_executed_when_no_peer (test_webrtc_adapter.WebRTCAdapterTests.test_execute_raises_not_executed_when_no_peer)
+Per ADR-0007: NotExecuted (no effect) when no peer connection — even if aiortc present. ... skipped 'aiortc not installed — testing peer-absent path requires aiortc'
+test_read_state_absent_for_never_executed_key (test_webrtc_adapter.WebRTCAdapterTests.test_read_state_absent_for_never_executed_key) ... ok
+test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTCAdapterTests.test_s15_partial_cache_miss_does_not_pollute_sibling)
+ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 76 tests in 5.917s
+Ran 86 tests in 5.523s
 
-OK (skipped=3)
+OK (skipped=4)
 ```
 
 ## demo
