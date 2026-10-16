@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymath OS — Ecosystem Dashboard</title>
+<style>
+body { background: #0a0a0a; color: #e0e0e0; font-family: monospace; max-width: 900px; margin: 0 auto; padding: 2rem; }
+h1 { color: #f0c040; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+.repo { background: #111; border: 1px solid #333; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+.repo h2 { color: #80c0ff; margin-top: 0; }
+.repo .size { color: #c0c0c0; }
+.repo .tier { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 0.5rem; }
+.tier-1 { background: #1a3a1a; color: #80ff80; }
+.tier-2 { background: #3a3a1a; color: #ffff80; }
+.stat { display: inline-block; margin-right: 2rem; color: #aaa; }
+.stat strong { color: #fff; }
+a { color: #80c0ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.circuit { background: #1a1a2a; border: 1px solid #444; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+.circuit-step { display: inline-block; padding: 4px 12px; margin: 4px; background: #222; border-radius: 3px; color: #80ff80; }
+.circuit-arrow { color: #666; }
+.pr-merged { color: #80ff80; font-weight: bold; }
+.pr-open { color: #ffff80; }
+pre { overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>Polymath OS — Ecosystem Dashboard</h1>
+<p>v2.4.0 · 2026-10-16 · 14 releases in one day</p>
+
+<h2>The 4 Repos</h2>
+<div class="repo">
+<h2>singulyar <span class="tier tier-1">Tier 1 core</span> <span class="tier tier-2">Tier 2 Nostr/STUN</span></h2>
+<p class="size">2.3 GB · такт v11.50 «НАПОЛНЕНИЕ» · 64 песни · 200 языков · 17 модулей · 44 двери</p>
+<p>Offline karaoke universe PWA. One HTML = entire platform.</p>
+<p class="stat">PRs from polymath-os: <strong>5</strong> (1 merged, 4 open)</p>
+<p class="stat">Issues from polymath-os: <strong>5</strong> (#6-#10)</p>
+</div>
+<div class="repo">
+<h2>singulyar-llm <span class="tier tier-1">Tier 1 weights</span> <span class="tier tier-2">Tier 2 HuggingFace CDN</span></h2>
+<p class="size">466 MB · v0.6 · Qwen2.5-0.5B-Instruct GGUF q4_k_m · 106 voice commands · 17 rules</p>
+<p>Local LLM weights for singulyar. Browser inference via wllama (WASM).</p>
+</div>
+<div class="repo">
+<h2>cell65-host <span class="tier tier-1">Tier 1 sing-box</span> <span class="tier tier-2">Tier 2 VPS/CF</span></h2>
+<p class="size">66 KB · sovereign-node · 3 transports: VLESS+Reality / VLESS+WS+CF / Hysteria2</p>
+<p>Personal anti-censorship kit. Auto-rotation. RU/non-RU split.</p>
+</div>
+<div class="repo">
+<h2>polymath-os <span class="tier tier-1">Tier 1 stdlib</span> <span class="tier tier-2">Tier 2 GitHub</span></h2>
+<p class="size">532 KB · v2.4.0 · 16 ADRs · 3 adapters · 20 CI checks · 93 tests</p>
+<p>Sovereign media-OS umbrella: SINGULYAR EIR v0.3 kernel + 3 real adapters + 9 patterns + 4 audit docs.</p>
+<p class="stat">Releases: <strong>15</strong></p>
+<p class="stat">CI: <strong>green</strong></p>
+<p class="stat">Live garden: <a href="https://rtynbirf.github.io/polymath-os/">rtynbirf.github.io/polymath-os/</a></p>
+</div>
+
+<h2>The Circuit — First Cross-Repo Execution</h2>
+<div class="circuit">
+<span class="circuit-step">audit</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">issue #7</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">kernel</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">GitAdapter</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">branch</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">commit</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step">PR #11</span>
+<span class="circuit-arrow">→</span>
+<span class="circuit-step pr-merged">MERGED ✅</span>
+</div>
+<p>S18 fix (S15_MAX 140→200) is live in singulyar main.</p>
+
+<h2>Open PRs (from polymath-os audit)</h2>
+<ul>
+<li class="pr-open">PR #13: S1 — honest tagline (README.md)</li>
+<li class="pr-open">PR #14: S26 — CSP connect-src Nostr allowlist (·17 ЗАЛ)</li>
+<li class="pr-open">PR #15: S27 — innerHTML→textContent XSS fix (·17 ЗАЛ)</li>
+<li class="pr-open">PR #16: S37 — data-clearing warning (·19 ЧЕЛОВЕК)</li>
+</ul>
+
+<h2>The Thesis — 4 Levels</h2>
+<pre>
+1. Kernel:     Intent→Capability→Adapter→Observation→Evidence
+2. Project:   AGENTS.md + ADR-0016 (AI session continuity)
+3. Ecosystem: ECOSYSTEM.md + issues + bridge (cross-repo intent flow)
+4. Execution: audit → issue → kernel → GitAdapter → PR → MERGE ✅
+</pre>
+
+<h2>The Numbers</h2>
+<pre>
+14 releases    in one day
+16 ADRs        (including recursive meta-ADR)
+93 tests       (76 active + 3 SKIP LLM + 10 WebRTC + 4 SKIP)
+20 CI checks   (12 original + 8 pattern)
+3 real adapters (LLMLocal, HTTP, WebRTC)
+4 audit docs   (3 levels of recursion)
+9 patterns     (all machine-checked)
+5 PRs filed    in singulyar (1 merged, 4 open)
+5 issues filed in singulyar (#6-#10)
+1 constitution (SOVEREIGNTY_CONTRACT.md, 201 lines)
+1 protocol      (5 laws + 12 lenses + 8 swarm laws)
+1 story         (THE_HUMAN_STORY.md)
+</pre>
+
+<p><a href="https://github.com/rtynbirf/polymath-os">→ polymath-os on GitHub</a></p>
+<p><a href="https://github.com/rtynbirf/polymath-os/blob/main/docs/THE_HUMAN_STORY.md">→ The Human's Story</a></p>
+<p><a href="https://github.com/rtynbirf/polymath-os/blob/main/docs/SOVEREIGNTY_CONTRACT.md">→ Sovereignty Contract</a></p>
+<p><a href="https://github.com/rtynbirf/polymath-os/blob/main/docs/ECOSYSTEM.md">→ Ecosystem Map</a></p>
+
+<p style="color: #666; margin-top: 3rem;">All from one human's intent. One brain. One electrode. One day.</p>
+</body>
+</html>
