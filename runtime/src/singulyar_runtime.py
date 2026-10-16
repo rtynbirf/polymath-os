@@ -16,6 +16,17 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from schema_validate import SchemaError, load_schema, validate
 
+# ─── Decree Log integration (ADR-0021 — ВОЛЯ = НАКАЗ) ───
+# The Decree Log is the supreme law layer. The kernel checks
+# compliance with active decrees BEFORE executing any Intent.
+# If a prohibition decree says 'never use Google' → DENIED by DECREE.
+try:
+    from decree_log import DecreeLog
+    _decree_log = None  # lazily initialized
+except ImportError:
+    DecreeLog = None
+    _decree_log = None
+
 # ─── Observability: structured traces (ADR-0019, no external deps) ───
 import json as _json_trace, sys as _sys_trace, time as _time_trace, uuid as _uuid_trace
 

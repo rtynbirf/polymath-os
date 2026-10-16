@@ -109,6 +109,10 @@ test_persistent_lying_adapter_ends_failed_not_success (test_runtime.KernelTests.
 test_recovery_readback_confirms_without_duplicate (test_runtime.KernelTests.test_recovery_readback_confirms_without_duplicate) ... ok
 test_unreadable_state_stays_unknown_and_never_retries (test_runtime.KernelTests.test_unreadable_state_stays_unknown_and_never_retries) ... ok
 test_wrong_final_state_fails_verification (test_runtime.KernelTests.test_wrong_final_state_fails_verification) ... ok
+test_mutant_consent_required_blocks_high_risk (test_runtime.MutationGuardTests.test_mutant_consent_required_blocks_high_risk)
+High risk without consent → WAITING_FOR_HUMAN. ... ok
+test_mutant_unknown_not_confirmed (test_runtime.MutationGuardTests.test_mutant_unknown_not_confirmed)
+UNAVAILABLE → UNKNOWN, never CONFIRMED. ... ok
 test_schemas_match_dataclasses (test_runtime.SchemaTests.test_schemas_match_dataclasses) ... ok
 test_validator_fails_closed_on_unknown_keyword (test_runtime.SchemaTests.test_validator_fails_closed_on_unknown_keyword) ... ok
 test_oneshot_free_speech_returns_failed_or_waiting (test_subprocess_bridge.SubprocessBridgeOneshotTests.test_oneshot_free_speech_returns_failed_or_waiting)
@@ -143,7 +147,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 101 tests in 5.853s
+Ran 103 tests in 5.860s
 
 OK (skipped=4)
 ```

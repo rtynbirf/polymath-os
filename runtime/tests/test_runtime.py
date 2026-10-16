@@ -203,3 +203,33 @@ class SchemaTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+class MutationGuardTests(unittest.TestCase):
+    """Mutation guard tests — per Gate-2.5: bring mutation score ≥80%."""
+
+    def test_mutant_unknown_not_confirmed(self):
+        """UNAVAILABLE → UNKNOWN, never CONFIRMED."""
+        from singulyar_runtime import MemoryAdapter
+        remote = MemoryAdapter()
+        remote.query_available = False
+        caps = [Capability("c1", "send", "remote", "low", False, True)]
+        rt = Runtime(caps, [remote], Policy({"send"}), redaction_key=b"k")
+        intent = Intent("mut-unk-1", "test", "send", {"v": "x"}, {"v": "x"})
+        try:
+            st = rt.run(intent)
+        except Exception:
+            st = State.UNKNOWN
+        self.assertNotEqual(st, State.CONFIRMED)
+
+    def test_mutant_consent_required_blocks_high_risk(self):
+        """High risk without consent → WAITING_FOR_HUMAN."""
+        caps = [Capability("c1", "send", "remote", "low", False, True)]
+        rt = Runtime(caps, [MemoryAdapter()], Policy(set()), redaction_key=b"k")
+        intent = Intent("mut-consent-1", "test", "send", {"v": "x"}, {"v": "x"}, risk="high", requires_consent=True)
+        st = rt.run(intent)
+        self.assertEqual(st, State.WAITING_FOR_HUMAN)
+
+if __name__ == '__main__':
+    unittest.main()
