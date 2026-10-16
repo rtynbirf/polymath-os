@@ -34,11 +34,11 @@ resource "kubernetes_namespace" "this" {
 # Chart: https://github.com/Unleash/unleash (helm chart from unleashed)
 # Personal env: single replica, embedded postgres. For prod: external RDS.
 resource "helm_release" "unleash" {
-  name       = "unleash"
-  repository = "https://docs.getunleash.io/docs/main/deploy/getting-started/operator/install-on-kubernetes"
-  chart      = "unleash"
-  version    = var.helm_chart_version
-  namespace  = kubernetes_namespace.this.metadata[0].name
+  name             = "unleash"
+  repository       = "https://docs.getunleash.io/docs/main/deploy/getting-started/operator/install-on-kubernetes"
+  chart            = "unleash"
+  version          = var.helm_chart_version
+  namespace        = kubernetes_namespace.this.metadata[0].name
   create_namespace = false
 
   set {
@@ -48,7 +48,7 @@ resource "helm_release" "unleash" {
 
   set {
     name  = "service.type"
-    value = "ClusterIP"   # ADR-0009 default-deny — expose via ingress module
+    value = "ClusterIP" # ADR-0009 default-deny — expose via ingress module
   }
 }
 

@@ -6,11 +6,11 @@
 
 terraform {
   backend "s3" {
-    bucket         = "polymath-os-tfstate"   # placeholders — replace from shared/ outputs
+    bucket         = "polymath-os-tfstate" # placeholders — replace from shared/ outputs
     key            = "environments/personal.tfstate"
     region         = "eu-central-1"
     dynamodb_table = "polymath-os-tfstate-lock"
-    encrypt         = true
+    encrypt        = true
 
     # OIDC role assumed at runtime via AWS SDK — see GitHub workflow.
   }

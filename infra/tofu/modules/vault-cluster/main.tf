@@ -30,9 +30,9 @@ resource "kubernetes_namespace" "this" {
   metadata {
     name = var.namespace
     labels = {
-      managed-by    = "opentofu"
-      module        = "vault-cluster"
-      policy-default-deny = "true"  # network policy: default-deny ingress
+      managed-by          = "opentofu"
+      module              = "vault-cluster"
+      policy-default-deny = "true" # network policy: default-deny ingress
     }
   }
 }
@@ -43,12 +43,12 @@ resource "kubernetes_namespace" "this" {
 #
 # Chart: https://github.com/hashicorp/vault-helm
 resource "helm_release" "vault" {
-  name       = "vault"
-  repository = "https://helm.releases.hashicorp.com"
-  chart      = "vault"
-  version    = var.helm_chart_version
-  namespace  = kubernetes_namespace.this.metadata[0].name
-  create_namespace = false  # already created above
+  name             = "vault"
+  repository       = "https://helm.releases.hashicorp.com"
+  chart            = "vault"
+  version          = var.helm_chart_version
+  namespace        = kubernetes_namespace.this.metadata[0].name
+  create_namespace = false # already created above
 
   set {
     name  = "server.dev.enabled"
@@ -120,5 +120,5 @@ data "kubernetes_service" "vault" {
 locals {
   # helm_release.status — это list of objects. Берём первый.
   release_status = length(helm_release.vault.status) > 0 ? helm_release.vault.status[0] : null
-  init_required = local.release_status == null ? true : local.release_status.stage != "Deployed"
+  init_required  = local.release_status == null ? true : local.release_status.stage != "Deployed"
 }

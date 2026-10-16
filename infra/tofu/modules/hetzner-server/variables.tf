@@ -26,7 +26,7 @@ variable "location" {
 variable "ssh_keys" {
   type = list(object({
     name       = string
-    public_key = string  # full PEM: "ssh-ed25519 AAAA... polymath@host"
+    public_key = string # full PEM: "ssh-ed25519 AAAA... polymath@host"
   }))
   description = "SSH public keys to register with Hetzner and place on server's root."
 }

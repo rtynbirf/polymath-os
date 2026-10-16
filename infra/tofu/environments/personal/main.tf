@@ -34,7 +34,7 @@ module "cloudflare_dns" {
       type     = "A"
       value    = module.hetzner_vps.ipv4
       ttl      = 1
-      proxied  = false  # Tier 2 alternative: turn on Cloudflare proxy for DDoS protection
+      proxied  = false # Tier 2 alternative: turn on Cloudflare proxy for DDoS protection
       priority = null
     },
     {
@@ -77,13 +77,13 @@ module "hetzner_vps" {
   source = "../../modules/hetzner-server"
 
   name        = "polymath-personal-1"
-  server_type = "cpx21"   # 3 vCPU / 4 GB / 80 GB — runs k3s + LGTM + Unleash
+  server_type = "cpx21" # 3 vCPU / 4 GB / 80 GB — runs k3s + LGTM + Unleash
   image       = "debian-12"
   location    = "nbg1"
 
   ssh_keys = [
     {
-      name       = "polymath-1"
+      name = "polymath-1"
       # Real public keys come from secrets.sops.yaml via a separate local value
       # (placeholder here — see README.md §Bootstrap).
       public_key = var.ssh_public_key_primary
@@ -104,16 +104,16 @@ module "vault" {
   source = "../../modules/vault-cluster"
 
   namespace = var.vault_namespace
-  replicas  = 1            # personal: standalone dev mode
+  replicas  = 1 # personal: standalone dev mode
   storage   = "10Gi"
-  dev_mode  = true         # ADR-0009: no external access; dev mode fine
+  dev_mode  = true # ADR-0009: no external access; dev mode fine
 }
 
 # ── Unleash via Helm ────────────────────────────────────────────────────
 module "unleash" {
   source = "../../modules/unleash"
 
-  namespace       = var.unleash_namespace
-  replicas        = 1
-  ingress_domain  = local.domain
+  namespace      = var.unleash_namespace
+  replicas       = 1
+  ingress_domain = local.domain
 }

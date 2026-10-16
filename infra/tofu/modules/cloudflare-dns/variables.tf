@@ -7,12 +7,12 @@ variable "domain" {
 
 variable "records" {
   type = list(object({
-    name     = string              # subdomain or "@" for apex, "*" for wildcard
-    type     = string              # A | AAAA | CNAME | MX
-    value    = string              # IP / hostname / target
-    ttl      = number              # 1 = automatic (proxied), else seconds
-    proxied  = bool                # Cloudflare proxy (orange cloud)
-    priority = optional(number)    # only for MX
+    name     = string           # subdomain or "@" for apex, "*" for wildcard
+    type     = string           # A | AAAA | CNAME | MX
+    value    = string           # IP / hostname / target
+    ttl      = number           # 1 = automatic (proxied), else seconds
+    proxied  = bool             # Cloudflare proxy (orange cloud)
+    priority = optional(number) # only for MX
   }))
   description = "List of DNS records to create under var.domain. Each must have unique name (used as for_each key)."
   default     = []

@@ -33,8 +33,8 @@ variable "hetzner_dns_token" {
 }
 
 variable "ssh_public_key_primary" {
-  type      = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "SSH public key for VPS root access. Pasted from ~/.ssh/id_ed25519.pub."
 }
 

@@ -1,0 +1,69 @@
+# .gitleaks.toml — Polymath OS gitleaks configuration
+#
+# Extends gitleaks default config (which already covers 100+ secret types:
+# AWS, GCP, Azure, GitHub PAT, GitLab token, npm token, Stripe, Slack,
+# database URLs, private keys, JWT, etc.).
+#
+# Adds allowlist entries for known false-positives in this repo:
+#   - The default-deny canary marker (intentionally public, lives in vault/)
+#   - Placeholder age public keys (clearly marked PLACEHOLDER-DO-NOT-USE)
+#   - Placeholder SOPS secrets.sops.yaml (committed as encrypted template)
+#   - pnpm-lock.yaml (third-party hashes; not secrets)
+#   - The local git author email (polymath-os@local)
+
+title = "polymath-os gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false-positives in polymath-os"
+
+# Path-based allowlist — these files are intentional templates/canaries.
+paths = [
+  # pnpm lockfile contains third-party hashes that look like secrets
+  '''pnpm-lock\.yaml''',
+  # placeholder SOPS encrypted secrets template (PLACEHOLDER-DO-NOT-USE values)
+  '''infra/tofu/environments/personal/secrets\.sops\.yaml''',
+  # placeholder SOPS config (placeholder age recipient key, not a real secret)
+  '''infra/tofu/environments/personal/\.sops\.yaml''',
+  # canary marker for default-deny publish test (ADR-0009) — intentionally public
+  '''vault/90-meta/canary-secret\.md''',
+]
+
+# Regex-based allowlist — these patterns are intentional, not leaks.
+regexes = [
+  # Default-deny canary marker (ADR-0009) — must be present in source, absent in publish output
+  '''__CANARY__do_not_publish__''',
+  # Placeholder age public key in .sops.yaml (always starts with age1...; real key fetched from 1Password at bootstrap)
+  '''age1[a-z0-9]{1,58}''',
+  # Placeholder values marked explicitly
+  '''PLACEHOLDER-DO-NOT-USE''',
+  # Local git author email (polymath-os@local) — clearly not a real account
+  '''polymath-os@local''',
+  # Code-embedded examples like "your-username" / "your-domain.com" / "example.com"
+  '''YOUR_USERNAME''',
+  '''your-username''',
+  '''example\.com''',
+  '''polymath\.example\.com''',
+  '''fake\.edge\.example\.org''',
+  # AWS account ID placeholder
+  '''AWS_ACCOUNT_ID_PLACEHOLDER''',
+  # GitHub placeholder user @USER (clearly not a real handle)
+  '''@USER''',
+]
+
+# Stop words — words that, if present in a candidate secret, down-rank it
+# (gitleaks default already has many; we add domain-specific ones).
+stopwords = [
+  "polymath",
+  "singulyar",
+  "ruvson",
+  "canary",
+  "example",
+  "placeholder",
+  "sample",
+  "test",
+  "demo",
+  "documentation",
+]

@@ -19,8 +19,8 @@ terraform {
 # SSH public keys передаются в модуль. Hetzner их зарегистрирует,
 # затем сервер создастся с этими ключами на root.
 resource "hcloud_ssh_key" "this" {
-  for_each = { for k in var.ssh_keys : k.name => k }
-  name     = each.value.name
+  for_each   = { for k in var.ssh_keys : k.name => k }
+  name       = each.value.name
   public_key = each.value.public_key
 }
 
@@ -35,46 +35,46 @@ resource "hcloud_firewall" "this" {
 
   # SSH — restricted to specified source IPs.
   rule {
-    direction = "in"
-    protocol  = "tcp"
-    port      = "22"
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "22"
     source_ips = var.ssh_source_ips
   }
 
   # HTTP(S) — open to world.
   rule {
-    direction = "in"
-    protocol  = "tcp"
-    port      = "80"
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "80"
     source_ips = ["0.0.0.0/0", "::/0"]
   }
 
   rule {
-    direction = "in"
-    protocol  = "tcp"
-    port      = "443"
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "443"
     source_ips = ["0.0.0.0/0", "::/0"]
   }
 
   # ICMP (for ping / MTU discovery) — open to world.
   rule {
-    direction = "in"
-    protocol  = "icmp"
+    direction  = "in"
+    protocol   = "icmp"
     source_ips = ["0.0.0.0/0", "::/0"]
   }
 }
 
 # ── Server itself ────────────────────────────────────────────────────────
 resource "hcloud_server" "this" {
-  name        = var.name
-  server_type = var.server_type
-  image       = var.image
-  location    = var.location
-  ssh_keys    = [for k in hcloud_ssh_key.this : k.id]
+  name         = var.name
+  server_type  = var.server_type
+  image        = var.image
+  location     = var.location
+  ssh_keys     = [for k in hcloud_ssh_key.this : k.id]
   firewall_ids = [hcloud_firewall.this.id]
-  labels      = merge(var.labels, {
-    managed-by = "opentofu"
-    module     = "hetzner-server"
+  labels = merge(var.labels, {
+    managed-by  = "opentofu"
+    module      = "hetzner-server"
     environment = var.labels.environment != "" ? var.labels.environment : "personal"
   })
 
