@@ -5,10 +5,6 @@
 # Per ADR-0002 §Tier 2: Cloudflare / Hetzner — rented services, replaceable.
 # Per ADR-0011: container-runtime-agnostic.
 
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
-
 provider "hcloud" {
   token = var.hetzner_token
 }

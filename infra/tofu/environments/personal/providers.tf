@@ -4,10 +4,6 @@
 # Per docs/05-devex-ci.md §OIDC trust: no static creds in code.
 # Per ADR-0002 §Tier 2: providers rented, replaceable.
 
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
-
 provider "hcloud" {
   token = var.hetzner_token
 }

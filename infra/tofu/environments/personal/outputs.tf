@@ -8,11 +8,6 @@ output "cluster_endpoint" {
   description = "k3s API server endpoint."
 }
 
-output "dns_records" {
-  value       = module.cloudflare_dns.fqdns
-  description = "Fully-qualified DNS records created by the cloudflare-dns module."
-}
-
 output "vault_address" {
   value       = module.vault.service_address
   description = "Vault service address (cluster-local)."

@@ -18,16 +18,10 @@ variable "environment" {
 
 variable "domain" {
   type        = string
-  description = "Root apex domain managed by Cloudflare (e.g. polymath.example.com). DNS records prefixed per service."
+  description = "Root apex domain managed by DNS provider (e.g. polymath.example.com). DNS records prefixed per service."
 }
 
 # ── Cloudflare (Tier 2: rented, replaceable — bind9 fallback per ADR-0002) ──
-variable "cloudflare_api_token" {
-  type        = string
-  description = "Cloudflare API token with Zone:DNS:Edit permission on the target zone."
-  sensitive   = true
-}
-
 # ── Hetzner (Tier 2: rented, replaceable — OVH/Scaleway/mini-PC fallback) ──
 variable "hetzner_token" {
   type        = string
@@ -37,7 +31,7 @@ variable "hetzner_token" {
 
 variable "hetzner_dns_token" {
   type        = string
-  description = "Hetzner DNS API token (separate from Cloud API). Used only if Cloudflare is replaced."
+  description = "Hetzner DNS API token (separate from Cloud API). Used for local unbound DNS (sovereign, non-corporate)."
   sensitive   = true
 }
 

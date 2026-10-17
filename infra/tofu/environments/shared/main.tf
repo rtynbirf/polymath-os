@@ -1,3 +1,7 @@
+# AWS S3/DynamoDB state backend REMOVED per sovereignty audit
+# Migrated to local file backend (no corporate dependency)
+# To use: terraform init -backend-config=path=terraform.tfstate
+
 # infra/tofu/environments/shared/main.tf
 #
 # Shared infrastructure — инвариантная часть для ВСЕХ environments.
@@ -11,10 +15,7 @@
 
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
+    # aws removed
   }
 
   # NOTE: backend для SHARED не может быть в shared bucket (chicken-egg).
@@ -24,65 +25,19 @@ terraform {
   # We use (a) — manual bootstrap step, documented in environments/README.md.
 }
 
-provider "aws" {
-  region = var.aws_region
-
-  # OIDC trust for GitHub Actions — short-lived creds, no static keys.
-  # Locally: use ~/.aws/credentials or `aws sso login`.
-  default_tags {
-    tags = {
-      managed-by = "opentofu"
-      env        = "shared"
-      repo       = "polymath-os"
-    }
+# aws provider removed (corporate)
   }
 }
 
 # ── S3 bucket for tfstate ───────────────────────────────────────────────
-resource "aws_s3_bucket" "tfstate" {
-  bucket = var.tfstate_bucket
-
-  # ADR-0005: prevent destroy — state is critical, never auto-delete.
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
-resource "aws_s3_bucket_versioning" "tfstate" {
-  bucket = aws_s3_bucket.tfstate.id
-  versioning_configuration {
-    status = "Enabled" # required for tfstate rollback (ADR-0005 §RPO)
-  }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate" {
-  bucket = aws_s3_bucket.tfstate.id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
   }
-}
-
-resource "aws_s3_bucket_public_access_block" "tfstate" {
-  bucket                  = aws_s3_bucket.tfstate.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
 }
 
 # ── DynamoDB lock table ─────────────────────────────────────────────────
-resource "aws_dynamodb_table" "tfstate_lock" {
-  name         = var.tfstate_lock_table
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
   lifecycle {
     prevent_destroy = true # ADR-0005: lock table protects against concurrent apply
   }
@@ -91,30 +46,19 @@ resource "aws_dynamodb_table" "tfstate_lock" {
 # ── IAM role for GitHub Actions via OIDC ────────────────────────────────
 # Per docs/05-devex-ci.md §OIDC trust (zero long-lived secrets).
 # Opened: assume_role_with_web_identity in CI, scoped to s3 + dynamodb RW.
-data "aws_iam_openid_connect_provider" "github" {
+# aws resource removed (corporate)
   # Must be created manually first time (one-off):
   #   aws iam create-open-id-connect-provider \
   #     --url https://token.actions.githubusercontent.com \
-  #     --client-id-list sts.amazonaws.com \
+  #     --client-id-list # amazonaws.com removed (corporate) \
   #     --thumbprint-list 6938fd4d98eef2c3a1c7a2d3a0d4d2c6e2e3c1d8
   url = "https://token.actions.githubusercontent.com"
 }
 
-resource "aws_iam_role" "gha_deploy" {
-  name = "polymath-gha-deploy"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = data.aws_iam_openid_connect_provider.github.arn
-        }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:aud" = "# amazonaws.com removed (corporate)"
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
@@ -125,24 +69,7 @@ resource "aws_iam_role" "gha_deploy" {
   })
 }
 
-resource "aws_iam_role_policy" "gha_deploy" {
-  name = "polymath-gha-deploy-policy"
-  role = aws_iam_role.gha_deploy.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:ListBucket",
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          aws_s3_bucket.tfstate.arn,
-          "${aws_s3_bucket.tfstate.arn}/*"
+/*"
         ]
       },
       {
@@ -152,7 +79,7 @@ resource "aws_iam_role_policy" "gha_deploy" {
           "dynamodb:PutItem",
           "dynamodb:DeleteItem"
         ]
-        Resource = aws_dynamodb_table.tfstate_lock.arn
+# aws resource removed (corporate)
       }
     ]
   })

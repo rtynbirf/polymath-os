@@ -1,11 +1,5 @@
 # infra/tofu/environments/shared/variables.tf
 
-variable "aws_region" {
-  type        = string
-  default     = "eu-central-1"
-  description = "AWS region for tfstate bucket + DynamoDB lock table. Pinned (ADR-0008 philosophy)."
-}
-
 variable "tfstate_bucket" {
   type        = string
   default     = "polymath-os-tfstate"

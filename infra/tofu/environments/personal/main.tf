@@ -4,7 +4,6 @@
 # Все значения либо берём из SOPS-decrypted secrets.sops.yaml (sensitive),
 # либо из environment-specific overrides (non-sensitive).
 #
-# Per ADR-0002 §Tier 2: Cloudflare/Hetzner rented, replaceable.
 # Per ADR-0009 (default-deny): services expose no public ingress by default.
 # Per ADR-0005 (separate rollback targets): IaC apply is `destroy`-able.
 
@@ -23,20 +22,7 @@ locals {
   domain = "polymath.example.com"
 }
 
-# ── Cloudflare DNS records ──────────────────────────────────────────────
-module "cloudflare_dns" {
-  source = "../../modules/cloudflare-dns"
-
-  domain = local.domain
-  records = [
-    {
-      name     = "@"
-      type     = "A"
-      value    = module.hetzner_vps.ipv4
-      ttl      = 1
-      proxied  = false # Tier 2 alternative: turn on Cloudflare proxy for DDoS protection
-      priority = null
-    },
+,
     {
       name     = "@"
       type     = "AAAA"

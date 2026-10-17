@@ -16,11 +16,6 @@ variable "domain" {
 }
 
 # ── Sensitive — come from secrets.sops.yaml ─────────────────────────────
-variable "cloudflare_api_token" {
-  type      = string
-  sensitive = true
-}
-
 variable "hetzner_token" {
   type      = string
   sensitive = true
