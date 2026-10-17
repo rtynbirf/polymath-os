@@ -6,41 +6,25 @@
     {
       "id": "rule.local",
       "version": "v0.1",
-      "capabilities": [
-        "rule.triage",
-        "rule.deny",
-        "rule.allow"
-      ],
+      "capabilities": ["rule.triage", "rule.deny", "rule.allow"],
       "tests": "covered by test_runtime.py"
     },
     {
       "id": "llm.local",
       "version": "v0.4",
-      "capabilities": [
-        "llm.command",
-        "llm.answer",
-        "llm.generate",
-        "llm.check_status"
-      ],
+      "capabilities": ["llm.command", "llm.answer", "llm.generate", "llm.check_status"],
       "tests": 20
     },
     {
       "id": "http.local",
       "version": "v0.1",
-      "capabilities": [
-        "http.get",
-        "http.post",
-        "http.put"
-      ],
+      "capabilities": ["http.get", "http.post", "http.put"],
       "tests": 12
     },
     {
       "id": "webrtc.local",
       "version": "v0.1",
-      "capabilities": [
-        "webrtc.send",
-        "webrtc.recv"
-      ],
+      "capabilities": ["webrtc.send", "webrtc.recv"],
       "tests": 10
     }
   ],
@@ -48,46 +32,26 @@
     {
       "id": "filesystem",
       "version": "v0.1",
-      "capabilities": [
-        "read_file",
-        "write_file",
-        "list_dir",
-        "search"
-      ]
+      "capabilities": ["read_file", "write_file", "list_dir", "search"]
     },
     {
       "id": "git",
       "version": "v0.1",
-      "capabilities": [
-        "clone",
-        "commit",
-        "push",
-        "log",
-        "diff"
-      ]
+      "capabilities": ["clone", "commit", "push", "log", "diff"]
     },
     {
       "id": "postgres",
       "version": "v0.1",
-      "capabilities": [
-        "query",
-        "execute",
-        "migrate"
-      ]
+      "capabilities": ["query", "execute", "migrate"]
     },
     {
       "id": "web_search",
       "version": "v0.1",
-      "capabilities": [
-        "search",
-        "fetch_page"
-      ]
+      "capabilities": ["search", "fetch_page"]
     }
   ],
   "adrs": 29,
-  "adr_ids": [
-    "0001-0028"
-  ],
+  "adr_ids": ["0001-0029", "0031"],
   "patterns": 9,
   "contracts": [
     "sovereignty",
