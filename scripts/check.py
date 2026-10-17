@@ -506,6 +506,21 @@ def check_freedom_no_tier3():
     except Exception as e:
         return True, f'freedom check skipped (json parse: {e})'
 
+
+
+def check_manifest_json():
+    m = REPO_ROOT / 'MANIFEST.json'
+    if not m.exists():
+        return False, 'MANIFEST.json missing (per ADR-0020 HoloManifest)'
+    try:
+        import json
+        data = json.loads(m.read_text())
+        if 'version' not in data or 'adapters' not in data:
+            return False, 'MANIFEST.json missing version/adapters fields'
+        return True, f'MANIFEST.json valid: {len(data.get("adapters",[]))} adapters, {data.get("adrs","?")} ADRs'
+    except Exception as e:
+        return False, f'MANIFEST.json parse error: {e}'
+
 # Append new checks to the checks list
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
@@ -517,6 +532,7 @@ extra_checks = [
     ("19. Pattern: storage eviction with protected-key Set (S30/S31)", check_pattern_08_storage_eviction_protected_keys),
     ("20. Pattern: identity backup documented (S37)", check_pattern_06_identity_backup_documented),
     ("21. Freedom: zero Tier 3 benefactors in code", check_freedom_no_tier3),
+    ("22. MANIFEST.json exists + valid (ADR-0020)", check_manifest_json),
 ]
 
 checks = [

@@ -15,6 +15,10 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from schema_validate import SchemaError, load_schema, validate
+try:
+    from decree_log import DecreeLog
+except ImportError:
+    DecreeLog = None
 
 # ─── Decree Log integration (ADR-0021 — ВОЛЯ = НАКАЗ) ───
 # The Decree Log is the supreme law layer. The kernel checks
