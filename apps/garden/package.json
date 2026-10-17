@@ -15,7 +15,7 @@
     "clean": "rm -rf public .quartz-cache",
     "check": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && biome check .",
-    "typecheck": "tsc --noEmit -p tsconfig.json || true",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"filter_vault.py end-to-end tested by publish-garden.yml (filter+canary+gitleaks steps); no per-package unit tests in apps/garden\""
   },
   "dependencies": {

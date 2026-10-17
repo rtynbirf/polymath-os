@@ -32,6 +32,21 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
+# Recognized technical acronyms — when a 2-word prohibition's second word is one
+# of these, classify it as a PHRASE (block on full phrase + head noun).
+_RECOGNIZED_ACRONYMS = frozenset({
+    "dns", "cdn", "api", "s3", "ec2", "ssh", "vpn", "smtp",
+    "http", "https", "ftp", "sql", "rdp", "os", "db", "cli",
+    "rest", "graphql", "grpc", "wsgi", "asgi",
+})
+
+# Known browser/technology proper nouns — even if a decree author forgets to
+# capitalize them, these still count as proper nouns for LIST classification.
+_KNOWN_PROPER_NOUNS = frozenset({
+    "chrome", "firefox", "edge", "safari",
+})
+
+
 class DecreeLog:
     """Append-only hash-chained decree log — the supreme law of polymath-os.
 
@@ -151,38 +166,110 @@ class DecreeLog:
             for r in rows
         ]
 
+    def _extract_prohibited_terms(self, decree_text: str) -> List[str]:
+        """v0.5 phrase-based matcher (deterministic, no LLM).
+
+        Given a prohibition decree of the form "never use X", extract X and
+        classify it as one of:
+
+          - LIST     : 3+ words, ALL proper nouns (each starts with uppercase in
+                       the original decree text OR is a known browser/tech proper
+                       noun). Each word is an INDEPENDENT prohibited term — block
+                       on any single match.
+          - PHRASE   : 2 words where the second word is a recognized technical
+                       acronym (DNS, CDN, ...). Block on the FULL phrase OR on
+                       the head noun alone (the first word).
+          - SINGLE   : 1 word. Block on that word.
+          - DEFAULT  : 2 words without a recognized acronym — treat as PHRASE
+                       (block on full phrase + first word).
+
+        Returns: List[str] of prohibited search terms, all lowercase, deduped.
+        Returns [] if the decree is not a "never use X" prohibition.
+        """
+        text_lower = decree_text.lower()
+        if "never" not in text_lower or "use" not in text_lower:
+            return []
+
+        # Lowercased split — used for the actual terms we search.
+        parts_lower = text_lower.split("use", 1)
+        if len(parts_lower) < 2:
+            return []
+        raw_lower = parts_lower[-1].strip().rstrip(".,;:!?")
+        words_lower = raw_lower.split()
+        if not words_lower:
+            return []
+
+        # Original-case split — used to detect proper nouns by capitalization.
+        # We split on the literal substring "use" exactly as above so the word
+        # indices line up with `words_lower`.
+        parts_orig = decree_text.split("use", 1)
+        if len(parts_orig) < 2:
+            return []
+        raw_orig = parts_orig[-1].strip().rstrip(".,;:!?")
+        words_orig = raw_orig.split()
+
+        def _is_proper_noun(orig_word: str, lower_word: str) -> bool:
+            if lower_word in _KNOWN_PROPER_NOUNS:
+                return True
+            return bool(orig_word) and orig_word[0].isupper()
+
+        # SINGLE: 1 word.
+        if len(words_lower) == 1:
+            return [words_lower[0]]
+
+        # LIST: 3+ words where ALL words look like proper nouns.
+        if len(words_lower) >= 3:
+            orig_aligned = words_orig if len(words_orig) == len(words_lower) else []
+            if orig_aligned and all(
+                _is_proper_noun(o, w) for o, w in zip(orig_aligned, words_lower)
+            ):
+                # Each word is independent — dedupe preserving order.
+                return list(dict.fromkeys(words_lower))
+
+        # 2-word PHRASE / DEFAULT case.
+        if len(words_lower) == 2:
+            full_phrase = " ".join(words_lower)
+            head_noun = words_lower[0]
+            # Dedupe in case head noun equals the full phrase (impossible for
+            # 2 words, but defensive).
+            return list(dict.fromkeys([full_phrase, head_noun]))
+
+        # Fallback for 3+ word decrees that aren't all proper nouns: treat the
+        # entire phrase as a single prohibited term. (Not in the spec's
+        # examples, but the most conservative default.)
+        return [" ".join(words_lower)]
+
     def check_compliance(self, intent_text: str) -> Dict[str, Any]:
         """Check if an intent complies with all active decrees.
 
         This is the enforcement mechanism — the kernel calls this before
         executing any Intent. If a decree prohibits the action → DENIED.
 
-        Simple implementation: string matching. If a prohibition decree
-        says 'never use Google' and the intent contains 'google' → denied.
+        v0.5: phrase-based deterministic matching. For each prohibition decree
+        of form "never use X", we extract X's prohibited search terms via
+        `_extract_prohibited_terms()` and block if ANY term appears as a
+        substring of `intent_text.lower()`. This fixes the v0.4 false positive
+        where decree "never use Google DNS" matched "dns" anywhere (e.g.
+        "configure DNS with local unbound"). v0.5 instead blocks on the full
+        phrase "google dns" OR the head noun "google" alone.
 
-        Future v0.5: NLP-based semantic matching (but deterministic, no LLM).
+        Known v0.5 limitation: substring match means "chrome" inside
+        "chromium" will trigger a denial. v0.6 will use word-boundary regex.
         """
         laws = self.get_active_laws()
         violations = []
+        intent_lower = intent_text.lower()
         for law in laws:
-            text_lower = law["text"].lower()
-            intent_lower = intent_text.lower()
-            # Simple keyword extraction from decree text
-            # If decree says "never use X" → check if intent contains X
-            # Extract prohibited keywords from 'never use X' decrees
-            if "never" in text_lower and "use" in text_lower:
-                parts = text_lower.split("use", 1)
-                if len(parts) > 1:
-                    prohibited_raw = parts[-1].strip().rstrip(".").rstrip(",")
-                    # Check each significant word in the prohibited phrase
-                    for word in prohibited_raw.split():
-                        if len(word) > 2 and word in intent_lower:
-                            violations.append({
-                                "decree_seq": law["seq"],
-                                "decree_text": law["text"],
-                                "violation": f"intent contains prohibited term: {word}",
-                            })
-                            break  # one violation per decree
+            terms = self._extract_prohibited_terms(law["text"])
+            for term in terms:
+                if term and term in intent_lower:
+                    violations.append({
+                        "decree_seq": law["seq"],
+                        "decree_text": law["text"],
+                        "violation": f"intent contains prohibited term: {term}",
+                        "matched_term": term,
+                    })
+                    break  # one violation per decree
             # If decree says "always X" → check if intent does X
             # (this is a positive requirement, harder to enforce)
         return {

@@ -1,0 +1,16 @@
+{
+  "name": "polymath-os-decree-portal",
+  "version": "0.1.0",
+  "description": "Electron desktop wrapper for the Polymath-OS Decree Portal — real SQLite decrees via Node bridge",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "author": "Polymath-OS",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

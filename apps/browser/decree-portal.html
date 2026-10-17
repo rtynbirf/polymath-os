@@ -89,15 +89,22 @@ b.classList.add('active');category=b.dataset.cat;
 function loadLog(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}}
 function saveLog(log){localStorage.setItem(STORAGE_KEY,JSON.stringify(log.slice(-100)))}
 
-// Bridge detection: in Node/Electron context, require('./decree-bridge.js') works.
-// In pure browser context, fall back to localStorage.
+// Bridge detection (three-tier, in order):
+//   1) Node / Electron-main:  typeof require === 'function'  → new DecreeBridge()
+//   2) Electron renderer:     window.decreeBridge (exposed by preload via contextBridge)
+//   3) Pure browser:           null → fall back to localStorage
 function getBridge(){
 try{
 if(typeof require==='function'){
 const m=require('./decree-bridge.js');
 return new m.DecreeBridge();
 }
-}catch(e){console.warn('[decree-portal] bridge unavailable, using localStorage:',e.message)}
+}catch(e){console.warn('[decree-portal] require-bridge unavailable:',e.message)}
+try{
+if(typeof window!=='undefined' && window.decreeBridge){
+return window.decreeBridge;
+}
+}catch(e){console.warn('[decree-portal] window.decreeBridge unavailable:',e.message)}
 return null;
 }
 

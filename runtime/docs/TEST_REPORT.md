@@ -19,6 +19,16 @@ test_hash_chain_verification_on_open (test_decree_log.DecreeLogTests.test_hash_c
 Opening a log with a broken chain → DecreeIntegrityError. ... ok
 test_issue_first_decree (test_decree_log.DecreeLogTests.test_issue_first_decree) ... ok
 test_issue_multiple_decrees_chain (test_decree_log.DecreeLogTests.test_issue_multiple_decrees_chain) ... ok
+test_v05_list_matching_chrome_firefox_edge_safari (test_decree_log.DecreeLogTests.test_v05_list_matching_chrome_firefox_edge_safari)
+v0.5 LIST classification: 'never use Chrome Firefox Edge Safari' ... ok
+test_v05_phrase_matching_blocks_full_phrase (test_decree_log.DecreeLogTests.test_v05_phrase_matching_blocks_full_phrase)
+v0.5: decree 'never use Google DNS' blocks the FULL phrase ... ok
+test_v05_phrase_matching_blocks_google_alone (test_decree_log.DecreeLogTests.test_v05_phrase_matching_blocks_google_alone)
+v0.5: decree 'never use Google DNS' still blocks any intent that ... ok
+test_v05_phrase_matching_google_dns_does_not_block_unbound (test_decree_log.DecreeLogTests.test_v05_phrase_matching_google_dns_does_not_block_unbound)
+v0.5 fix: decree 'never use Google DNS' must NOT block an intent ... ok
+test_v05_single_word_prohibition_still_blocks (test_decree_log.DecreeLogTests.test_v05_single_word_prohibition_still_blocks)
+v0.5 SINGLE classification: 'never use Cloudflare' → prohibited ... ok
 test_no_decree_log_allows_all (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_no_decree_log_allows_all) ... ok
 test_permission_decree_allows (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_permission_decree_allows) ... ok
 test_prohibition_decree_blocks_intent (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_prohibition_decree_blocks_intent) ... ok
@@ -150,7 +160,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 106 tests in 7.009s
+Ran 111 tests in 5.830s
 
 OK (skipped=4)
 ```
