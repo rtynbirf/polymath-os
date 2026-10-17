@@ -459,7 +459,13 @@ class DecreeLog:
         """
         laws = self.get_active_laws()
         # v0.6 scope filter — only apply decrees whose scope matches.
-        if scope is not None:
+        # v3.15.0 FIX: when scope="all" (or None), ALL decrees apply (no filter).
+        # Previously, scope="all" was treated as a filter that only kept decrees
+        # with scope=="all" — incorrectly excluding scope-specific decrees like
+        # "never use Google DNS" (scope="polymath-os"). Now scope="all" means
+        # "no filter" — matching the semantic intent of decree_scope="all" on
+        # Agent Cards (per ADR-0023: 'all' = all decrees apply).
+        if scope is not None and scope != "all":
             laws = [law for law in laws if law["scope"] == "all" or law["scope"] == scope]
         violations = []
         for law in laws:

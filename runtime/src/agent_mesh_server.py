@@ -318,15 +318,73 @@ class AgentMeshServer:
 # ─── CLI ──────────────────────────────────────────────────────────────────
 
 def _demo_execute_fn(request: IntentRequest) -> Dict[str, Any]:
-    """Demo execute_fn for the CLI server — returns a canned response."""
+    """Demo execute_fn for the CLI server — returns a canned response.
+
+    For production, replace with real Runtime integration (see make_runtime_execute_fn).
+    """
     return {
         "state": "CONFIRMED",
         "agent_id": "singulyar-eir.local",
         "intent_id": request.intent_id,
         "description": request.description,
         "operation": request.operation,
-        "note": "demo execute_fn — replace with real runtime integration",
+        "note": "demo execute_fn — use --use-runtime for real Runtime.run() integration",
     }
+
+
+def make_runtime_execute_fn(decree_log=None, scope=None):
+    """Factory: returns an execute_fn that calls the real SINGULYAR EIR Runtime.
+
+    Per ADR-0027 §5 (v3.15.0): production deployments should use this instead of
+    _demo_execute_fn. The Runtime is constructed with:
+    - 1 Capability (operation 'send', adapter_id 'memory', risk 'low', idempotent True)
+    - 1 MemoryAdapter
+    - Policy({'send'}) — allows 'send' operation
+    - decree_log attached (if provided) — decree gate fires BEFORE policy
+
+    The execute_fn constructs an Intent from the request and calls rt.run(intent).
+    Returns {"state": <State.value>, "intent_id": ..., "description": ..., ...}.
+    """
+    from singulyar_runtime import Runtime, Policy, Capability, Intent, State, MemoryAdapter
+
+    caps = [Capability("c1", "send", "memory", "low", True, True)]
+    rt = Runtime(
+        capabilities=caps,
+        adapters=[MemoryAdapter()],
+        policy=Policy({"send"}),
+        redaction_key=b"agent-mesh-server-v3.15.0",
+    )
+    if decree_log is not None:
+        rt.set_decree_log(decree_log, scope=scope)
+
+    def execute_fn(request: IntentRequest) -> Dict[str, Any]:
+        # Build an Intent from the JSON-RPC request.
+        intent = Intent(
+            intent_id=request.intent_id or f"agent-mesh-{int(time.time() * 1000)}",
+            description=request.description,
+            operation=request.operation or "send",
+            payload=request.payload or {},
+            expected=request.payload or {},
+        )
+        try:
+            state = rt.run(intent)
+            return {
+                "state": state.value if hasattr(state, "value") else str(state),
+                "agent_id": "singulyar-eir.local",
+                "intent_id": intent.intent_id,
+                "description": intent.description,
+                "operation": intent.operation,
+                "note": "real Runtime.run() integration (v3.15.0+)",
+            }
+        except Exception as e:
+            return {
+                "state": "FAILED",
+                "agent_id": "singulyar-eir.local",
+                "intent_id": intent.intent_id,
+                "error": f"{type(e).__name__}: {e}",
+            }
+
+    return execute_fn
 
 
 def main(argv=None):
@@ -347,6 +405,10 @@ def main(argv=None):
         default=os.path.expanduser("~/.polymath-os/decrees.db"),
         help="path to DecreeLog SQLite DB (default ~/.polymath-os/decrees.db)"
     )
+    parser.add_argument(
+        "--use-runtime", action="store_true",
+        help="use real SINGULYAR EIR Runtime.run() instead of _demo_execute_fn (v3.15.0+ production mode)"
+    )
     args = parser.parse_args(argv)
 
     # Open the decree log (if exists)
@@ -356,12 +418,19 @@ def main(argv=None):
         print("  Run `python3 /home/z/my-project/scripts/issue_decrees.py` first to issue 7 foundational decrees.", file=sys.stderr)
         dl = None
     else:
-        dl = DecreeLog(str(decree_db))
+        dl = DecreeLog(str(decree_db), check_same_thread=False)
         print(f"✓ DecreeLog opened: {decree_db} ({dl.count()} decrees)", file=sys.stderr)
 
     # Build the mesh
     mesh = AgentMesh(decree_log=dl)
-    mesh.register(SINGULYAR_EIR_CARD, _demo_execute_fn)
+    # v3.15.0: use real Runtime integration if --use-runtime flag is set
+    if args.use_runtime:
+        singulyar_exec_fn = make_runtime_execute_fn(decree_log=dl)
+        print("✓ Using real SINGULYAR EIR Runtime.run() for singulyar-eir.local (v3.15.0+ production mode)", file=sys.stderr)
+    else:
+        singulyar_exec_fn = _demo_execute_fn
+        print("⚠ Using _demo_execute_fn (canned response). Use --use-runtime for real Runtime.run().", file=sys.stderr)
+    mesh.register(SINGULYAR_EIR_CARD, singulyar_exec_fn)
     # Also register the other default cards (all use the demo execute_fn)
     from agent_card import POLYMATH_OS_BROWSER_CARD, CELL65_LLM_CARD
     mesh.register(POLYMATH_OS_BROWSER_CARD, _demo_execute_fn)

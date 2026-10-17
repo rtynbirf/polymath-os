@@ -109,7 +109,14 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 
 The decree log is the **human's supreme law layer** — above every ADR, above the kernel, above the code. Per ADR-0021 + ADR-0022 + MANIFESTO principle 2 (`PAROLE > LANGUE`).
 
-### 7 foundational decrees (in `~/.polymath-os/decrees.db`)
+### 7 foundational decrees + N supersession/amendment decrees (in `~/.polymath-os/decrees.db`)
+
+The 7 foundational decrees are issued once via `python3 /home/z/my-project/scripts/issue_decrees.py`. After that, additional decrees may be added via the Decree Portal:
+- `category=supersession` — revokes a previous decree (per ADR-0028, v3.14.0)
+- `category=amendment` — drives ADR operations: create/amend/supersede/deprecate (per ADR-0026, v3.12.0)
+- `category=law/prohibition/permission/observation/directive` — new rules (existing behavior)
+
+All decrees are **append-only, immutable, hash-chained**. Superseded decrees remain in the log for audit but `get_active_laws()` skips them.
 
 | # | Category | Text |
 |---|----------|------|
@@ -227,6 +234,13 @@ This repo was built through an iterative dialogue:
 4. **v3.0.0-v3.5.0**: Liberation roadmap (DNS unbound + Cloudflare-free + Chrome-free + sovereign browser) → Decree Portal UI + ADR-0022 + MANIFEST.json
 5. **v3.6.0 (OPERATIONAL)**: Decree Bridge wired — 7 foundational decrees recorded in real SQLite. Runtime.set_decree_log() implemented. check_compliance() works on real decrees. v0.5 NLP phrase matching (LIST/PHRASE/SINGLE/DEFAULT classification).
 6. **v3.7.0 (Multiagent)**: 4 parallel subagent tracks — production decree demo + v0.5 NLP + Electron desktop wrapper + CI steps 8+ green. All 4/4 CI checks green.
-7. **v3.8.0 (CLEAN-UP, current)**: v0.6 word-boundary regex matching (fixes `chrome` ↔ `chromebook` false positive) + decree scope filtering + regex prohibition parser + token hygiene automation (`scripts/check_token_hygiene.py` + claim #23 + SECURITY.md best practices). 23/23 verify, 123/123 tests, 5/5 CI green.
+7. **v3.8.0 (CLEAN-UP)**: v0.6 word-boundary regex matching (fixes `chrome` ↔ `chromebook` false positive) + decree scope filtering + regex prohibition parser + token hygiene automation (`scripts/check_token_hygiene.py` + claim #23 + SECURITY.md best practices). 23/23 verify, 123/123 tests, 5/5 CI green.
+8. **v3.9.0 (DOCS SYNC)**: All documentation synced with reality — README badges, MANIFEST counts, ARCHITECTURE ADR table (22 → 28), TZ.md layer count.
+9. **v3.10.0 (СИНГУЛЯР synthesis)**: ADR-0023 Agent Card Protocol + ADR-0024 Decree-Enforced Multi-Agent Communication. Decree system теперь работает в 2 направлениях (inbound in-process + outbound).
+10. **v3.11.0 (Symmetric СИНГУЛЯР)**: ADR-0025 Decree-Driven A2A Client (outbound decree gate BEFORE network request). v0.6.1 regex extension (+send/share/transmit/expose verbs). Decree Portal UI multi-agent view. Agent Card schema validation (claim #24). 4/5 CI green.
+11. **v3.12.0 (Meta-architecture)**: ADR-0026 Decree-Driven ADR Amendment Mechanism (closes ADR-0016 target-for-v1.0 ahead of schedule). AdrAmender class. New 'amendment' decree category. 4 patterns: create/amend/supersede/deprecate. СИНГУЛЯР extends to 3 layers (runtime + meta-architecture + audit).
+12. **v3.13.0 (HTTP inbound)**: ADR-0027 Decree-Enforced HTTP JSON-RPC Server (stdlib only). .well-known/agent.json теперь actually serves a real JSON-RPC endpoint. Closes ADR-0023 endpoint loop. СИНГУЛЯР полный в 4 направлениях.
+13. **v3.14.0 (Decree revocation)**: ADR-0028 Decree Supersession Mechanism. Decrees can now be revoked via supersession decree category. Decree system CLOSED under all natural operations (issue + enforce + supersede). Append-only + revocable, no contradiction.
+14. **v3.15.0 (ALL GAPS CLOSED, current)**: Production DB reset to 7 decrees (was 8 from manual test). MANIFEST.json synced (v3.14.0, adrs=28, tests=220, ci_checks=24, expanded features). ARCHITECTURE.md ADR table 28 rows. README "7 foundational + N" instead of stale "7". AgentMeshServer real Runtime integration (replace _demo_execute_fn). AdrAmender production use (create amendments.log). Audit of sovereignty_drill + cross-repo-governance workflows. Electron install test.
 
-Worklog: `/home/z/my-project/worklog.md` (4 Task IDs across 4 release sessions — full audit trail of every change).
+Worklog: `/home/z/my-project/worklog.md` (10+ Task IDs across multiple release sessions — full audit trail of every change).

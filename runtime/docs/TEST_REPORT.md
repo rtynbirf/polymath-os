@@ -96,41 +96,41 @@ test_register_and_list (test_agent_mesh.AgentMeshRegistrationTests.test_register
 test_unregister (test_agent_mesh.AgentMeshRegistrationTests.test_unregister) ... ok
 test_send_no_decree_log_no_decree_check (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_no_decree_log_no_decree_check) ... ok
 test_send_unknown_agent_returns_error (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_unknown_agent_returns_error) ... ok
-test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-10-17T09:04:59Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
+test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
 ok
-test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-10-17T09:05:00Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-10-17T09:05:00Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
+test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
 ok
-test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-10-17T09:05:00Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
+test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
 ok
-test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-10-17T09:05:00Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-10-17T09:05:00Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
+test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-10-17T09:33:53Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
 ok
 test_full_scenario_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_blocked)
-Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-10-17T09:05:01Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-10-17T09:33:53Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_chrome_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_chrome_blocked)
-Chrome decree (LIST classification) — single word match. ... [2026-10-17T09:05:01Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Chrome decree (LIST classification) — single word match. ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_compliant (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_compliant)
-Full HTTP cycle — compliant intent passes through. ... [2026-10-17T09:05:01Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+Full HTTP cycle — compliant intent passes through. ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
-test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-10-17T09:05:01Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
+test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
 ok
-test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-10-17T09:05:02Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_blocked_intent_returns_decree_block_403 (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_blocked_intent_returns_decree_block_403)
-CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-10-17T09:05:02Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
-test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-10-17T09:05:02Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_to_cell65_llm_uses_different_agent (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_cell65_llm_uses_different_agent)
-Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-10-17T09:05:02Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
+Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-10-17T09:33:54Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
 ok
 test_send_to_unknown_agent_returns_503_or_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_unknown_agent_returns_503_or_error)
-Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-10-17T09:05:02Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
+Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-10-17T09:33:55Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
 ok
 test_get_superseded_decrees (test_decree_log.DecreeLogSupersessionTests.test_get_superseded_decrees)
 get_superseded_decrees() returns list of supersession records. ... ok
@@ -325,7 +325,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 220 tests in 9.324s
+Ran 220 tests in 8.468s
 
 OK (skipped=4)
 ```

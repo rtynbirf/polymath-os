@@ -133,7 +133,7 @@ PID=1 как метафора допустима (человек — init-про
 
 ## 6. ADR (Architecture Decision Records)
 
-Все архитектурные решения документируются в `docs/adr/`. **22 ADRs создано** (0001-0022) после аудита SINGULYAR EIR v0.3 + multiagent v3.7.0 + clean-up v3.8.0:
+Все архитектурные решения документируются в `docs/adr/`. **28 ADRs создано** (0001-0028) после аудита SINGULYAR EIR v0.3 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0:
 
 | ADR | Тема | Audit response | Реализовано |
 |---|---|---|---|
@@ -149,20 +149,36 @@ PID=1 как метафора допустима (человек — init-про
 | `0010` | Мутационный контроль для критичных путей | A10 | ✓ |
 | `0011` | Container runtime — colima/podman/containerd+nerdctl | A11 | partial |
 | `0012` | SINGULYAR EIR как Layer 5 — Execution Kernel | интеграция | ✓ |
-| `0013` | SLSA Build L3 target | (extension) | target v1.0 |
+| `0013` | SLSA Build L3 target | (extension) | target v1.0 (Proposed) |
 | `0014` | WebRTC adapter as Tier 2 dependency | (extension) | ✓ |
-| `0015` | Real LLM inference in CI | (extension) | target v1.0 |
-| `0016` | Self-rewriting ADR mechanism | (extension) | target v1.0 |
+| `0015` | Real LLM inference in CI | (extension) | target v1.0 (Proposed) |
+| `0016` | Self-rewriting ADR mechanism | (extension) | **✓ CLOSED by ADR-0026** (v3.12.0) |
 | `0017` | Ecosystem governance protocol | (extension) | ✓ |
 | `0018` | Genomic architecture | (extension) | partial |
 | `0019` | Observability-first | (extension) | ✓ |
 | `0020` | Manifest-driven architecture | (extension) | ✓ |
 | `0021` | **Decree as supreme law** (v3.6.0 OPERATIONAL) | (extension) | ✓ |
 | `0022` | **Decree Portal as human interface** (v3.5.0+) | (extension) | ✓ |
+| `0023` | **Agent Card Protocol** (.well-known/agent.json, A2A) | (extension) | ✓ (v3.10.0) |
+| `0024` | **Decree-Enforced Multi-Agent Communication** (inbound in-process) | (extension) | ✓ (v3.10.0) |
+| `0025` | **Decree-Driven A2A Client** (outbound decree gate) | (extension) | ✓ (v3.11.0) |
+| `0026` | **Decree-Driven ADR Amendment Mechanism** (closes ADR-0016) | (extension) | ✓ (v3.12.0) |
+| `0027` | **Decree-Enforced HTTP JSON-RPC Server** (inbound HTTP) | (extension) | ✓ (v3.13.0) |
+| `0028` | **Decree Supersession Mechanism** (decrees can be revoked) | (extension) | ✓ (v3.14.0) |
 
 ADR — immutable после Accepted. Новые решения создаются superseding ADR'ом со ссылкой на старый. Соответствие замечаний аудита → действиям — в `docs/AUDIT_RESPONSE.md`.
 
-ADR-0021 + ADR-0022 — выделяются особо: они описывают **decree system** — supreme law layer, над всеми ADRs. Декрет, написанный человеком в Decree Portal, может supersede существующий ADR (per ADR-0016 self-rewriting mechanism). Это материализация тезиса `PAROLE > LANGUE` — индивидуальное слово выше коллективного договора.
+ADR-0021 + ADR-0022 — выделяются особо: они описывают **decree system** — supreme law layer, над всеми ADRs. Декрет, написанный человеком в Decree Portal, может supersede существующий ADR (per ADR-0016 self-rewriting mechanism, реализованный в ADR-0026). Это материализация тезиса `PAROLE > LANGUE` — индивидуальное слово выше коллективного договора.
+
+ADR-0023 through ADR-0028 — образуют **СИНГУЛЯР architecture**:
+- **ADR-0023** Agent Card Protocol — A2A-compatible discovery
+- **ADR-0024** Decree-Enforced Multi-Agent Communication (inbound in-process)
+- **ADR-0025** Decree-Driven A2A Client (outbound decree gate)
+- **ADR-0026** Decree-Driven ADR Amendment Mechanism (meta-architecture)
+- **ADR-0027** Decree-Enforced HTTP JSON-RPC Server (inbound HTTP)
+- **ADR-0028** Decree Supersession Mechanism (decree revocation)
+
+Все 6 ADRs (0023-0028) реализованы и покрыты тестами (220 total). Decree enforcement сейчас работает в 4 направлениях: inbound in-process + inbound HTTP + outbound + meta-architecture.
 
 ## 7. Эмерджентность — проверяемая гипотеза
 

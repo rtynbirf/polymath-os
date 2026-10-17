@@ -1,7 +1,7 @@
 {
-  "version": "3.8.0",
+  "version": "3.14.0",
   "released": "2026-10-17",
-  "commit": "3f279c0",
+  "commit": "6030791",
   "adapters": [
     {
       "id": "rule.local",
@@ -50,8 +50,8 @@
       "capabilities": ["search", "fetch_page"]
     }
   ],
-  "adrs": 22,
-  "adr_ids": ["0001-0022"],
+  "adrs": 28,
+  "adr_ids": ["0001-0028"],
   "patterns": 9,
   "contracts": [
     "sovereignty",
@@ -64,20 +64,23 @@
     "decree",
     "operational",
     "phrase-matching",
-    "token-hygiene"
+    "token-hygiene",
+    "decree-supersession",
+    "decree-amendment",
+    "decree-enforced-mesh"
   ],
-  "tests": 123,
-  "tests_detail": "123 pass, 4 skipped (aiortc-absent path), +5 new for v0.5 NLP, +12 new for v0.6 word-boundary",
-  "ci_checks": 23,
+  "tests": 220,
+  "tests_detail": "220 pass, 4 skipped (3 LLM integration + 1 WebRTC aiortc). +8 v0.5 NLP, +12 v0.6 word-boundary, +33 v3.10 AgentCard+AgentMesh, +17 v3.11 A2AClient, +24 v3.12 AdrAmender, +15 v3.13 AgentMeshServer, +8 v3.14 supersession",
+  "ci_checks": 24,
   "ci_check_runs": 5,
-  "ci_status": "all green on commit 3f279c0",
-  "releases": 29,
-  "releases_detail": "v1.0.0 → v3.8.0 (29 total releases as of 2026-10-17)",
+  "ci_status": "all green on commit 6030791 (v3.14.0)",
+  "releases": 30,
+  "releases_detail": "v1.0.0 → v3.14.0 (30 total releases as of 2026-10-17)",
   "audit_levels": 5,
   "freedom_score": "24/24 templates",
   "foundational_decrees": 7,
   "decree_db": "~/.polymath-os/decrees.db",
-  "decree_log_version": "v0.6",
+  "decree_log_version": "v0.6.1",
   "decree_log_features": [
     "append-only (immutable once recorded)",
     "hash-chained (SHA-256, fail-closed per ADR-0006)",
@@ -85,28 +88,70 @@
     "word-boundary regex matching (\\b{term}\\b, v0.6)",
     "decree scope filtering (v0.6 — decree.scope filters by scope arg)",
     "regex prohibition parser (v0.6 — recognizes use/install/deploy/run/adopt/rely on)",
-    "Runtime integration via set_decree_log() (checked BEFORE policy per ADR-0021)"
+    "v0.6.1 extension: +{send, share, transmit, expose} verbs for data-flow prohibitions (ADR-0025)",
+    "decree supersession (v3.14.0, ADR-0028 — decrees can be revoked without breaking append-only invariant)",
+    "Runtime integration via set_decree_log() (checked BEFORE policy per ADR-0021)",
+    "decree_scope parameter on check_compliance() for outbound filtering (ADR-0025)"
   ],
-  "runtime_version": "v0.6",
+  "runtime_version": "v0.6.1",
   "runtime_features": [
-    "Intent → Capability → Adapter → Observation → Evidence cycle",
+    "Intent → (Decree Gate) → Capability → Adapter → Observation → Evidence cycle",
     "UNKNOWN first-class state (ADR-0006, falsifiable)",
     "DECREE_BLOCK ledger event (v3.6.0+)",
     "Recovery protocol (UNKNOWN → RECOVERING → VERIFYING)",
     "Mutation testing critical paths (ADR-0010, mutmut)",
     "Hash-chain integrity for EvidenceLedger (fail-closed)",
-    "Idempotent retries via idempotency_key"
+    "Idempotent retries via idempotency_key",
+    "SQLite cross-thread support (check_same_thread parameter, v3.13.0)"
   ],
+  "singulyar_layers": {
+    "decree_log": "ADR-0021 (supreme law, append-only, hash-chained)",
+    "inbound_in_process": "ADR-0024 (AgentMesh — DECREE_BLOCK JSON-RPC error)",
+    "inbound_http": "ADR-0027 (AgentMeshServer — stdlib http.server, JSON-RPC 2.0 over HTTP)",
+    "outbound": "ADR-0025 (A2AClient — outbound decree gate BEFORE network request)",
+    "meta_architecture": "ADR-0026 (AdrAmender — decrees can create/amend/supersede/deprecate ADRs)",
+    "decree_supersession": "ADR-0028 (decrees can be revoked via supersession decree category)",
+    "audit": "ADR-0019 (Evidence Ledger as audit trail for all decree operations)"
+  },
   "ui_components": [
-    "apps/browser/decree-portal.html — Decree Portal UI (3-tier bridge: require → window.decreeBridge → localStorage)",
-    "apps/browser/decree-bridge.js — Node bridge to Python DecreeLog",
+    "apps/browser/decree-portal.html — Decree Portal UI (3-tier bridge: require → window.decreeBridge → localStorage, + multi-agent view v3.11.0, + 'Отозвать' button v3.14.0)",
+    "apps/browser/decree-bridge.js — Node bridge to Python DecreeLog (issueDecree, getDecrees, checkCompliance, getAgents, supersedeDecree + CLI)",
     "apps/browser/electron/ — Electron desktop wrapper (contextIsolation=true, nodeIntegration=false)"
   ],
+  "a2a_endpoints": {
+    "discovery": "GET /.well-known/agent.json (per ADR-0023)",
+    "health": "GET /health",
+    "jsonrpc": "POST /agent/{agent_id} (per ADR-0027)",
+    "decree_block_http_status": 403,
+    "default_port": 7654,
+    "cli": "python3 -m runtime.src.agent_mesh_server --port 7654"
+  },
   "token_hygiene": {
     "scanner": "scripts/check_token_hygiene.py",
     "patterns": 7,
     "thresholds": "github_pat_ 50+ chars; ghp_/gho_/ghu_/ghs_ exact 36 chars; ghr_ exact 76 chars; env_var_literal 50+ char value",
     "make_verify_claim": 23,
     "security_md_section": "Token hygiene — GitHub PAT best practices"
+  },
+  "adr_amender": {
+    "decree_category": "amendment",
+    "patterns": 4,
+    "patterns_list": [
+      "create ADR-NNNN about <topic>",
+      "amend ADR-XXXX to <change>",
+      "supersede ADR-XXXX with ADR-YYYY",
+      "deprecate ADR-XXXX"
+    ],
+    "log_file": "docs/adr/amendments.log",
+    "immutability_invariant": "original ADR files NEVER modified — all changes to amendments.log",
+    "adr_lifecycle": "Proposed (auto-generated) → Accepted (human review) → Deprecated → Superseded (per ADR-0016)"
+  },
+  "decree_supersession": {
+    "decree_category": "supersession",
+    "scope_format": "supersession:<target_seq>",
+    "method": "DecreeLog.supersede(target_seq, reason)",
+    "behavior": "get_active_laws() skips superseded decrees; original unchanged (immutability preserved); hash chain intact",
+    "ui_integration": "'Отозвать' button on law/prohibition decrees in Decree Portal",
+    "cli": "node decree-bridge.js supersede <seq> '<reason>'"
   }
 }
