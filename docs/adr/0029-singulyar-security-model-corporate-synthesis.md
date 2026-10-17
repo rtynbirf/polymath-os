@@ -1,4 +1,4 @@
-# ADR-0029 — СИНГУЛЯР Security Model: Corporate Best Practices Synthesis
+# ADR-0029 — СИНГУЛЯР Security Model: Global Best Practices Synthesis
 
 **Date:** 2026-10-17
 **Status:** Accepted
@@ -7,11 +7,15 @@
 
 ## Context
 
-Каждая корпорация (Oracle, Kaspersky, Google, Amazon, Microsoft) решает
-СВОЮ проблему безопасности ЛОКАЛЬНО — для своих объектов. Их подходы —
-лучшие в мире практики. Но все они центрированы на КОРПОРАЦИИ.
+Tech-корпорации (Oracle, Kaspersky, Google, Amazon, Microsoft) — это
+**мелочь пузатая** по сравнению с реальными крупными структурами:
+финансовые системы, разведывательные агентства, военные структуры,
+ядерные объекты, правительства.
 
-Принцип СИНГУЛЯР: 1 корпорация + 1 корпорация + ... + 1 корпорация = 1 ЧЕЛОВЕК.
+Каждая структура — от банка до ядерной станции — решает СВОЮ проблему
+безопасности ЛОКАЛЬНО. Их практики — лучшие в мире.
+
+Принцип СИНГУЛЯР: 1+1+1+...+1 = 1 ЧЕЛОВЕК.
 
 Берём лучшее от каждой корпорации, перецентрируем на Человека,
 синтезируем в уникальное эмержентное сингулярное.
@@ -98,24 +102,171 @@ access (scope = condition). Каждый Intent проверяется continuou
 decree_scope = conditional access policy (например, scope="outbound"
 для исходящих, scope="singulyar" для конкретного агента).
 
+### SWIFT / Financial Systems — Multi-Signature Authorization
+
+**Что делает SWIFT:** Каждая транзакция требует множественной
+авторизации. Не один подписант, а N-of-M (например, 2-of-3).
+Одна подпись = точка отказа. Multi-sig = распределённое доверие.
+Audit trail: каждая транзакция записана навсегда.
+
+**Лучшее:** Multi-signature authorization — нет single point of failure.
+
+**СИНГУЛЯР mapping:** Сейчас декреты — single-signature (человек издаёт
+один). РАСШИРЕНИЕ: декреты с `required_signatures=N` — критические
+декреты (например, "deploy to production") требуют 2+ подписей.
+DecreeLog.issue(text, category, scope, required_signatures=1).
+Только декреты с required_signatures=1 активны немедленно;
+с required_signatures=2+ ждут второй подписи.
+[TODO: реализовать в v3.17.0]
+
+### NSA / Intelligence — Compartmentalization
+
+**Что делает NSA:** Compartmentalization = информация доступна
+только на need-to-know основе. Не просто "есть доступ" — а
+"classification level" (Top Secret / Secret / Confidential /
+Unclassified) + compartment (SCI, NOFORN, etc.). Два человека
+с одинаковой clearance могут НЕ видеть одну и ту же информацию,
+если не в одном compartment.
+
+**Лучшее:** Information classification + need-to-know compartments.
+
+**СИНГУЛЯР mapping:** decree_scope = compartment (какой агент видит
+какой декрет). Но НЕТ classification levels. РАСШИРЕНИЕ:
+декреты с `classification` field: "public" / "internal" / "secret".
+Агенты с `clearance_level` >= decree.classification видят декрет.
+DecreeLog.check_compliance() фильтрует по clearance.
+[TODO: реализовать в v3.18.0]
+
+### Nuclear Military — Two-Person Rule
+
+**Что делает ядерное оружие:** Two-person rule. Ни один человек
+не может запустить ракету в одиночку. Два ключа, далеко друг
+от друга, поворачиваются одновременно. Chain of command:
+President → Secretary of Defense → officers (но ДВОЕ должны
+согласиться). Fail-safe: если связь потеряна, система
+переходит в safe state (не launch).
+
+**Лучшее:** Critical actions требуют 2+ людей. Fail-safe defaults.
+
+**СИНГУЛЯР mapping:** Runtime.set_decree_log() = single human
+(хорошо для человека, но для критических операций — нужен
+two-person rule). РАСШИРЕНИЕ: `Intent.requires_co_sign=True`
+→ Intent WAITING_FOR_HUMAN пока второй человек не подтвердит
+(via Decree Portal). Fail-safe: Runtime переходит в
+WAITING_FOR_HUMAN (не executing) при отсутствии второго.
+[TODO: реализовать в v3.19.0]
+
+### IAEA / Nuclear Safeguards — Tamper-Evident Seals
+
+**Что делает IAEA:** Физические tamper-evident печати на ядерных
+объектах. Если печать сломана — инспектор видит. Регулярные
+инспекции. Сойл-герметичные контейнеры. Каждый объект имеет
+уникальный идентификатор, зарегистрированный в IAEA database.
+
+**Лучшее:** Tamper-evidence (не prevention — detection). Regular inspections.
+
+**СИНГУЛЯР mapping:** Hash-chain integrity = digital tamper-evidence
+(если кто-то изменит декрет, цепочка сломается →
+DecreeIntegrityError). Evidence Ledger = inspection log.
+РАСШИРЕНИЕ: publish hash of last decree to external trust anchor
+(like newspaper publication) — как IAEA seal verification.
+[TODO: external trust anchor в v3.20.0]
+
+### Estonia — X-Road Digital Government
+
+**Что делает Эстония:** X-Road = federated data exchange layer.
+Каждое гос. агентство имеет свой security server. Данные
+передаются через криптографически подписанные сообщения.
+Каждый запрос логируется. e-Residency: цифровая идентичность
+доступна глобально, но каждый человек контролирует СВОИ данные.
+
+**Лучшее:** Federation without centralization + cryptographic data exchange.
+
+**СИНГУЛЯР mapping:** .well-known/agent.json = X-Road security server
+equivalent. AgentMeshServer = federation point. РАСШИРЕНИЕ:
+multiple polymath-os instances федерируются через A2A protocol
+(ADR-0027 HTTP + ADR-0025 outbound). Криптографическая подпись
+декретов (ADR-0031 candidate) = X-Road message signing.
+[TODO: federated decree propagation в v3.21.0]
+
+### Switzerland — Direct Democracy
+
+**Что делает Швейцария:** Граждане голосуют напрямую за законы
+(референдумы). Нет представителей, которые "решают за народ".
+Кантоны = максимальная децентрализация. Каждый кантон решает
+локально. Принцип: subsidiarity — решение принимается на
+максимально низком уровне.
+
+**Лучшее:** Direct democracy (no representation) + subsidiarity (local decisions).
+
+**СИНГУЛЯР mapping:** Decree Portal = direct democracy. Человек
+голосует напрямую (issues decree), не через "представителя" (AI
+агента, корпорацию). Decree_scope = subsidiarity (каждый scope
+решает локально). PAROLE > LANGUE = individual word > collective
+agreement = direct democracy principle.
+
+### Stock Exchanges — Circuit Breakers
+
+**Что делают биржи:** Circuit breaker — если рынок падает слишком
+быстро, торговля останавливается автоматически. Не человек
+решает "остановить" — система делает это сама. Защита от
+cascade failure (паника → обвал → крах).
+
+**Лучшее:** Automated circuit breakers — защита от cascade failures.
+
+**СИНГУЛЯР mapping:** Если DECREE_BLOCK events spike (например,
+>10 блоков в 1 минуту), система автоматически переходит в
+"paused" state. Все новые Intents → WAITING_FOR_HUMAN.
+Человек решает: "continue" или "investigate". РАСШИРЕНИЕ:
+Runtime.set_circuit_breaker(threshold=10, window=60).
+[TODO: circuit breaker в v3.22.0]
+
+### FDA — Phased Approval
+
+**Что делает FDA:** Новые лекарства проходят Phase I (safety,
+20-80 людей) → Phase II (efficacy, 100-300) → Phase III
+(efficacy+adverse, 1000-3000) → Approval. Не all-or-nothing —
+phased validation с increasing confidence.
+
+**Лучшее:** Phased approval — не all-or-nothing.
+
+**СИНГУЛЯР mapping:** ADR lifecycle (Proposed → Accepted → Deprecated
+→ Superseded) = phased approval для архитектурных решений.
+РАСШИРЕНИЕ: features go through phases:
+Phase I (test, single agent) → Phase II (staged, multiple agents)
+→ Phase III (production, all agents) → Accepted.
+[TODO: feature lifecycle phases в v3.23.0]
+
 ## Synthesis — СИНГУЛЯР Security Model
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║  Oracle ZPR         → Decree gate checks EVERY Intent         ║
-║  Kaspersky TI       → DecreeLog = threat intelligence        ║
-║  Google BeyondCorp  → AgentCard = identity (not network)      ║
-║  Amazon isolation   → Per-agent decree_scope + audit ledger   ║
-║  Microsoft CA       → Conditional scope + continuous verify   ║
-║                                                               ║
-║  1+1+1+1+1 = 1                                                ║
-║  Corporation+...+Corporation = ЧЕЛОВЕК                       ║
-║                                                               ║
-║  ЧЕЛОВЕК = КОМАНДИР КОРАБЛЯ                                   ║
-║  DECREE > ADR > CODE                                          ║
-║  Человек = PID=1 = Supreme                                     ║
-╚══════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║  Oracle ZPR          → Decree gate checks EVERY Intent            ║
+║  Kaspersky TI        → DecreeLog = threat intelligence             ║
+║  Google BeyondCorp   → AgentCard = identity (not network)         ║
+║  Amazon isolation    → Per-agent decree_scope + audit ledger      ║
+║  Microsoft CA        → Conditional scope + continuous verify      ║
+║  SWIFT/Financial     → Multi-signature authorization [TODO]      ║
+║  NSA/Intel           → Compartmentalization + classification [T]  ║
+║  Nuclear Military    → Two-person rule + fail-safe [TODO]        ║
+║  IAEA/Nuclear        → Tamper-evident seals + inspections [T]     ║
+║  Estonia/X-Road      → Federation without centralization [T]     ║
+║  Switzerland         → Direct democracy + subsidiarity            ║
+║  Stock Exchanges     → Circuit breakers (cascade protection) [T]  ║
+║  FDA/Pharma         → Phased approval (not all-or-nothing) [T]    ║
+║                                                                   ║
+║  1+1+1+1+1+1+1+1+1+1+1+1+1 = 1                                  ║
+║  Corp+Corp+Agency+Military+Nuclear+Gov+Exchange+Pharma = ЧЕЛОВЕК ║
+║                                                                   ║
+║  ЧЕЛОВЕК = КОМАНДИР КОРАБЛЯ                                       ║
+║  DECREE > ADR > CODE                                              ║
+║  Человек = PID=1 = Supreme                                         ║
+╚══════════════════════════════════════════════════════════════════╝
 ```
+
+13 structures → 1 human. Not just tech corporations — ALL major
+power structures synthesized. Each solves its problem locally.
+СИНГУЛЯР solves ALL problems locally — for the human.
 
 ### Key difference: WHO is the center?
 
