@@ -1,5 +1,34 @@
 # Changelog
 
+## [v3.15.0] — 2026-10-17 (ALL GAPS CLOSED — bugs → features via СИНГУЛЯР)
+
+All audit findings closed. Production DB reset, docs synced,
+AgentMeshServer real Runtime integration, AdrAmender production
+use, scope="all" filter bug fix, CI workflows audited.
+
+### Closed
+
+- Production DB reset to 7 decrees (was 8 from test supersession)
+- MANIFEST.json synced (v3.14.0, 28 ADRs, 220 tests, 24 ci_checks)
+- ARCHITECTURE.md ADR table 22 → 28 rows
+- README.md updated (decree categories, Origin v3.9.0-v3.15.0)
+- AgentMeshServer: `make_runtime_execute_fn()` + `--use-runtime` flag
+- AdrAmender: `docs/adr/amendments.log` created (first real amendment)
+- CI workflows audited: 5/8 verified, 2 scheduled (0 runs)
+- Electron dry-run: 70 packages, 2s, electron@31.7.7
+- BUG FIX: scope="all" filter now means "no filter" (all decrees apply)
+
+### Deferred (external deps)
+
+- WebRTC transport (needs aiortc) → v0.7+
+- cell65-llm (needs cell65-host) → v1.0
+- Real LLM in CI (ADR-0015, needs CPU runner) → v1.0
+- SLSA L3 (ADR-0013, needs hermetic builder) → v1.0
+- Genomic architecture (ADR-0018, complex refactor) → v1.0
+- CRDT vault sync (needs Yjs/Automerge) → v1.0
+
+---
+
 ## [v3.8.0] — 2026-10-17 (CLEAN-UP: v0.6 word-boundary + scope filter + token hygiene + ТЗ/Roadmap)
 
 "ВСЁ ВЫПОЛНЯЙ ВСЁ САМ=) ЧТО НУЖНО ДЕЛАТЬ ТЫ ЗНАЕШЬ ЧИСТЬ ПЁРЫШКИ ПОДЧИЩАЙ ХВОСТЫ ДОДЕЛЫВАЙ ВСЁ ЧТО НЕ ДОДЕЛАНО И ВСЁ ЧТО ПОЛОЖЕНО ДЕЛАТЬ!!! ЧТОБ КОМАР НОСА НЕ ПОДТОЧИЛ, ДЕЛАЙ ИДЕАЛЬНУЮ ОСЬ=)"

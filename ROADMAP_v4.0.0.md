@@ -140,7 +140,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 
 ## 4. Ближайшие задачи (v3.11.0 — 30 дней)
 
-### 4.1. WebRTC transport для AgentMesh (ADR-0024 extension)
+### 4.1. WebRTC transport для AgentMesh (ADR-0024 extension) — ⏸ DEFERRED (needs aiortc)
 
 **Цель:** реальная P2P коммуникация между агентами, без HTTP-only.
 
@@ -150,7 +150,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 - `runtime/src/agent_mesh.py` — добавить WebRTC transport
 - `runtime/tests/test_agent_mesh_webrtc.py` — P2P test
 
-### 4.2. cell65-llm integration (ADR-0015 partial)
+### 4.2. cell65-llm integration (ADR-0015 partial) — ⏸ DEFERRED (needs cell65-host server)
 
 **Цель:** реальный локальный LLM через cell65-host.
 
@@ -160,7 +160,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 - `runtime/src/adapters/llm_local_adapter.py` — integrate with cell65-llm endpoint
 - `runtime/tests/test_llm_local_adapter_integration.py` — real LLM smoke test
 
-### 4.3. Decree Portal UI — multi-agent view
+### 4.3. Decree Portal UI — multi-agent view — ✓ DONE (v3.11.0)
 
 **Цель:** показать в UI все зарегистрированные агенты + их decree_scope.
 
@@ -168,7 +168,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 - `apps/browser/decree-portal.html` — new "Agents" section
 - `apps/browser/decree-bridge.js` — `getAgents()` API
 
-### 4.4. Agent Card schema validation в make verify (claim #24)
+### 4.4. Agent Card schema validation в make verify (claim #24) — ✓ DONE (v3.11.0)
 
 **Цель:** `.well-known/agent.json` валиден по JSON Schema.
 
@@ -176,7 +176,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 - `runtime/schemas/agent-card.schema.json` — JSON Schema
 - `scripts/check.py` — `check_agent_card()` claim #24
 
-### 4.5. ADR-0025: Decree-driven A2A client
+### 4.5. ADR-0025: Decree-driven A2A client — ✓ DONE (v3.11.0)
 
 **Цель:** polymath-os может не только быть endpoint, но и client к другим A2A-агентам.
 
@@ -189,27 +189,27 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 
 ## 5. Среднесрочные задачи (v4.0.0 — 3 месяца)
 
-### 5.1. Self-rewriting ADR mechanism (ADR-0016 full)
+### 5.1. Self-rewriting ADR mechanism (ADR-0016 full) — ✓ DONE (v3.12.0, ahead of schedule)
 
 **Цель:** decree может создавать/амендить ADR. "create ADR-0026 about X" → ADR-0026 generated from decree.
 
-### 5.2. Real LLM inference in CI (ADR-0015 full)
+### 5.2. Real LLM inference in CI (ADR-0015 full) — ⏸ DEFERRED (needs CPU runner + model)
 
 **Цель:** weekly CI job запускает Qwen2.5-0.5B на GitHub runner, integration test с реальным LLM.
 
-### 5.3. SLSA L3 (ADR-0013 full)
+### 5.3. SLSA L3 (ADR-0013 full) — ⏸ DEFERRED (needs hermetic builder)
 
 **Цель:** hermetic builder, two-party review, reproducible builds.
 
-### 5.4. Genomic architecture (ADR-0018 full)
+### 5.4. Genomic architecture (ADR-0018 full) — ⏸ DEFERRED (complex refactor)
 
 **Цель:** каждый adapter = отдельная клетка с своим контрактом, isolation per-component.
 
-### 5.5. Distributed task queue with WebRTC
+### 5.5. Distributed task queue with WebRTC — ⏸ DEFERRED (needs aiortc)
 
 **Цель:** Intent → distributed queue (P2P), workers = peer nodes, recovery = peer read-back.
 
-### 5.6. CRDT-based vault sync
+### 5.6. CRDT-based vault sync — ⏸ DEFERRED (needs Yjs/Automerge)
 
 **Цель:** Obsidian vault sync через Yjs/Automerge, без GitHub dependency.
 
