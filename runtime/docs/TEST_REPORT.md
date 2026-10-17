@@ -96,42 +96,70 @@ test_register_and_list (test_agent_mesh.AgentMeshRegistrationTests.test_register
 test_unregister (test_agent_mesh.AgentMeshRegistrationTests.test_unregister) ... ok
 test_send_no_decree_log_no_decree_check (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_no_decree_log_no_decree_check) ... ok
 test_send_unknown_agent_returns_error (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_unknown_agent_returns_error) ... ok
-test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
+test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-10-17T17:11:52Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
 ok
-test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-10-17T17:11:52Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
+test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-10-17T17:11:53Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
 ok
-test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
+test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-10-17T17:11:53Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
 ok
-test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-10-17T17:11:53Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-10-17T16:53:05Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
+test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-10-17T17:11:53Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
 ok
 test_full_scenario_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_blocked)
-Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_chrome_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_chrome_blocked)
-Chrome decree (LIST classification) — single word match. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Chrome decree (LIST classification) — single word match. ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_compliant (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_compliant)
-Full HTTP cycle — compliant intent passes through. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+Full HTTP cycle — compliant intent passes through. ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
-test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
+test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
 ok
-test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_blocked_intent_returns_decree_block_403 (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_blocked_intent_returns_decree_block_403)
-CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-10-17T17:11:54Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
-test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-10-17T17:11:55Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_to_cell65_llm_uses_different_agent (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_cell65_llm_uses_different_agent)
-Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
+Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-10-17T17:11:55Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
 ok
 test_send_to_unknown_agent_returns_503_or_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_unknown_agent_returns_503_or_error)
-Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-10-17T16:53:06Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
+Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-10-17T17:11:56Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
 ok
+test_circuit_breaker_blocks_all_intents_when_tripped (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_blocks_all_intents_when_tripped)
+Once tripped, ALL Intents are blocked — even ones that don't violate ... ok
+test_circuit_breaker_not_tripped_below_threshold (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_not_tripped_below_threshold)
+DECREE_BLOCK count below threshold → breaker stays armed, not tripped. ... ok
+test_circuit_breaker_resumed_by_human (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_resumed_by_human)
+resume_from_circuit_breaker() clears the paused flag and block ... ok
+test_circuit_breaker_tripped_at_threshold (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_tripped_at_threshold)
+Once `threshold` DECREE_BLOCKs are recorded, the NEXT Intent's ... ok
+test_circuit_breaker_window_expiry (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_window_expiry)
+Old DECREE_BLOCK entries are pruned once they fall outside the ... ok
+test_clearance_internal_sees_public_and_internal (test_decree_log.DecreeLogClearanceTests.test_clearance_internal_sees_public_and_internal)
+clearance='internal' → 'public' + 'internal' decrees checked. ... ok
+test_clearance_public_only_sees_public (test_decree_log.DecreeLogClearanceTests.test_clearance_public_only_sees_public)
+clearance='public' → ONLY 'public'-classified decrees are checked. ... ok
+test_clearance_secret_sees_all (test_decree_log.DecreeLogClearanceTests.test_clearance_secret_sees_all)
+clearance='secret' → ALL decrees checked (public + internal + secret). ... ok
+test_secret_decree_hidden_from_public_clearance (test_decree_log.DecreeLogClearanceTests.test_secret_decree_hidden_from_public_clearance)
+Core compartmentalization invariant: a 'secret' decree MUST NOT ... ok
+test_cosign_idempotent (test_decree_log.DecreeLogMultiSigTests.test_cosign_idempotent)
+Calling co_sign() twice with the same signer_id is idempotent — ... ok
+test_get_co_signatures (test_decree_log.DecreeLogMultiSigTests.test_get_co_signatures)
+get_co_signatures() returns all co-signatures for a decree, ... ok
+test_multisig_blocks_check_compliance (test_decree_log.DecreeLogMultiSigTests.test_multisig_blocks_check_compliance)
+A multi-sig decree blocks check_compliance ONLY after its ... ok
+test_multisig_decree_active_after_threshold (test_decree_log.DecreeLogMultiSigTests.test_multisig_decree_active_after_threshold)
+Once the co-signature count reaches required_signatures, the ... ok
+test_multisig_decree_not_active_until_threshold (test_decree_log.DecreeLogMultiSigTests.test_multisig_decree_not_active_until_threshold)
+A decree with required_signatures=3 is NOT active until 3 ... ok
 test_get_superseded_decrees (test_decree_log.DecreeLogSupersessionTests.test_get_superseded_decrees)
 get_superseded_decrees() returns list of supersession records. ... ok
 test_supersede_a_supersession_decree_raises (test_decree_log.DecreeLogSupersessionTests.test_supersede_a_supersession_decree_raises)
@@ -220,6 +248,15 @@ test_each_ablation_link_is_load_bearing (test_experiment.ExperimentTests.test_ea
 Removing a link must make at least one scenario unsafe; otherwise the link proves nothing. ... ok
 test_eir_regression_guard_on_scenario_matrix (test_experiment.ExperimentTests.test_eir_regression_guard_on_scenario_matrix) ... ok
 test_generated_artifacts_are_fresh_and_deterministic (test_experiment.ExperimentTests.test_generated_artifacts_are_fresh_and_deterministic) ... ok
+test_federate_decrees_fetches_from_remote (test_federation.FederationDecreeRpcTests.test_federate_decrees_fetches_from_remote)
+A2AClient.federate_decrees() fetches active laws from a remote ... [2026-10-17T17:11:58Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+ok
+test_get_active_laws_via_http (test_federation.FederationDecreeRpcTests.test_get_active_laws_via_http)
+POST method=decree.get_active_laws → returns the active laws list. ... [2026-10-17T17:11:59Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+ok
+test_get_all_decrees_via_http (test_federation.FederationDecreeRpcTests.test_get_all_decrees_via_http)
+POST method=decree.get_all → returns ALL decrees (full record). ... [2026-10-17T17:11:59Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+ok
 test_real_http_4xx_raises_runtime_error (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_4xx_raises_runtime_error) ... ok
 test_real_http_5xx_get_raises_not_executed (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_5xx_get_raises_not_executed)
 5xx on idempotent GET → NotExecuted (safe to retry). ... ok
@@ -307,6 +344,14 @@ test_server_ping_pong (test_subprocess_bridge.SubprocessBridgeServerTests.test_s
 Server responds to ping with pong. ... ok
 test_server_ready_signal (test_subprocess_bridge.SubprocessBridgeServerTests.test_server_ready_signal)
 Server sends 'ready' signal on stdout before processing. ... ok
+test_publish_trust_anchor (test_trust_anchor.TrustAnchorTests.test_publish_trust_anchor)
+publish_trust_anchor writes a JSON file with the last decree's ... ok
+test_verify_trust_anchor_match (test_trust_anchor.TrustAnchorTests.test_verify_trust_anchor_match)
+Verify returns verified=True when the decree log's hash matches ... ok
+test_verify_trust_anchor_mismatch (test_trust_anchor.TrustAnchorTests.test_verify_trust_anchor_mismatch)
+Verify returns verified=False when the decree log's hash differs ... ok
+test_verify_trust_anchor_missing (test_trust_anchor.TrustAnchorTests.test_verify_trust_anchor_missing)
+Verify returns verified=False with a clear 'file not found' ... ok
 test_runtime_with_webrtc_adapter_send (test_webrtc_adapter.IntegrationWithRuntimeTests.test_runtime_with_webrtc_adapter_send)
 Runtime with WebRTCAdapter — execute a send via kernel. ... ok
 test_adapter_id_constant (test_webrtc_adapter.WebRTCAdapterTests.test_adapter_id_constant) ... ok
@@ -325,7 +370,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 220 tests in 7.855s
+Ran 241 tests in 12.517s
 
 OK (skipped=4)
 ```

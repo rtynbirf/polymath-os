@@ -329,6 +329,100 @@ class A2AClient:
             id=request.id,
         )
 
+    def federate_decrees(self, agent_url: str) -> list:
+        """Fetch active laws from a remote AgentMeshServer instance.
+
+        Per ADR-0029 (v3.16.0) — federation: remote instances expose
+        ``decree.get_active_laws`` as a read-only JSON-RPC method on
+        ``POST /agent/{agent_id}``. This method issues that call and
+        returns the remote's active law decrees as a list.
+
+        This is a READ-ONLY federation operation: it does NOT carry any
+        intent/payload that could leak sensitive data, so the outbound
+        decree gate is not consulted. The remote decree log's contents
+        are the authoritative source — we trust the remote (the operator
+        explicitly asked us to federate from it).
+
+        Args:
+            agent_url: full URL to the remote JSON-RPC endpoint
+                       (e.g. ``http://peer.local:7654/agent/singulyar-eir.local``)
+
+        Returns:
+            List of active-law decree dicts (as returned by the remote's
+            ``DecreeLog.get_active_laws()``). Empty list on any error
+            (network failure, JSON parse error, remote JSON-RPC error)
+            — keeps federation fail-soft so a flaky peer doesn't break
+            local operations.
+        """
+        request_body = {
+            "jsonrpc": "2.0",
+            "method": "decree.get_active_laws",
+            "params": {},
+            "id": f"federate-{int(time.time() * 1000)}",
+        }
+        try:
+            req = urllib.request.Request(
+                agent_url,
+                data=json.dumps(request_body).encode("utf-8"),
+                headers={
+                    "User-Agent": self.user_agent,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                response_body = r.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": f"HTTP {e.code}: {e.reason}",
+            })
+            return []
+        except urllib.error.URLError as e:
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": f"URL error: {e.reason}",
+            })
+            return []
+        except Exception as e:  # federation is fail-soft by design
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": f"{type(e).__name__}: {e}",
+            })
+            return []
+
+        # Parse the JSON-RPC response envelope.
+        try:
+            parsed = json.loads(response_body)
+        except json.JSONDecodeError as e:
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": f"invalid JSON: {e}",
+            })
+            return []
+
+        if not isinstance(parsed, dict) or "error" in parsed:
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": parsed.get("error") if isinstance(parsed, dict) else "non-object response",
+            })
+            return []
+
+        result = parsed.get("result", [])
+        if not isinstance(result, list):
+            self._emit("FEDERATE_DECREES_ERROR", {
+                "agent_url": agent_url,
+                "error": f"expected list result, got {type(result).__name__}",
+            })
+            return []
+
+        self._emit("FEDERATE_DECREES_FETCHED", {
+            "agent_url": agent_url,
+            "count": len(result),
+        })
+        return result
+
     def _emit(self, event_type: str, payload: Dict[str, Any]) -> None:
         """Emit event to internal log + optional external ledger."""
         event = {

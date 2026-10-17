@@ -569,6 +569,315 @@ class DecreeLogSupersessionTests(unittest.TestCase):
             dl.close()
 
 
+class DecreeLogClearanceTests(unittest.TestCase):
+    """v3.18.0 — NSA compartmentalization tests (per ADR-0029 §7).
+
+    AgentCard.clearance_level (added v3.17.0) is now ENFORCED in
+    check_compliance() via the new `clearance` parameter. Each decree carries
+    a `classification` ∈ {'public', 'internal', 'secret'} (hierarchy:
+    'public' < 'internal' < 'secret'). A decree whose classification exceeds
+    the caller's clearance is INVISIBLE — filtered out before the prohibition
+    matcher runs. Compartmentalization invariant: a 'secret' decree CANNOT
+    cause a DENIED result for a 'public'-cleared agent.
+    """
+
+    def _issue_three(self, dl):
+        """Issue 3 prohibitions, one at each classification level.
+
+        'Google'  → public   (always visible)
+        'Slack'   → internal (visible to internal+secret)
+        'AWS'     → secret   (visible only to secret)
+        """
+        dl.issue("never use Google", category="prohibition", classification="public")
+        dl.issue("never use Slack", category="prohibition", classification="internal")
+        dl.issue("never use AWS", category="prohibition", classification="secret")
+
+    def test_clearance_public_only_sees_public(self):
+        """clearance='public' → ONLY 'public'-classified decrees are checked.
+
+        'internal' (Slack) and 'secret' (AWS) decrees are invisible — even
+        when the intent mentions the prohibited term by name, the decree
+        cannot block because the caller doesn't know it exists.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            self._issue_three(dl)
+
+            # 'Slack' (internal decree) — invisible to public-clearance caller.
+            r = dl.check_compliance("install Slack for chat", clearance="public")
+            self.assertTrue(
+                r["compliant"],
+                f"public clearance must hide 'internal' Slack decree. Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 1, "only 'public' decree visible")
+
+            # 'AWS' (secret decree) — invisible to public-clearance caller.
+            r = dl.check_compliance("deploy on AWS", clearance="public")
+            self.assertTrue(
+                r["compliant"],
+                f"public clearance must hide 'secret' AWS decree. Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 1)
+
+            # 'Google' (public decree) — still enforced at public clearance.
+            r = dl.check_compliance("use Google search", clearance="public")
+            self.assertFalse(r["compliant"], "public decree still enforced at public clearance")
+            self.assertEqual(r["laws_checked"], 1)
+            dl.close()
+
+    def test_clearance_internal_sees_public_and_internal(self):
+        """clearance='internal' → 'public' + 'internal' decrees checked.
+
+        'secret' (AWS) decree remains invisible.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            self._issue_three(dl)
+
+            # 'Google' (public) — enforced at internal clearance.
+            r = dl.check_compliance("use Google search", clearance="internal")
+            self.assertFalse(r["compliant"], "public decree enforced at internal clearance")
+
+            # 'Slack' (internal) — enforced at internal clearance.
+            r = dl.check_compliance("install Slack for chat", clearance="internal")
+            self.assertFalse(r["compliant"], "internal decree enforced at internal clearance")
+
+            # 'AWS' (secret) — STILL invisible at internal clearance.
+            r = dl.check_compliance("deploy on AWS", clearance="internal")
+            self.assertTrue(
+                r["compliant"],
+                f"internal clearance must hide 'secret' AWS decree. Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 2, "public + internal visible at internal clearance")
+            dl.close()
+
+    def test_clearance_secret_sees_all(self):
+        """clearance='secret' → ALL decrees checked (public + internal + secret)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            self._issue_three(dl)
+
+            # All 3 decrees enforced at secret clearance.
+            r = dl.check_compliance("use Google search", clearance="secret")
+            self.assertFalse(r["compliant"], "public decree enforced at secret clearance")
+            r = dl.check_compliance("install Slack for chat", clearance="secret")
+            self.assertFalse(r["compliant"], "internal decree enforced at secret clearance")
+            r = dl.check_compliance("deploy on AWS", clearance="secret")
+            self.assertFalse(r["compliant"], "secret decree enforced at secret clearance")
+
+            # Non-prohibited intent → compliant, all 3 laws were checked.
+            r = dl.check_compliance("use Fastly for CDN", clearance="secret")
+            self.assertTrue(r["compliant"], "non-prohibited intent is compliant")
+            self.assertEqual(r["laws_checked"], 3, "all 3 decrees visible at secret clearance")
+            dl.close()
+
+    def test_secret_decree_hidden_from_public_clearance(self):
+        """Core compartmentalization invariant: a 'secret' decree MUST NOT
+        block at clearance='public' — even when the intent literally
+        mentions the prohibited term by name. The agent does not know the
+        decree exists, so it cannot be DENIED on its basis.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            # Only a single 'secret' decree — no public/internal decrees at all.
+            dl.issue("never use AWS", category="prohibition", classification="secret")
+
+            # At public clearance — AWS decree is INVISIBLE, intent is compliant.
+            r = dl.check_compliance("deploy on AWS", clearance="public")
+            self.assertTrue(
+                r["compliant"],
+                f"secret decree MUST be hidden from public clearance. Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 0, "no laws visible at public clearance")
+
+            # At secret clearance — AWS decree enforced, intent DENIED.
+            r = dl.check_compliance("deploy on AWS", clearance="secret")
+            self.assertFalse(r["compliant"], "secret decree enforced at secret clearance")
+            self.assertEqual(r["laws_checked"], 1)
+            dl.close()
+
+
+class DecreeLogMultiSigTests(unittest.TestCase):
+    """v3.18.0 — N-of-M multi-signature blocking tests (per ADR-0029 §6).
+
+    Decrees with required_signatures > 1 are PENDING until enough
+    co-signatures are collected. get_active_laws() excludes PENDING
+    decrees; check_compliance() therefore doesn't enforce them. Once
+    the threshold is met (count >= required_signatures), the decree
+    becomes ACTIVE and is enforced.
+
+    The issuer is auto-recorded as signer '_issuer' at issue() time,
+    so a required_signatures=1 decree is ACTIVE immediately (no
+    explicit co_sign() call needed) and a required_signatures=N
+    decree (N>1) needs N-1 additional explicit co_sign() calls.
+    """
+
+    def test_multisig_decree_not_active_until_threshold(self):
+        """A decree with required_signatures=3 is NOT active until 3
+        co-signatures are collected (including the implicit '_issuer')."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Slack", category="prohibition",
+                          required_signatures=3)
+            # After issue(): 1 co-sign (implicit '_issuer') — NOT active (1 < 3).
+            self.assertFalse(
+                dl.is_decree_active(d1["seq"]),
+                "Decree with required_signatures=3 must NOT be active after "
+                "issue() with only the implicit _issuer co-sign (count=1 < 3)",
+            )
+            self.assertEqual(
+                len(dl.get_active_laws()), 0,
+                "PENDING decree must NOT appear in get_active_laws()",
+            )
+
+            # Add 1 explicit co-sign — still below threshold (count=2 < 3).
+            r1 = dl.co_sign(d1["seq"], "alice")
+            self.assertEqual(r1["signatures_collected"], 2)
+            self.assertFalse(r1["is_active"], "Still below threshold (2 < 3)")
+            self.assertFalse(dl.is_decree_active(d1["seq"]))
+            self.assertEqual(len(dl.get_active_laws()), 0)
+
+            # check_compliance must NOT enforce a PENDING decree.
+            r = dl.check_compliance("install Slack for team chat")
+            self.assertTrue(
+                r["compliant"],
+                f"PENDING multi-sig decree must NOT block check_compliance. "
+                f"Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 0, "PENDING decree not counted")
+            dl.close()
+
+    def test_multisig_decree_active_after_threshold(self):
+        """Once the co-signature count reaches required_signatures, the
+        decree becomes ACTIVE and appears in get_active_laws()."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Slack", category="prohibition",
+                          required_signatures=3)
+            # Below threshold — not active.
+            self.assertFalse(dl.is_decree_active(d1["seq"]))
+            self.assertEqual(len(dl.get_active_laws()), 0)
+
+            # Add 2 explicit co-signs — threshold met (count=3 >= 3).
+            dl.co_sign(d1["seq"], "alice")
+            r2 = dl.co_sign(d1["seq"], "bob")
+            self.assertEqual(r2["signatures_collected"], 3)
+            self.assertTrue(
+                r2["is_active"],
+                "Decree must be ACTIVE once count reaches required_signatures",
+            )
+            self.assertTrue(dl.is_decree_active(d1["seq"]))
+
+            # get_active_laws() now includes the decree with threshold info.
+            active = dl.get_active_laws()
+            self.assertEqual(len(active), 1)
+            self.assertEqual(active[0]["seq"], d1["seq"])
+            self.assertEqual(active[0]["required_signatures"], 3)
+            self.assertEqual(active[0]["signatures_collected"], 3)
+            dl.close()
+
+    def test_cosign_idempotent(self):
+        """Calling co_sign() twice with the same signer_id is idempotent —
+        the duplicate insert is ignored (PRIMARY KEY on (decree_seq,
+        signer_id)) and signatures_collected stays the same."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Slack", category="prohibition",
+                          required_signatures=3)
+            # Initial count after issue(): 1 (implicit '_issuer').
+            r1 = dl.co_sign(d1["seq"], "alice")
+            self.assertEqual(
+                r1["signatures_collected"], 2,
+                "After 1 explicit co_sign: count = 2 (issuer + alice)",
+            )
+            # Second co_sign with same signer_id — must be a no-op.
+            r2 = dl.co_sign(d1["seq"], "alice")
+            self.assertEqual(
+                r2["signatures_collected"], 2,
+                "Idempotent: second co_sign(alice) must NOT increment count",
+            )
+            # is_active status unchanged after the duplicate call.
+            self.assertFalse(r2["is_active"], "count=2 < 3 → still not active")
+
+            # Verify the co_signatures table has exactly 2 rows
+            # (issuer + alice), not 3 (no duplicate alice).
+            sigs = dl.get_co_signatures(d1["seq"])
+            self.assertEqual(len(sigs), 2, "No duplicate rows in co_signatures")
+            signer_ids = {s["signer_id"] for s in sigs}
+            self.assertEqual(signer_ids, {"_issuer", "alice"})
+            dl.close()
+
+    def test_get_co_signatures(self):
+        """get_co_signatures() returns all co-signatures for a decree,
+        including the implicit '_issuer' signature auto-recorded at
+        issue() time. Each entry has signer_id + timestamp keys."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Slack", category="prohibition",
+                          required_signatures=3)
+            dl.co_sign(d1["seq"], "alice")
+            dl.co_sign(d1["seq"], "bob")
+
+            sigs = dl.get_co_signatures(d1["seq"])
+            # 3 entries: _issuer (auto) + alice + bob.
+            self.assertEqual(len(sigs), 3)
+            signer_ids = {s["signer_id"] for s in sigs}
+            self.assertEqual(signer_ids, {"_issuer", "alice", "bob"})
+
+            # Each entry must have a non-empty timestamp (ISO 8601 UTC).
+            for s in sigs:
+                self.assertIn("signer_id", s)
+                self.assertIn("timestamp", s)
+                self.assertTrue(s["timestamp"], "timestamp must be non-empty")
+                self.assertIn("T", s["timestamp"], "ISO 8601 'T' separator present")
+                self.assertTrue(s["timestamp"].endswith("Z"), "UTC 'Z' suffix present")
+
+            # get_co_signatures for a nonexistent decree → empty list
+            # (defensive — doesn't raise).
+            self.assertEqual(dl.get_co_signatures(999), [])
+            dl.close()
+
+    def test_multisig_blocks_check_compliance(self):
+        """A multi-sig decree blocks check_compliance ONLY after its
+        required_signatures threshold is met. Before that, the decree is
+        PENDING and check_compliance() returns compliant=True with
+        laws_checked=0 for intents the decree would otherwise block."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Slack", category="prohibition",
+                          required_signatures=2)
+            # After issue(): count=1 (issuer) < 2 → PENDING, NOT enforced.
+            r = dl.check_compliance("install Slack for team chat")
+            self.assertTrue(
+                r["compliant"],
+                f"PENDING multi-sig decree must NOT block. Got: {r}",
+            )
+            self.assertEqual(
+                r["laws_checked"], 0,
+                "PENDING decree not counted as a checked law",
+            )
+
+            # Add 1 explicit co-sign → count=2 >= 2 → ACTIVE.
+            dl.co_sign(d1["seq"], "alice")
+
+            # Now the decree is active — Slack is blocked.
+            r = dl.check_compliance("install Slack for team chat")
+            self.assertFalse(
+                r["compliant"],
+                f"ACTIVE multi-sig decree must block matching intent. Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 1, "1 active law checked")
+            # The violation must point at the multi-sig decree.
+            self.assertEqual(len(r["violations"]), 1)
+            self.assertEqual(r["violations"][0]["decree_seq"], d1["seq"])
+            self.assertEqual(r["violations"][0]["matched_term"], "slack")
+
+            # A non-matching intent is still compliant (no false positives).
+            r = dl.check_compliance("use Discord for team chat")
+            self.assertTrue(r["compliant"], "Non-matching intent must be compliant")
+            dl.close()
+
+
 if __name__ == "__main__":
     import sqlite3
     unittest.main()

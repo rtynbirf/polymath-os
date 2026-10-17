@@ -106,6 +106,20 @@ _KNOWN_PROPER_NOUNS = frozenset({
     "chrome", "firefox", "edge", "safari",
 })
 
+# v3.18.0: NSA compartmentalization (per ADR-0029 §7).
+# Classification hierarchy for decrees: 'public' < 'internal' < 'secret'.
+# An agent's clearance_level (set on AgentCard) determines which decrees it
+# is permitted to see during check_compliance(). Lower rank = lower clearance.
+# A decree with classification > caller's clearance is INVISIBLE to that caller
+# — i.e. it is filtered out before the prohibition matcher runs. This means a
+# 'secret' decree cannot block an intent from a 'public'-cleared agent — the
+# agent literally doesn't know the decree exists.
+_CLASSIFICATION_RANK: Dict[str, int] = {
+    "public": 0,
+    "internal": 1,
+    "secret": 2,
+}
+
 
 class DecreeLog:
     """Append-only hash-chained decree log — the supreme law of polymath-os.
@@ -150,8 +164,38 @@ class DecreeLog:
             decree_text TEXT NOT NULL,
             category TEXT NOT NULL DEFAULT 'directive',
             scope TEXT NOT NULL DEFAULT 'all',
-            decree_hash TEXT NOT NULL UNIQUE
+            decree_hash TEXT NOT NULL UNIQUE,
+            classification TEXT NOT NULL DEFAULT 'public',
+            required_signatures INTEGER NOT NULL DEFAULT 1
         )""")
+
+        # v3.18.0: Migration for pre-v3.18.0 databases that were created
+        # without the `classification` column. ALTER TABLE ... ADD COLUMN is
+        # idempotent-unsafe: SQLite raises OperationalError 'duplicate column
+        # name' if the column already exists (e.g. on a freshly-created table
+        # above). We catch + ignore that specific case. Existing rows get the
+        # DEFAULT 'public' classification — preserving back-compat with the
+        # 7 foundational decrees in ~/.polymath-os/decrees.db.
+        try:
+            self.db.execute(
+                "ALTER TABLE decrees ADD COLUMN classification TEXT NOT NULL DEFAULT 'public'"
+            )
+        except sqlite3.OperationalError:
+            # Column already exists — nothing to migrate.
+            pass
+
+        # v3.18.0 (N-of-M multi-sig, ADR-0029 §6): add required_signatures
+        # column to pre-multi-sig databases. Same idempotent-unsafe pattern
+        # as `classification` above — catch the duplicate-column error.
+        # Existing rows get DEFAULT 1 (single-sig → active immediately).
+        try:
+            self.db.execute(
+                "ALTER TABLE decrees ADD COLUMN required_signatures "
+                "INTEGER NOT NULL DEFAULT 1"
+            )
+        except sqlite3.OperationalError:
+            # Column already exists — nothing to migrate.
+            pass
 
         # v3.17.0: Multi-signature (SWIFT pattern, per ADR-0029 §6)
         # Co-signatures for decrees that require N-of-M authorization
@@ -162,6 +206,26 @@ class DecreeLog:
             PRIMARY KEY (decree_seq, signer_id),
             FOREIGN KEY (decree_seq) REFERENCES decrees(seq)
         )""")
+
+        # v3.18.0 (N-of-M blocking): backfill an implicit _issuer co-signature
+        # for every legacy decree that doesn't yet have one. This preserves
+        # back-compat: legacy decrees had required_signatures=1 (the migration
+        # above set the default) but no co_signatures row — under the new
+        # "count >= required_signatures" rule they'd become INACTIVE (count=0
+        # < 1). The issuer is the implicit first signer per SWIFT multi-sig
+        # semantics, so we auto-record it. INSERT OR IGNORE makes this
+        # idempotent across opens. For decrees issued via the new issue()
+        # below, the _issuer row is already inserted at issue-time so this
+        # is a no-op.
+        self.db.execute(
+            "INSERT OR IGNORE INTO co_signatures "
+            "(decree_seq, signer_id, timestamp) "
+            "SELECT seq, '_issuer', timestamp FROM decrees "
+            "WHERE NOT EXISTS ("
+            "  SELECT 1 FROM co_signatures c "
+            "  WHERE c.decree_seq = decrees.seq AND c.signer_id = '_issuer'"
+            ")"
+        )
 
     def _hash_decree(self, prev_hash: str, timestamp: str, text: str) -> str:
         body = f"{prev_hash}|{timestamp}|{text}"
@@ -181,7 +245,14 @@ class DecreeLog:
                 raise DecreeIntegrityError(f"Chain broken at seq {seq}: hash mismatch")
             prev = dhash
 
-    def issue(self, text: str, category: str = "directive", scope: str = "all") -> Dict[str, Any]:
+    def issue(
+        self,
+        text: str,
+        category: str = "directive",
+        scope: str = "all",
+        classification: str = "public",
+        required_signatures: int = 1,
+    ) -> Dict[str, Any]:
         """Issue a new decree. The human's word becomes law.
 
         Args:
@@ -191,9 +262,29 @@ class DecreeLog:
                       'directive' (specific action command)
             scope: 'all' (system-wide), 'singulyar', 'polymath-os',
                    'cell65-host', 'singulyar-llm', or specific module/adapter
+            classification: v3.18.0 — NSA compartmentalization label per ADR-0029 §7.
+                      'public' (default; visible to all agents),
+                      'internal' (visible to internal+secret cleared agents),
+                      'secret' (visible only to secret-cleared agents).
+                      Stored on the decree row; checked by check_compliance()
+                      against the caller's `clearance` argument.
+            required_signatures: v3.18.0 — N-of-M threshold (default 1 =
+                      single-sig). The decree is PENDING (not enforced by
+                      get_active_laws / check_compliance) until at least
+                      `required_signatures` co-signatures exist in the
+                      co_signatures table. The issuer is auto-recorded as
+                      signer '_issuer' — so required_signatures=1 → active
+                      immediately upon issue; required_signatures=N (N>1) →
+                      requires N-1 additional explicit co_sign() calls.
+                      Must be an int >= 1 (raises ValueError otherwise).
 
         Returns: The decree record as a dict.
         """
+        if not isinstance(required_signatures, int) or required_signatures < 1:
+            raise ValueError(
+                f"required_signatures must be an int >= 1, got {required_signatures!r}"
+            )
+
         timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         prev_row = self.db.execute(
             "SELECT decree_hash FROM decrees ORDER BY seq DESC LIMIT 1"
@@ -204,59 +295,113 @@ class DecreeLog:
         self.db.execute("BEGIN IMMEDIATE")
         try:
             self.db.execute(
-                "INSERT INTO decrees (prev_hash, timestamp, decree_text, category, scope, decree_hash) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (prev_hash, timestamp, text, category, scope, decree_hash)
+                "INSERT INTO decrees "
+                "(prev_hash, timestamp, decree_text, category, scope, classification, "
+                " required_signatures, decree_hash) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (prev_hash, timestamp, text, category, scope, classification,
+                 required_signatures, decree_hash)
+            )
+            seq = self.db.execute(
+                "SELECT seq FROM decrees WHERE decree_hash=?", (decree_hash,)
+            ).fetchone()[0]
+            # v3.18.0 (N-of-M blocking): auto-record the issuer as the
+            # implicit first co-signer. This means required_signatures=1
+            # decrees are ACTIVE immediately (count=1 >= 1) without any
+            # explicit co_sign() call, preserving back-compat with all
+            # pre-v3.18.0 callers. Multi-sig decrees (required_signatures=N,
+            # N>1) still need N-1 additional explicit co_sign() calls to
+            # reach the threshold. signer_id='_issuer' is reserved.
+            self.db.execute(
+                "INSERT OR IGNORE INTO co_signatures "
+                "(decree_seq, signer_id, timestamp) VALUES (?, ?, ?)",
+                (seq, "_issuer", timestamp)
             )
             self.db.execute("COMMIT")
         except Exception:
             self.db.execute("ROLLBACK")
             raise
 
-        seq = self.db.execute("SELECT seq FROM decrees WHERE decree_hash=?", (decree_hash,)).fetchone()[0]
         return {
             "seq": seq,
             "timestamp": timestamp,
             "decree_text": text,
             "category": category,
             "scope": scope,
+            "classification": classification,
+            "required_signatures": required_signatures,
             "decree_hash": decree_hash[:16] + "...",
             "prev_hash": prev_hash[:16] + "...",
         }
 
     def get_all(self) -> List[Dict[str, Any]]:
-        """Return all decrees in order."""
+        """Return all decrees in order (v3.18.0: includes classification +
+        required_signatures)."""
         rows = self.db.execute(
-            "SELECT seq, timestamp, decree_text, category, scope, decree_hash FROM decrees ORDER BY seq"
+            "SELECT seq, timestamp, decree_text, category, scope, classification, "
+            "required_signatures, decree_hash FROM decrees ORDER BY seq"
         ).fetchall()
         return [
             {"seq": r[0], "timestamp": r[1], "decree_text": r[2],
-             "category": r[3], "scope": r[4], "decree_hash": r[5][:16] + "..."}
+             "category": r[3], "scope": r[4], "classification": r[5],
+             "required_signatures": r[6], "decree_hash": r[7][:16] + "..."}
             for r in rows
         ]
 
     def get_active_laws(self) -> List[Dict[str, Any]]:
-        """Return all 'law' and 'prohibition' decrees that are NOT superseded — the binding rules.
+        """Return all 'law' and 'prohibition' decrees that are NOT superseded
+        AND have reached their required_signatures threshold — the binding rules.
 
         Per ADR-0028 (v3.14.0): decrees with category='supersession' and
         scope='supersession:N' mark decree #N as superseded. Such decrees
         are excluded from the active_laws list (the supersession decree
         itself is also excluded — it's a meta-decree, not a law to enforce).
+
+        Per ADR-0029 §6 (v3.18.0 N-of-M blocking): decrees whose
+        co-signature count is below their required_signatures threshold
+        are PENDING — excluded from active_laws (and therefore NOT enforced
+        by check_compliance). The issuer is auto-recorded as signer '_issuer'
+        at issue() time, so required_signatures=1 decrees are active as soon
+        as they're issued (no explicit co_sign() call needed).
         """
         # Build the set of superseded seqs by scanning for supersession decrees.
         # A supersession decree has category='supersession' and scope='supersession:N'
         # where N is the seq of the target decree.
         superseded_set = self._build_superseded_set()
 
+        # Single LEFT JOIN + GROUP BY query — avoids N+1 query pattern.
+        # COUNT(c.signer_id) returns 0 when no co_signatures rows exist
+        # (LEFT JOIN produces a NULL row → COUNT of non-NULL = 0).
         rows = self.db.execute(
-            "SELECT seq, timestamp, decree_text, category, scope FROM decrees "
-            "WHERE category IN ('law', 'prohibition') ORDER BY seq"
+            "SELECT d.seq, d.timestamp, d.decree_text, d.category, d.scope, "
+            "d.classification, d.required_signatures, COUNT(c.signer_id) AS sig_count "
+            "FROM decrees d "
+            "LEFT JOIN co_signatures c ON c.decree_seq = d.seq "
+            "WHERE d.category IN ('law', 'prohibition') "
+            "GROUP BY d.seq "
+            "ORDER BY d.seq"
         ).fetchall()
-        return [
-            {"seq": r[0], "timestamp": r[1], "text": r[2], "category": r[3], "scope": r[4]}
-            for r in rows
-            if r[0] not in superseded_set  # v3.14.0: skip superseded decrees
-        ]
+        active = []
+        for r in rows:
+            (seq, ts, text, cat, scope, classification,
+             required, count) = r
+            if seq in superseded_set:
+                continue  # v3.14.0: skip superseded decrees
+            # v3.18.0 (N-of-M blocking): exclude decrees below their
+            # required_signatures threshold. PENDING decrees are not enforced.
+            if count < required:
+                continue
+            active.append({
+                "seq": seq,
+                "timestamp": ts,
+                "text": text,
+                "category": cat,
+                "scope": scope,
+                "classification": classification,
+                "required_signatures": required,
+                "signatures_collected": count,
+            })
+        return active
 
     def _build_superseded_set(self) -> set:
         """Build the set of seqs of decrees that have been superseded.
@@ -321,53 +466,108 @@ class DecreeLog:
             scope=f"supersession:{target_seq}",
         )
 
+    def is_decree_active(self, decree_seq: int) -> bool:
+        """Return True if the decree has reached its required_signatures threshold.
+
+        Per ADR-0029 §6 (v3.18.0 N-of-M): a decree is ACTIVE iff its
+        co-signature count is >= its required_signatures. PENDING decrees
+        (count < required_signatures) are NOT enforced by check_compliance()
+        and are excluded from get_active_laws().
+
+        The issuer's signature is auto-recorded at issue() time
+        (signer_id='_issuer'), so a required_signatures=1 decree is ACTIVE
+        immediately upon issue. A required_signatures=N (N>1) decree needs
+        N-1 additional explicit co_sign() calls to become ACTIVE.
+
+        Args:
+            decree_seq: seq of the decree to check.
+
+        Returns:
+            True if the decree exists AND has enough co-signatures.
+            False if the decree doesn't exist OR is still PENDING (below
+            its required_signatures threshold).
+        """
+        row = self.db.execute(
+            "SELECT required_signatures FROM decrees WHERE seq = ?",
+            (decree_seq,)
+        ).fetchone()
+        if row is None:
+            return False  # decree doesn't exist — not active
+        required = row[0]
+        count = self.db.execute(
+            "SELECT COUNT(*) FROM co_signatures WHERE decree_seq = ?",
+            (decree_seq,)
+        ).fetchone()[0]
+        return count >= required
+
     def co_sign(self, decree_seq: int, signer_id: str) -> Dict[str, Any]:
         """Add a co-signature to a decree (SWIFT multi-sig pattern, per ADR-0029 §6).
 
         Decrees with required_signatures > 1 are PENDING until enough
-        co-signatures are collected. Once the threshold is met,
-        the decree becomes ACTIVE.
+        co-signatures are collected. Once the threshold is met
+        (count >= required_signatures), the decree becomes ACTIVE and
+        get_active_laws() / check_compliance() enforce it.
+
+        The issuer is auto-recorded as signer '_issuer' at issue() time,
+        so a decree with required_signatures=N needs N-1 additional explicit
+        co_sign() calls to become active.
+
+        Co-signing is idempotent: the (decree_seq, signer_id) pair is the
+        PRIMARY KEY of the co_signatures table, so calling co_sign() twice
+        with the same signer_id is a no-op (the second insert is silently
+        ignored, and the returned signatures_collected count is unchanged).
 
         Args:
             decree_seq: seq of the decree to co-sign
-            signer_id: identifier of the co-signer
+            signer_id: identifier of the co-signer. '_issuer' is reserved
+                       for the implicit issuer signature auto-recorded at
+                       issue() time; external callers should use a different
+                       id (e.g. 'alice', 'agent-cell65', etc.).
 
-        Returns: {decree_seq, signer_id, signatures_collected, required, is_active}
+        Returns:
+            {decree_seq, signer_id, signatures_collected, required,
+             is_active, timestamp} where `required` is the decree's actual
+            required_signatures (read from the decrees row) and `is_active`
+            is True iff signatures_collected >= required.
+
+        Raises:
+            ValueError: if decree_seq doesn't exist.
         """
-        # Check decree exists
+        # Check decree exists and fetch its required_signatures threshold
         row = self.db.execute(
-            'SELECT decree_text, category, scope FROM decrees WHERE seq = ?', (decree_seq,)
+            'SELECT decree_text, category, scope, required_signatures '
+            'FROM decrees WHERE seq = ?', (decree_seq,)
         ).fetchone()
         if row is None:
             raise ValueError(f'Cannot co-sign: no decree with seq={decree_seq}')
 
-        # Record the co-signature (ignore if already signed)
+        required = row[3]
+
+        # Record the co-signature (idempotent — PRIMARY KEY on
+        # (decree_seq, signer_id) means duplicate inserts are ignored).
         ts = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         try:
             self.db.execute(
-                'INSERT INTO co_signatures (decree_seq, signer_id, timestamp) VALUES (?, ?, ?)',
+                'INSERT INTO co_signatures (decree_seq, signer_id, timestamp) '
+                'VALUES (?, ?, ?)',
                 (decree_seq, signer_id, ts)
             )
         except Exception:
-            pass  # already signed — idempotent
+            pass  # already signed by this signer_id — idempotent
 
-        # Count signatures
+        # Count signatures (real threshold check, replacing v3.17.0's
+        # hardcoded required=1 / is_active=True audit-only behavior).
         count = self.db.execute(
-            'SELECT COUNT(*) FROM co_signatures WHERE decree_seq = ?', (decree_seq,)
+            'SELECT COUNT(*) FROM co_signatures WHERE decree_seq = ?',
+            (decree_seq,)
         ).fetchone()[0]
-
-        # For v3.17.0, all decrees have required_signatures=1 (single-sig by default).
-        # Multi-sig decrees would be issued with a custom required count
-        # stored in the decree_text as metadata. For now, co_sign is
-        # an audit mechanism — it records WHO signed, but doesn't block.
-        # Full multi-sig enforcement (blocking until threshold met) is v3.18.0.
 
         return {
             'decree_seq': decree_seq,
             'signer_id': signer_id,
             'signatures_collected': count,
-            'required': 1,  # v3.17.0: single-sig by default; v3.18.0 will support N-of-M
-            'is_active': True,  # active with 1 signature (default)
+            'required': required,
+            'is_active': count >= required,
             'timestamp': ts,
         }
 
@@ -483,11 +683,26 @@ class DecreeLog:
         return [" ".join(words_lower)]
 
 
-    def check_compliance(self, intent_text: str, scope: Optional[str] = None) -> Dict[str, Any]:
+    def check_compliance(
+        self,
+        intent_text: str,
+        scope: Optional[str] = None,
+        clearance: str = "public",
+    ) -> Dict[str, Any]:
         """Check if an intent complies with all active decrees.
 
         This is the enforcement mechanism — the kernel calls this before
         executing any Intent. If a decree prohibits the action → DENIED.
+
+        v3.18.0 (NSA compartmentalization, per ADR-0029 §7):
+        - **Clearance filtering.** New optional `clearance` parameter. Each
+          decree has a `classification` ∈ {'public', 'internal', 'secret'}
+          (hierarchy: 'public' < 'internal' < 'secret'). A decree whose
+          classification EXCEEDS the caller's clearance is INVISIBLE — it is
+          filtered out before the prohibition matcher runs. So a 'secret'
+          decree cannot block an intent from a 'public'-cleared agent: the
+          agent literally doesn't know the decree exists (compartmentalization
+          invariant). Default `clearance='public'` is the most restrictive.
 
         v0.6 changes (vs v0.5):
         - **Word-boundary regex matching.** Each prohibited term is matched
@@ -522,6 +737,12 @@ class DecreeLog:
                    == "all" → always applies. Otherwise, exact string match
                    with the passed scope. Pass None to check all decrees
                    (backward compatible with v0.5).
+            clearance: v3.18.0 — caller's clearance_level per ADR-0029 §7.
+                   'public' (default; sees only 'public' decrees),
+                   'internal' (sees 'public' + 'internal' decrees),
+                   'secret' (sees all decrees). Decrees whose classification
+                   exceeds clearance are filtered out before the prohibition
+                   matcher runs — they cannot cause a DENIED result.
 
         Returns: {compliant: bool, violations: [...], laws_checked: int}
         """
@@ -535,6 +756,20 @@ class DecreeLog:
         # Agent Cards (per ADR-0023: 'all' = all decrees apply).
         if scope is not None and scope != "all":
             laws = [law for law in laws if law["scope"] == "all" or law["scope"] == scope]
+
+        # v3.18.0: NSA compartmentalization — filter out decrees whose
+        # classification EXCEEDS the caller's clearance. The caller must not
+        # even know such decrees exist (so they can't cause DENIED results and
+        # they don't show up in `laws_checked`). Rank: 'public'=0 < 'internal'=1
+        # < 'secret'=2. Unknown classifications are treated as 'public' (rank 0)
+        # on both sides — fail-open on the classification axis, fail-closed on
+        # the decree axis (default-deny still applies for visible decrees).
+        clearance_rank = _CLASSIFICATION_RANK.get(clearance, 0)
+        laws = [
+            law for law in laws
+            if _CLASSIFICATION_RANK.get(law.get("classification", "public"), 0) <= clearance_rank
+        ]
+
         violations = []
         for law in laws:
             terms = self._extract_prohibited_terms(law["text"])

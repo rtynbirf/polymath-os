@@ -158,6 +158,16 @@ class AgentMeshRequestHandler(BaseHTTPRequestHandler):
             self._send_jsonrpc_error(agent_id, request_id, -32600, "Invalid Request: missing 'method'")
             return
 
+        # v3.16.0 (ADR-0029): federation — read-only decree log JSON-RPC methods.
+        # These methods do NOT require agent registration — they bypass the
+        # mesh.send() path entirely and operate directly on the decree_log
+        # so remote instances can fetch laws for cross-instance federation.
+        if method in ("decree.get_active_laws",
+                      "decree.get_all",
+                      "decree.check_compliance"):
+            self._handle_decree_rpc(agent_id, method, params, request_id)
+            return
+
         # Build IntentRequest
         intent_request = IntentRequest(
             jsonrpc=request_data.get("jsonrpc", "2.0"),
@@ -217,6 +227,76 @@ class AgentMeshRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_jsonrpc_result(self, request_id: Any, result: Any) -> None:
+        """Send a JSON-RPC 2.0 success response with a result payload."""
+        body = json.dumps({
+            "jsonrpc": "2.0",
+            "result": result,
+            "id": request_id,
+        }, ensure_ascii=False).encode("utf-8")
+        self.send_response(200)
+        self._send_cors_headers()
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _handle_decree_rpc(self, agent_id: str, method: str,
+                          params: Any, request_id: Any) -> None:
+        """Dispatch read-only decree log JSON-RPC methods (per ADR-0029).
+
+        These methods are exposed for cross-instance federation — remote
+        AgentMeshServers can fetch this instance's active laws, full decree
+        log, or run a compliance check. They do NOT require agent registration
+        because they bypass ``mesh.send()`` (no execute_fn is involved).
+
+        Dispatch table:
+          - ``decree.get_active_laws`` → ``decree_log.get_active_laws()``
+          - ``decree.get_all``         → ``decree_log.get_all()``
+          - ``decree.check_compliance``→ ``decree_log.check_compliance(params['text'])``
+        """
+        if self.mesh is None or self.mesh.decree_log is None:
+            self._send_jsonrpc_error(
+                agent_id, request_id, -32603,
+                "DECREE_LOG_NOT_CONFIGURED: no decree_log attached to this mesh",
+            )
+            return
+
+        decree_log = self.mesh.decree_log
+        params_dict = params if isinstance(params, dict) else {}
+
+        try:
+            if method == "decree.get_active_laws":
+                result: Any = decree_log.get_active_laws()
+            elif method == "decree.get_all":
+                result = decree_log.get_all()
+            elif method == "decree.check_compliance":
+                text = params_dict.get("text")
+                if not isinstance(text, str) or not text:
+                    self._send_jsonrpc_error(
+                        agent_id, request_id, -32602,
+                        "Invalid params: 'text' (non-empty string) required "
+                        "for decree.check_compliance",
+                    )
+                    return
+                result = decree_log.check_compliance(text)
+            else:
+                # Defensive — the caller already filtered the method, but
+                # in case this is invoked directly with an unknown method.
+                self._send_jsonrpc_error(
+                    agent_id, request_id, -32601,
+                    f"Method not found: {method}",
+                )
+                return
+        except Exception as e:
+            self._send_jsonrpc_error(
+                agent_id, request_id, -32603,
+                f"DECREE_LOG_ERROR: {type(e).__name__}: {e}",
+            )
+            return
+
+        self._send_jsonrpc_result(request_id, result)
 
 
 class AgentMeshServer:
