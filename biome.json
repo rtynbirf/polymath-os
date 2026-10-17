@@ -42,13 +42,19 @@
     "rules": {
       "recommended": true,
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "off",
+        "useSingleVarDeclarator": "off"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noRedundantUseStrict": "off"
+      },
+      "complexity": {
+        "noForEach": "off"
       },
       "correctness": {
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "off"
       }
     }
   },

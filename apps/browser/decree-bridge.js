@@ -13,12 +13,12 @@
 //   node decree-bridge.js list
 //   node decree-bridge.js check "intent text"
 
-const { spawn } = require('child_process');
-const path = require('path');
-const os = require('os');
+const { spawn } = require("node:child_process");
+const path = require("node:path");
+const os = require("node:os");
 
-const RUNTIME_SRC = path.join(__dirname, '..', '..', 'runtime', 'src');
-const DB_PATH = path.join(os.homedir(), '.polymath-os', 'decrees.db');
+const RUNTIME_SRC = path.join(__dirname, "..", "..", "runtime", "src");
+const DB_PATH = path.join(os.homedir(), ".polymath-os", "decrees.db");
 
 class DecreeBridge {
   constructor(opts = {}) {
@@ -29,24 +29,31 @@ class DecreeBridge {
 
   _runPython(script) {
     return new Promise((resolve, reject) => {
-      const py = spawn('python3', ['-c', script], {
+      const py = spawn("python3", ["-c", script], {
         env: { ...process.env, PYTHONPATH: this.runtimeSrc },
       });
-      let out = '';
-      let err = '';
-      py.stdout.on('data', d => { out += d; });
-      py.stderr.on('data', d => { err += d; });
-      py.on('close', code => {
+      let out = "";
+      let err = "";
+      py.stdout.on("data", (d) => {
+        out += d;
+      });
+      py.stderr.on("data", (d) => {
+        err += d;
+      });
+      py.on("close", (code) => {
         if (code !== 0) {
           return reject(new Error(`python exit ${code}: ${err.slice(0, 400)}`));
         }
-        try { resolve(JSON.parse(out.trim())); }
-        catch (e) { reject(new Error(`parse: ${e.message}, got: ${out.slice(0, 200)}`)); }
+        try {
+          resolve(JSON.parse(out.trim()));
+        } catch (e) {
+          reject(new Error(`parse: ${e.message}, got: ${out.slice(0, 200)}`));
+        }
       });
     });
   }
 
-  async issueDecree(text, category = 'directive', scope = 'all') {
+  async issueDecree(text, category = "directive", scope = "all") {
     const script = `
 import sys, json, os
 sys.path.insert(0, ${JSON.stringify(this.runtimeSrc)})
@@ -95,38 +102,61 @@ else:
 if (require.main === module) {
   const bridge = new DecreeBridge();
   const cmd = process.argv[2];
-  if (cmd === 'issue') {
+  if (cmd === "issue") {
     const text = process.argv[3];
-    const cat = process.argv[4] || 'directive';
+    const cat = process.argv[4] || "directive";
     if (!text) {
       console.error('Usage: node decree-bridge.js issue "text" [category]');
       process.exit(1);
     }
-    bridge.issueDecree(text, cat)
-      .then(r => { console.log(JSON.stringify(r, null, 2)); process.exit(0); })
-      .catch(e => { console.error(e.message); process.exit(1); });
-  } else if (cmd === 'list') {
-    bridge.getDecrees()
-      .then(r => { console.log(JSON.stringify(r, null, 2)); process.exit(0); })
-      .catch(e => { console.error(e.message); process.exit(1); });
-  } else if (cmd === 'check') {
+    bridge
+      .issueDecree(text, cat)
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 2));
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(1);
+      });
+  } else if (cmd === "list") {
+    bridge
+      .getDecrees()
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 2));
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(1);
+      });
+  } else if (cmd === "check") {
     const text = process.argv[3];
     if (!text) {
       console.error('Usage: node decree-bridge.js check "intent text"');
       process.exit(1);
     }
-    bridge.checkCompliance(text)
-      .then(r => { console.log(JSON.stringify(r, null, 2)); process.exit(0); })
-      .catch(e => { console.error(e.message); process.exit(1); });
+    bridge
+      .checkCompliance(text)
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 2));
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(1);
+      });
   } else {
-    console.log('Polymath-OS Decree Bridge — Node <-> Python DecreeLog');
-    console.log('');
-    console.log('Usage:');
-    console.log('  node decree-bridge.js issue "decree text" [law|prohibition|permission|directive|observation]');
-    console.log('  node decree-bridge.js list');
+    console.log("Polymath-OS Decree Bridge — Node <-> Python DecreeLog");
+    console.log("");
+    console.log("Usage:");
+    console.log(
+      '  node decree-bridge.js issue "decree text" [law|prohibition|permission|directive|observation]',
+    );
+    console.log("  node decree-bridge.js list");
     console.log('  node decree-bridge.js check "intent text to verify"');
-    console.log('');
-    console.log('DB:', DB_PATH);
+    console.log("");
+    console.log("DB:", DB_PATH);
     process.exit(0);
   }
 }

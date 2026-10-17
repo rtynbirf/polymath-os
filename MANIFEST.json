@@ -1,13 +1,37 @@
 {
   "version": "3.5.0",
   "adapters": [
-    {"id": "llm.local", "version": "v0.4", "capabilities": ["llm.command","llm.answer","llm.generate","llm.check_status"], "tests": 20},
-    {"id": "http.local", "version": "v0.1", "capabilities": ["http.get","http.post","http.put"], "tests": 12},
-    {"id": "webrtc.local", "version": "v0.1", "capabilities": ["webrtc.send","webrtc.recv"], "tests": 10}
+    {
+      "id": "llm.local",
+      "version": "v0.4",
+      "capabilities": ["llm.command", "llm.answer", "llm.generate", "llm.check_status"],
+      "tests": 20
+    },
+    {
+      "id": "http.local",
+      "version": "v0.1",
+      "capabilities": ["http.get", "http.post", "http.put"],
+      "tests": 12
+    },
+    {
+      "id": "webrtc.local",
+      "version": "v0.1",
+      "capabilities": ["webrtc.send", "webrtc.recv"],
+      "tests": 10
+    }
   ],
   "adrs": 22,
   "patterns": 9,
-  "contracts": ["sovereignty","falsifiability","default-deny","failover","audit","drill","self-rewriting","decree"],
+  "contracts": [
+    "sovereignty",
+    "falsifiability",
+    "default-deny",
+    "failover",
+    "audit",
+    "drill",
+    "self-rewriting",
+    "decree"
+  ],
   "tests": 103,
   "ci_checks": 21,
   "releases": 25,
