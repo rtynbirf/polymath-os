@@ -1,0 +1,39 @@
+{
+  "id": "singulyar-eir.local",
+  "name": "SINGULYAR EIR",
+  "description": "Execution kernel — preserves intent across executor changes; enforces human decrees before policy",
+  "version": "v0.6",
+  "capabilities": [
+    "intent.execute",
+    "intent.recover",
+    "intent.cancel",
+    "evidence.query",
+    "decree.check_compliance"
+  ],
+  "decree_scope": "all",
+  "protocol_version": "a2a/1.0 + mcp/1.0",
+  "endpoints": [
+    {
+      "type": "in-process",
+      "url": "python:runtime.src.singulyar_runtime.Runtime",
+      "metadata": {}
+    },
+    {
+      "type": "http",
+      "url": "http://localhost:7654/agent/singulyar",
+      "metadata": {}
+    }
+  ],
+  "auth": {
+    "type": "decree",
+    "description": "All requests checked against DecreeLog before execution"
+  },
+  "maintainer": "polymath-os",
+  "license": "MIT",
+  "homepage": "https://github.com/rtynbirf/polymath-os",
+  "tags": [
+    "layer-5",
+    "execution-kernel",
+    "decree-enforced"
+  ]
+}

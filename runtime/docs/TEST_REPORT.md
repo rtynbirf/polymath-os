@@ -6,6 +6,45 @@ Run: 2026-10-17 · Python 3.12.15 · Linux
 Exit code: 0
 
 ```text
+test_extra_unknown_fields_ignored (test_agent_card.AgentCardSerializationTests.test_extra_unknown_fields_ignored)
+Forward-compatible — unknown fields don't fail validation. ... ok
+test_from_file (test_agent_card.AgentCardSerializationTests.test_from_file) ... ok
+test_invalid_json_rejected (test_agent_card.AgentCardSerializationTests.test_invalid_json_rejected) ... ok
+test_missing_required_field_in_dict (test_agent_card.AgentCardSerializationTests.test_missing_required_field_in_dict) ... ok
+test_to_json_and_back (test_agent_card.AgentCardSerializationTests.test_to_json_and_back) ... ok
+test_decree_scope_custom (test_agent_card.AgentCardValidationTests.test_decree_scope_custom) ... ok
+test_decree_scope_default_all (test_agent_card.AgentCardValidationTests.test_decree_scope_default_all) ... ok
+test_empty_decree_scope_rejected (test_agent_card.AgentCardValidationTests.test_empty_decree_scope_rejected) ... ok
+test_invalid_endpoint_type_rejected (test_agent_card.AgentCardValidationTests.test_invalid_endpoint_type_rejected) ... ok
+test_invalid_id_rejected (test_agent_card.AgentCardValidationTests.test_invalid_id_rejected) ... ok
+test_missing_required_field_rejected (test_agent_card.AgentCardValidationTests.test_missing_required_field_rejected) ... ok
+test_valid_card_construction (test_agent_card.AgentCardValidationTests.test_valid_card_construction) ... ok
+test_all_default_cards_distinct_ids (test_agent_card.DefaultAgentCardsTests.test_all_default_cards_distinct_ids) ... ok
+test_all_default_cards_serializable (test_agent_card.DefaultAgentCardsTests.test_all_default_cards_serializable) ... ok
+test_cell65_llm_card_valid (test_agent_card.DefaultAgentCardsTests.test_cell65_llm_card_valid) ... ok
+test_polymath_os_browser_card_valid (test_agent_card.DefaultAgentCardsTests.test_polymath_os_browser_card_valid) ... ok
+test_singulyar_eir_card_valid (test_agent_card.DefaultAgentCardsTests.test_singulyar_eir_card_valid) ... ok
+test_agent_exception_returns_error_response (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_agent_exception_returns_error_response) ... ok
+test_caller_can_override_decree_scope (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_caller_can_override_decree_scope)
+Caller can pass decree_scope in params to override agent's default. ... ok
+test_cloudflare_blocked (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_cloudflare_blocked) ... ok
+test_compliant_intent_passes_through (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_compliant_intent_passes_through) ... ok
+test_decree_block_events_recorded (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_decree_block_events_recorded) ... ok
+test_decree_blocks_intent_before_execution (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_decree_blocks_intent_before_execution)
+Core test — DECREE_BLOCK fires BEFORE execute_fn is called. ... ok
+test_intent_executed_event_recorded_on_success (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_intent_executed_event_recorded_on_success) ... ok
+test_scope_filter_only_matching_decrees (test_agent_mesh.AgentMeshDecreeEnforcementTests.test_scope_filter_only_matching_decrees)
+decree_scope filters which decrees apply. ... ok
+test_agent_a_blocked_when_calling_agent_b_with_prohibited_intent (test_agent_mesh.AgentMeshMultiAgentTests.test_agent_a_blocked_when_calling_agent_b_with_prohibited_intent)
+Agent A tries to use Agent B to send data to Google — blocked by decree. ... ok
+test_agent_a_calls_agent_b_via_mesh (test_agent_mesh.AgentMeshMultiAgentTests.test_agent_a_calls_agent_b_via_mesh)
+Agent A composes an Intent that targets Agent B. ... ok
+test_discover_by_capability (test_agent_mesh.AgentMeshRegistrationTests.test_discover_by_capability) ... ok
+test_duplicate_register_rejected (test_agent_mesh.AgentMeshRegistrationTests.test_duplicate_register_rejected) ... ok
+test_register_and_list (test_agent_mesh.AgentMeshRegistrationTests.test_register_and_list) ... ok
+test_unregister (test_agent_mesh.AgentMeshRegistrationTests.test_unregister) ... ok
+test_send_no_decree_log_no_decree_check (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_no_decree_log_no_decree_check) ... ok
+test_send_unknown_agent_returns_error (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_unknown_agent_returns_error) ... ok
 test_append_only_cannot_amend (test_decree_log.DecreeLogTests.test_append_only_cannot_amend)
 Decrees are immutable. Can't UPDATE text directly. ... ok
 test_check_compliance_no_decrees_allows_all (test_decree_log.DecreeLogTests.test_check_compliance_no_decrees_allows_all)
@@ -184,7 +223,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 123 tests in 6.439s
+Ran 156 tests in 5.776s
 
 OK (skipped=4)
 ```
