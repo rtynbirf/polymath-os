@@ -8,7 +8,7 @@ Verifies:
 - Decrees survive restart (SQLite WAL durability)
 """
 
-import os, sys, sqlite3, tempfile, unittest
+import os, sys, sqlite3, tempfile, time, unittest
 from pathlib import Path
 
 _HERE = Path(__file__).resolve()
@@ -287,15 +287,19 @@ class DecreeLogV06Tests(unittest.TestCase):
             dl.close()
 
     def test_v06_scope_filter_only_matching_decrees(self):
-        """v0.6 NEW: scope parameter filters decrees.
-        Decree with scope='singulyar' is only checked when scope='singulyar'
-        is passed to check_compliance."""
+        """v0.6 scope parameter filters decrees.
+
+        v3.19.0 NOTE: scope filtering now follows a true hierarchy
+        (see _SCOPE_HIERARCHY). A decree scoped to 'singulyar' (rank 1)
+        is now ALSO enforced when checking at scope='polymath-os' (rank 2)
+        — the more specific scope inherits the more general (parent)
+        decrees. This replaces v0.6's flat 'exact match OR all' rule.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             dl = DecreeLog(Path(tmp) / "decrees.db")
-            # Decree scoped to 'singulyar' — only enforced when checking
-            # intents with scope='singulyar'
+            # Decree scoped to 'singulyar' (rank 1)
             dl.issue("never use Google DNS", category="prohibition", scope="singulyar")
-            # Decree scoped to 'all' — always enforced
+            # Decree scoped to 'all' (rank 0)
             dl.issue("never use Cloudflare", category="prohibition", scope="all")
 
             # Without scope filter — all decrees apply (backward compat)
@@ -303,39 +307,50 @@ class DecreeLogV06Tests(unittest.TestCase):
             self.assertFalse(r["compliant"], "without scope, all decrees apply")
             self.assertEqual(r["laws_checked"], 2)
 
-            # With scope='singulyar' — Google DNS decree applies
+            # With scope='singulyar' (rank 1) — sees rank 0 (all) + rank 1
+            # (singulyar). Both Google DNS and Cloudflare apply.
             r = dl.check_compliance("configure DNS with Google 8.8.8.8", scope="singulyar")
             self.assertFalse(r["compliant"], "Google DNS decree scope=singulyar applies")
             self.assertEqual(r["laws_checked"], 2)  # all + singulyar
 
-            # With scope='polymath-os' — Google DNS decree does NOT apply
-            # (only Cloudflare, scope='all')
+            # With scope='polymath-os' (rank 2) — v3.19.0 hierarchy: also
+            # inherits decrees from singulyar (rank 1) and all (rank 0).
+            # So the Google DNS decree (scope='singulyar', rank 1) ALSO
+            # applies at scope='polymath-os' (rank 2).
             r = dl.check_compliance("configure DNS with Google 8.8.8.8", scope="polymath-os")
-            self.assertTrue(r["compliant"],
-                "Google DNS decree scope=singulyar does NOT apply to scope=polymath-os")
-            self.assertEqual(r["laws_checked"], 1, "only 'all'-scoped decree applies")
+            self.assertFalse(r["compliant"],
+                "v3.19.0 hierarchy: Google DNS decree (scope=singulyar, rank 1) "
+                "applies at scope=polymath-os (rank 2) via inheritance")
+            self.assertEqual(r["laws_checked"], 2,
+                "rank 2 caller sees rank 0 + rank 1 decrees (both apply)")
 
-            # Cloudflare still blocks under any scope (it's scope='all')
+            # Cloudflare (rank 0) still blocks under any scope — it's universal.
             r = dl.check_compliance("use Cloudflare for CDN", scope="polymath-os")
             self.assertFalse(r["compliant"], "Cloudflare scope=all always applies")
             dl.close()
 
     def test_v06_scope_filter_with_runtime(self):
-        """v0.6: realistic Runtime use case.
-        scope='all' decrees apply to every Intent.
-        scope='singulyar' decrees only apply to singulyar Intents."""
+        """v0.6 realistic Runtime use case.
+
+        v3.19.0 NOTE: scope='all' decrees apply to every Intent. Under the
+        new scope hierarchy, scope='singulyar' decrees ALSO apply to more
+        specific scopes (polymath-os, cell65-host) via inheritance — but
+        NOT to less specific scopes (the parent doesn't see the child).
+        """
         with tempfile.TemporaryDirectory() as tmp:
             dl = DecreeLog(Path(tmp) / "decrees.db")
             dl.issue("never use Cloudflare", category="prohibition", scope="all")
             dl.issue("never use WebRTC", category="prohibition", scope="singulyar")
 
-            # Simulate singulyar Intent
+            # Simulate singulyar Intent (rank 1) — sees rank 0 + rank 1.
             r = dl.check_compliance("use WebRTC for video", scope="singulyar")
             self.assertFalse(r["compliant"], "WebRTC decree applies to singulyar scope")
-            # Simulate non-singulyar Intent
+            # Simulate polymath-os Intent (rank 2) — v3.19.0 hierarchy:
+            # also inherits singulyar (rank 1) decrees via inheritance.
             r = dl.check_compliance("use WebRTC for video", scope="polymath-os")
-            self.assertTrue(r["compliant"],
-                "WebRTC decree scope=singulyar does NOT apply to polymath-os scope")
+            self.assertFalse(r["compliant"],
+                "v3.19.0 hierarchy: WebRTC decree (scope=singulyar) also applies "
+                "at scope=polymath-os via inheritance (rank 2 >= rank 1)")
             dl.close()
 
     def test_v06_regex_parser_handles_never_abuse(self):
@@ -875,6 +890,210 @@ class DecreeLogMultiSigTests(unittest.TestCase):
             # A non-matching intent is still compliant (no false positives).
             r = dl.check_compliance("use Discord for team chat")
             self.assertTrue(r["compliant"], "Non-matching intent must be compliant")
+            dl.close()
+
+
+class DecreeLogExpiryAndScopeHierarchyTests(unittest.TestCase):
+    """v3.19.0 — Decree expiry (time-limited decrees) + scope hierarchy.
+
+    Two features in this release:
+
+    1. **Decree expiry (expires_at).** issue() accepts an optional
+       `expires_at` parameter (ISO 8601 UTC datetime string). If set,
+       get_active_laws() (and therefore check_compliance()) automatically
+       excludes the decree once the current UTC time exceeds expires_at.
+       NULL = no expiry (permanent — backward compatible with all
+       pre-v3.19.0 decrees, including the 7 foundational decrees in
+       ~/.polymath-os/decrees.db). The decree remains in the append-only
+       log (immutable, hash-chained); it simply stops being enforced.
+
+    2. **Scope hierarchy (nested scopes).** A scope with a HIGHER rank
+       inherits all decrees from scopes with LOWER rank (per
+       _SCOPE_HIERARCHY = {'all': 0, 'singulyar': 1, 'polymath-os': 2,
+       'cell65-host': 3, 'outbound': 1}). So a decree scoped to
+       'singulyar' (rank 1) also applies when checking compliance at
+       scope='polymath-os' (rank 2) — the more specific scope sees the
+       more general (parent) decrees. Conversely, scope='singulyar'
+       (rank 1) does NOT see scope='polymath-os' (rank 2) decrees —
+       parent doesn't see child.
+    """
+
+    # ---- Decree expiry tests (expires_at) ----
+
+    def test_expired_decree_not_in_active_laws(self):
+        """A decree with expires_at in the past is excluded from
+        get_active_laws() and therefore not enforced by
+        check_compliance(). The decree remains in get_all() (the
+        append-only audit view) — it's just no longer binding.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            dl.issue(
+                "never use Cloudflare",
+                category="prohibition",
+                expires_at="1999-01-01T00:00:00Z",  # past → already expired
+            )
+
+            # get_active_laws() excludes the expired decree.
+            active = dl.get_active_laws()
+            self.assertEqual(
+                len(active), 0,
+                f"Expired decree must NOT be in get_active_laws(). Got: {active}",
+            )
+
+            # check_compliance() consumes get_active_laws() — so it sees
+            # zero laws and the intent is compliant.
+            r = dl.check_compliance("use Cloudflare for CDN")
+            self.assertTrue(
+                r["compliant"],
+                f"Expired decree must NOT block check_compliance(). Got: {r}",
+            )
+            self.assertEqual(
+                r["laws_checked"], 0,
+                "Expired decree counts as 0 laws checked",
+            )
+
+            # But the decree is STILL in get_all() — append-only invariant.
+            # It's not deleted, just not enforced. (Audit view shows expiry.)
+            all_decrees = dl.get_all()
+            self.assertEqual(len(all_decrees), 1, "Decree still in append-only log")
+            self.assertEqual(all_decrees[0]["expires_at"], "1999-01-01T00:00:00Z")
+            dl.close()
+
+    def test_non_expired_decree_still_active(self):
+        """A decree with expires_at in the future remains active and
+        enforced. The expires_at field is surfaced in the active_laws
+        record so callers can see when the decree will lapse.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            dl.issue(
+                "never use Cloudflare",
+                category="prohibition",
+                expires_at="2999-01-01T00:00:00Z",  # far future → not expired
+            )
+
+            active = dl.get_active_laws()
+            self.assertEqual(len(active), 1, "Future-expiry decree is still active")
+            self.assertEqual(active[0]["expires_at"], "2999-01-01T00:00:00Z")
+
+            r = dl.check_compliance("use Cloudflare for CDN")
+            self.assertFalse(
+                r["compliant"],
+                f"Non-expired decree MUST still block check_compliance(). Got: {r}",
+            )
+            self.assertEqual(r["laws_checked"], 1)
+            dl.close()
+
+    def test_expiry_after_time_passes(self):
+        """A decree whose expires_at is computed dynamically as 1 second
+        before 'now' is correctly excluded. This proves the time-based
+        comparison fires whenever expires_at < now (strict >).
+
+        We compute expires_at from time.time()-1 (UTC epoch) so the test
+        is robust against clock skew between when the test computes the
+        stamp and when get_active_laws() reads the clock — the gap is at
+        most a few ms, well within the 1-second floor.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            # expires_at = 'now - 1 second' in the same ISO 8601 UTC format
+            # used internally by issue() / get_active_laws().
+            past_epoch = time.time() - 1
+            past_iso = time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ", time.gmtime(past_epoch)
+            )
+            dl.issue(
+                "never use Cloudflare",
+                category="prohibition",
+                expires_at=past_iso,
+            )
+
+            active = dl.get_active_laws()
+            self.assertEqual(
+                len(active), 0,
+                f"Decree with expires_at 1s in the past ({past_iso}) must be "
+                f"excluded from active_laws. Got: {active}",
+            )
+            r = dl.check_compliance("use Cloudflare for CDN")
+            self.assertTrue(
+                r["compliant"],
+                f"Decree with expires_at in the past must not block. Got: {r}",
+            )
+            dl.close()
+
+    # ---- Scope hierarchy tests (nested scopes) ----
+
+    def test_scope_hierarchy_child_sees_parent_decrees(self):
+        """v3.19.0 scope hierarchy: when checking compliance at
+        scope='polymath-os' (rank 2), decrees scoped to 'singulyar'
+        (rank 1) ALSO apply — polymath-os inherits singulyar's decrees.
+
+        The more specific scope (child, rank 2) sees the more general
+        (parent, rank 1) decree.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            # Decree scoped to 'singulyar' (rank 1) — a parent of polymath-os.
+            dl.issue(
+                "never use WebRTC",
+                category="prohibition",
+                scope="singulyar",
+            )
+
+            # Check at scope='polymath-os' (rank 2) — the WebRTC decree
+            # (rank 1) applies via inheritance (1 <= 2).
+            r = dl.check_compliance("use WebRTC for video", scope="polymath-os")
+            self.assertFalse(
+                r["compliant"],
+                f"v3.19.0 hierarchy: scope=polymath-os (rank 2) MUST see "
+                f"scope=singulyar (rank 1) decrees. Got: {r}",
+            )
+            self.assertEqual(
+                r["laws_checked"], 1,
+                "WebRTC decree (rank 1) inherited by polymath-os (rank 2)",
+            )
+            dl.close()
+
+    def test_scope_hierarchy_parent_doesnt_see_child_decrees(self):
+        """v3.19.0 scope hierarchy: when checking compliance at
+        scope='singulyar' (rank 1), decrees scoped to 'polymath-os'
+        (rank 2) do NOT apply — the parent scope doesn't see child-scoped
+        decrees.
+
+        This is the inverse of test_scope_hierarchy_child_sees_parent_decrees
+        and confirms the hierarchy is one-directional (child inherits from
+        parent, NOT vice versa).
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            # Decree scoped to 'polymath-os' (rank 2) — a child of singulyar.
+            dl.issue(
+                "never use WebRTC",
+                category="prohibition",
+                scope="polymath-os",
+            )
+
+            # Check at scope='singulyar' (rank 1) — the polymath-os decree
+            # (rank 2) does NOT apply (2 > 1 → not inherited).
+            r = dl.check_compliance("use WebRTC for video", scope="singulyar")
+            self.assertTrue(
+                r["compliant"],
+                f"v3.19.0 hierarchy: scope=singulyar (rank 1) MUST NOT see "
+                f"scope=polymath-os (rank 2) decrees. Got: {r}",
+            )
+            self.assertEqual(
+                r["laws_checked"], 0,
+                "WebRTC decree (rank 2) NOT inherited by singulyar (rank 1)",
+            )
+
+            # Sanity check: the same decree DOES apply at scope='polymath-os'
+            # (its own scope, exact rank match — 2 <= 2).
+            r = dl.check_compliance("use WebRTC for video", scope="polymath-os")
+            self.assertFalse(
+                r["compliant"],
+                "Sanity: decree applies at its own scope (exact rank match)",
+            )
             dl.close()
 
 

@@ -26,6 +26,7 @@ The decree ALWAYS wins over existing ADRs — PAROLE > LANGUE.
 
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import time
@@ -120,6 +121,29 @@ _CLASSIFICATION_RANK: Dict[str, int] = {
     "secret": 2,
 }
 
+# v3.19.0: Scope hierarchy (nested scopes).
+# A scope with a HIGHER rank inherits all decrees from scopes with LOWER rank.
+# So when checking compliance at scope="polymath-os" (rank 2), decrees scoped
+# to "singulyar" (rank 1) AND "all" (rank 0) also apply — the more specific
+# scope inherits the more general (parent) decrees. Conversely, checking at
+# scope="singulyar" (rank 1) does NOT see decrees scoped to "polymath-os"
+# (rank 2) — the parent doesn't see the child.
+#
+# Pre-v3.19.0 behavior was a flat 2-level filter: scope="all" (always applies)
+# OR exact string match. v3.19.0 generalizes this into a true hierarchy so
+# that, e.g., a polymath-os-scoped intent is bound by singulyar-scoped
+# prohibitions (the whole-system scope "singulyar" governs sub-scopes).
+#
+# Unknown scopes default to rank 0 (treated as 'all' — fail-open at the scope
+# axis; the decree axis remains default-deny).
+_SCOPE_HIERARCHY: Dict[str, int] = {
+    "all": 0,
+    "singulyar": 1,
+    "polymath-os": 2,
+    "cell65-host": 3,
+    "outbound": 1,
+}
+
 
 class DecreeLog:
     """Append-only hash-chained decree log — the supreme law of polymath-os.
@@ -166,7 +190,8 @@ class DecreeLog:
             scope TEXT NOT NULL DEFAULT 'all',
             decree_hash TEXT NOT NULL UNIQUE,
             classification TEXT NOT NULL DEFAULT 'public',
-            required_signatures INTEGER NOT NULL DEFAULT 1
+            required_signatures INTEGER NOT NULL DEFAULT 1,
+            expires_at TEXT
         )""")
 
         # v3.18.0: Migration for pre-v3.18.0 databases that were created
@@ -192,6 +217,21 @@ class DecreeLog:
             self.db.execute(
                 "ALTER TABLE decrees ADD COLUMN required_signatures "
                 "INTEGER NOT NULL DEFAULT 1"
+            )
+        except sqlite3.OperationalError:
+            # Column already exists — nothing to migrate.
+            pass
+
+        # v3.19.0: Migration for the `expires_at` column (time-limited
+        # decrees). NULL = no expiry (permanent — backward compatible with
+        # all pre-v3.19.0 decrees, including the 7 foundational decrees in
+        # ~/.polymath-os/decrees.db). Same idempotent-unsafe ALTER TABLE
+        # pattern as `classification` and `required_signatures` above —
+        # catch the duplicate-column OperationalError on freshly-created
+        # tables where the column already exists.
+        try:
+            self.db.execute(
+                "ALTER TABLE decrees ADD COLUMN expires_at TEXT"
             )
         except sqlite3.OperationalError:
             # Column already exists — nothing to migrate.
@@ -252,6 +292,7 @@ class DecreeLog:
         scope: str = "all",
         classification: str = "public",
         required_signatures: int = 1,
+        expires_at: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Issue a new decree. The human's word becomes law.
 
@@ -261,7 +302,10 @@ class DecreeLog:
                       'permission' (explicitly allow X), 'observation' (record),
                       'directive' (specific action command)
             scope: 'all' (system-wide), 'singulyar', 'polymath-os',
-                   'cell65-host', 'singulyar-llm', or specific module/adapter
+                   'cell65-host', 'singulyar-llm', or specific module/adapter.
+                   Per v3.19.0 scope hierarchy, a decree scoped to a LOWER
+                   rank (e.g. 'singulyar', rank 1) also applies when checking
+                   compliance at a HIGHER rank (e.g. 'polymath-os', rank 2).
             classification: v3.18.0 — NSA compartmentalization label per ADR-0029 §7.
                       'public' (default; visible to all agents),
                       'internal' (visible to internal+secret cleared agents),
@@ -277,6 +321,17 @@ class DecreeLog:
                       immediately upon issue; required_signatures=N (N>1) →
                       requires N-1 additional explicit co_sign() calls.
                       Must be an int >= 1 (raises ValueError otherwise).
+            expires_at: v3.19.0 — Optional ISO 8601 UTC datetime string
+                      (e.g. '2999-01-01T00:00:00Z') marking when the decree
+                      EXPIRES. After expires_at, the decree is automatically
+                      excluded from get_active_laws() and therefore not
+                      enforced by check_compliance() (the decree is still
+                      in the append-only log — immutable, hash-chained —
+                      but no longer binding). Default None = no expiry
+                      (permanent — backward compatible with all
+                      pre-v3.19.0 decrees). Comparison is a strict string
+                      compare of ISO 8601 UTC values (lexicographic =
+                      chronological for the fixed-width format).
 
         Returns: The decree record as a dict.
         """
@@ -297,10 +352,10 @@ class DecreeLog:
             self.db.execute(
                 "INSERT INTO decrees "
                 "(prev_hash, timestamp, decree_text, category, scope, classification, "
-                " required_signatures, decree_hash) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                " required_signatures, expires_at, decree_hash) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (prev_hash, timestamp, text, category, scope, classification,
-                 required_signatures, decree_hash)
+                 required_signatures, expires_at, decree_hash)
             )
             seq = self.db.execute(
                 "SELECT seq FROM decrees WHERE decree_hash=?", (decree_hash,)
@@ -322,6 +377,40 @@ class DecreeLog:
             self.db.execute("ROLLBACK")
             raise
 
+        # v3.x.0 (Task 13-B / claim #25): auto-publish the external trust
+        # anchor AFTER the decree is committed (per ADR-0029 §9 IAEA pattern).
+        #
+        # The trust anchor is a JSON file containing the last decree's full
+        # SHA-256 hash. It is the 'external seal' — out-of-band relative to
+        # the SQLite db — so that if someone rebuilds the decree log from
+        # scratch (resigning every decree), the anchor won't match and
+        # `make verify` will report TAMPER DETECTED.
+        #
+        # The publish is best-effort: wrapped in try/except so a failure to
+        # write the anchor (e.g. read-only filesystem) does NOT fail the
+        # decree issue. The decree itself is already law; the anchor is the
+        # auditor's tool, not a hard correctness requirement of issue().
+        #
+        # Gating: auto-publish fires only when (a) this DecreeLog is the
+        # production database (~/.polymath-os/decrees.db) OR (b) the env var
+        # POLYMATH_OS_TRUST_ANCHOR_PATH is set (used by tests to redirect the
+        # anchor to a temp file). Temp-dir dbs used by the rest of the test
+        # suite do not pollute the user's real anchor file.
+        try:
+            _default_db = os.path.expanduser("~/.polymath-os/decrees.db")
+            _env_anchor = os.environ.get("POLYMATH_OS_TRUST_ANCHOR_PATH")
+            if _env_anchor is not None or self.path == _default_db:
+                # Lazy import — avoids a circular dependency at module load:
+                # trust_anchor.py is imported here only when a decree is
+                # actually issued, not when decree_log.py is first imported.
+                from trust_anchor import publish_trust_anchor
+                publish_trust_anchor(self)
+        except Exception:
+            # Anchor publish failed (disk full, permission denied, ...).
+            # The decree itself is already committed — do NOT roll it back.
+            # The next successful publish will overwrite the stale anchor.
+            pass
+
         return {
             "seq": seq,
             "timestamp": timestamp,
@@ -330,27 +419,35 @@ class DecreeLog:
             "scope": scope,
             "classification": classification,
             "required_signatures": required_signatures,
+            "expires_at": expires_at,
             "decree_hash": decree_hash[:16] + "...",
             "prev_hash": prev_hash[:16] + "...",
         }
 
     def get_all(self) -> List[Dict[str, Any]]:
         """Return all decrees in order (v3.18.0: includes classification +
-        required_signatures)."""
+        required_signatures; v3.19.0: includes expires_at).
+
+        NOTE: expired decrees are still returned here — this is the append-only
+        audit view. Use get_active_laws() for the binding-law view (which
+        excludes expired decrees).
+        """
         rows = self.db.execute(
             "SELECT seq, timestamp, decree_text, category, scope, classification, "
-            "required_signatures, decree_hash FROM decrees ORDER BY seq"
+            "required_signatures, expires_at, decree_hash FROM decrees ORDER BY seq"
         ).fetchall()
         return [
             {"seq": r[0], "timestamp": r[1], "decree_text": r[2],
              "category": r[3], "scope": r[4], "classification": r[5],
-             "required_signatures": r[6], "decree_hash": r[7][:16] + "..."}
+             "required_signatures": r[6], "expires_at": r[7],
+             "decree_hash": r[8][:16] + "..."}
             for r in rows
         ]
 
     def get_active_laws(self) -> List[Dict[str, Any]]:
-        """Return all 'law' and 'prohibition' decrees that are NOT superseded
-        AND have reached their required_signatures threshold — the binding rules.
+        """Return all 'law' and 'prohibition' decrees that are NOT superseded,
+        NOT expired, AND have reached their required_signatures threshold —
+        the binding rules.
 
         Per ADR-0028 (v3.14.0): decrees with category='supersession' and
         scope='supersession:N' mark decree #N as superseded. Such decrees
@@ -363,6 +460,14 @@ class DecreeLog:
         by check_compliance). The issuer is auto-recorded as signer '_issuer'
         at issue() time, so required_signatures=1 decrees are active as soon
         as they're issued (no explicit co_sign() call needed).
+
+        v3.19.0 (time-limited decrees): decrees with a non-NULL `expires_at`
+        column are excluded once the current UTC time exceeds expires_at.
+        NULL = no expiry (permanent — backward compatible with all
+        pre-v3.19.0 decrees, including the 7 foundational decrees in
+        ~/.polymath-os/decrees.db). Comparison is a strict string compare of
+        ISO 8601 UTC values — lexicographic order == chronological order for
+        the fixed-width '%Y-%m-%dT%H:%M:%SZ' format produced by time.gmtime.
         """
         # Build the set of superseded seqs by scanning for supersession decrees.
         # A supersession decree has category='supersession' and scope='supersession:N'
@@ -374,22 +479,34 @@ class DecreeLog:
         # (LEFT JOIN produces a NULL row → COUNT of non-NULL = 0).
         rows = self.db.execute(
             "SELECT d.seq, d.timestamp, d.decree_text, d.category, d.scope, "
-            "d.classification, d.required_signatures, COUNT(c.signer_id) AS sig_count "
+            "d.classification, d.required_signatures, d.expires_at, "
+            "COUNT(c.signer_id) AS sig_count "
             "FROM decrees d "
             "LEFT JOIN co_signatures c ON c.decree_seq = d.seq "
             "WHERE d.category IN ('law', 'prohibition') "
             "GROUP BY d.seq "
             "ORDER BY d.seq"
         ).fetchall()
+        # v3.19.0: snapshot 'now' once (in the SAME ISO 8601 UTC format as
+        # `expires_at`) so that all rows are compared against the same
+        # reference instant. time.strftime + time.gmtime == the same stamp
+        # used at issue() — formats match → lexicographic compare is sound.
+        now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         active = []
         for r in rows:
             (seq, ts, text, cat, scope, classification,
-             required, count) = r
+             required, expires_at, count) = r
             if seq in superseded_set:
                 continue  # v3.14.0: skip superseded decrees
             # v3.18.0 (N-of-M blocking): exclude decrees below their
             # required_signatures threshold. PENDING decrees are not enforced.
             if count < required:
+                continue
+            # v3.19.0 (time-limited decrees): exclude expired decrees.
+            # expires_at is NULL → no expiry (permanent). Otherwise, if the
+            # current time is strictly greater than expires_at → exclude.
+            # ISO 8601 UTC strings compare lexicographically == chronologically.
+            if expires_at is not None and now > expires_at:
                 continue
             active.append({
                 "seq": seq,
@@ -400,6 +517,7 @@ class DecreeLog:
                 "classification": classification,
                 "required_signatures": required,
                 "signatures_collected": count,
+                "expires_at": expires_at,
             })
         return active
 
@@ -704,6 +822,34 @@ class DecreeLog:
           agent literally doesn't know the decree exists (compartmentalization
           invariant). Default `clearance='public'` is the most restrictive.
 
+        v3.19.0 (scope hierarchy — nested scopes):
+        - **Hierarchical scope inheritance.** The `scope` parameter now
+          follows the _SCOPE_HIERARCHY = {'all': 0, 'singulyar': 1,
+          'polymath-os': 2, 'cell65-host': 3, 'outbound': 1}. A decree
+          whose scope rank is <= the caller's scope rank applies. So at
+          scope='polymath-os' (rank 2), decrees with scope='singulyar'
+          (rank 1) AND 'all' (rank 0) ALSO apply — the more specific
+          scope inherits the more general (parent) decrees. The reverse
+          is NOT true: at scope='singulyar' (rank 1), decrees with
+          scope='polymath-os' (rank 2) do NOT apply (parent doesn't see
+          child).
+        - **Hybrid fallback for unknown scopes.** When EITHER the caller's
+          scope OR the decree's scope is NOT in _SCOPE_HIERARCHY, fall back
+          to the pre-v3.19.0 'exact match OR all' behavior. This preserves
+          backward compatibility with arbitrary custom scopes (e.g.
+          'internal-only') — a custom-scoped decree still only applies
+          when the caller's scope exactly matches it.
+        - Replaces v0.6's flat 2-level filter for known-hierarchy scopes
+          (decree.scope == "all" OR decree.scope == scope).
+
+        v3.19.0 (time-limited decrees):
+        - **Expiry filtering.** Decrees with a non-NULL `expires_at` column
+          are automatically excluded from `get_active_laws()` once the
+          current time exceeds expires_at. check_compliance() therefore
+          doesn't enforce them after expiry. This happens INSIDE
+          get_active_laws() — check_compliance() doesn't filter expiry
+          itself, it just consumes the active-law set.
+
         v0.6 changes (vs v0.5):
         - **Word-boundary regex matching.** Each prohibited term is matched
           using `\\b{term}\\b` regex instead of v0.5's substring check. This
@@ -712,9 +858,9 @@ class DecreeLog:
           as a whole word). v0.6 uses re.escape + word boundaries.
         - **Decree scope filtering.** New optional `scope` parameter. When
           passed (e.g. scope="singulyar"), only decrees whose scope matches
-          (decree.scope == "all" OR decree.scope == scope) are checked.
-          When scope=None (default), all decrees are checked (backward
-          compatible with v0.5 behavior).
+          are checked. v3.19.0 generalizes this into a true hierarchy (see
+          above). When scope=None (default), all decrees are checked
+          (backward compatible with v0.5 behavior).
         - **Regex-based prohibition parser.** `_extract_prohibited_terms()`
           now uses `_PROHIBITION_REGEX` instead of naive
           `text.split("use", 1)`. This fixes mis-parsing of "never abuse
@@ -733,10 +879,12 @@ class DecreeLog:
         Args:
             intent_text: The intent's description (or any text to check).
             scope: Optional scope filter. If provided, only decrees whose
-                   scope matches are checked. Scope matching: decree.scope
-                   == "all" → always applies. Otherwise, exact string match
-                   with the passed scope. Pass None to check all decrees
-                   (backward compatible with v0.5).
+                   scope rank is <= the caller's scope rank (per
+                   _SCOPE_HIERARCHY) are checked. So at scope='polymath-os'
+                   (rank 2), decrees with scopes 'all' (0), 'singulyar'
+                   (1), 'outbound' (1), and 'polymath-os' (2) all apply.
+                   scope=None (or scope="all") means no filter — every
+                   active decree is checked (backward compatible with v0.5).
             clearance: v3.18.0 — caller's clearance_level per ADR-0029 §7.
                    'public' (default; sees only 'public' decrees),
                    'internal' (sees 'public' + 'internal' decrees),
@@ -747,15 +895,46 @@ class DecreeLog:
         Returns: {compliant: bool, violations: [...], laws_checked: int}
         """
         laws = self.get_active_laws()
-        # v0.6 scope filter — only apply decrees whose scope matches.
-        # v3.15.0 FIX: when scope="all" (or None), ALL decrees apply (no filter).
-        # Previously, scope="all" was treated as a filter that only kept decrees
-        # with scope=="all" — incorrectly excluding scope-specific decrees like
-        # "never use Google DNS" (scope="polymath-os"). Now scope="all" means
-        # "no filter" — matching the semantic intent of decree_scope="all" on
-        # Agent Cards (per ADR-0023: 'all' = all decrees apply).
+        # v3.19.0: scope hierarchy — a caller at scope S (rank r_S) inherits
+        # all decrees with scope rank <= r_S. So at scope='polymath-os'
+        # (rank 2), decrees scoped to 'singulyar' (rank 1) AND 'all' (rank 0)
+        # also apply — the more specific scope inherits the more general
+        # (parent) decrees.
+        #
+        # v3.15.0 FIX (preserved): when scope="all" (or None), NO filter
+        # is applied — all active decrees are checked. This matches the
+        # semantic intent of decree_scope="all" on Agent Cards (per
+        # ADR-0023: 'all' = all decrees apply).
+        #
+        # Hybrid fallback for unknown scopes: when EITHER the caller's
+        # scope OR the decree's scope is NOT in _SCOPE_HIERARCHY, fall back
+        # to the pre-v3.19.0 'exact match OR all' semantics. This preserves
+        # backward compatibility with arbitrary custom scopes (e.g.
+        # 'internal-only') that are intentionally NOT part of the standard
+        # hierarchy — a custom-scoped decree still only applies when the
+        # caller's scope exactly matches it (or the decree is scope='all').
         if scope is not None and scope != "all":
-            laws = [law for law in laws if law["scope"] == "all" or law["scope"] == scope]
+            caller_rank = _SCOPE_HIERARCHY.get(scope)
+            if caller_rank is not None:
+                # Caller is in the hierarchy → use rank comparison for
+                # in-hierarchy decrees; fall back to exact-match for
+                # out-of-hierarchy decree scopes.
+                def _scope_applies(law: Dict[str, Any]) -> bool:
+                    decree_rank = _SCOPE_HIERARCHY.get(law["scope"])
+                    if decree_rank is not None:
+                        # Both in hierarchy → child inherits from parent
+                        # (decree_rank <= caller_rank).
+                        return decree_rank <= caller_rank
+                    # Decree's scope is custom (not in the hierarchy) →
+                    # only apply on exact match with the caller's scope
+                    # (or if it's the universal 'all' scope, which is in
+                    # the hierarchy so wouldn't reach here).
+                    return law["scope"] == scope or law["scope"] == "all"
+                laws = [law for law in laws if _scope_applies(law)]
+            else:
+                # Caller's scope is NOT in the hierarchy → use the
+                # pre-v3.19.0 legacy behavior (exact match OR 'all').
+                laws = [law for law in laws if law["scope"] == "all" or law["scope"] == scope]
 
         # v3.18.0: NSA compartmentalization — filter out decrees whose
         # classification EXCEEDS the caller's clearance. The caller must not

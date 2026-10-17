@@ -13,6 +13,13 @@ border:1px solid var(--line);border-radius:12px;padding:16px;font:inherit;font-s
 .decree-cat button{padding:8px 16px;border:1px solid var(--line);border-radius:999px;
 background:var(--panel2);color:var(--text);cursor:pointer;font-size:14px}
 .decree-cat button.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.decree-class{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.decree-class button{padding:6px 12px;border:1px solid var(--line);border-radius:999px;
+background:var(--panel2);color:var(--text);cursor:pointer;font-size:13px}
+.decree-class button.active{background:#3a2a1a;color:#f2c879;border-color:#f2c879}
+.decree-class button[data-class="public"].active{background:#1a3a1a;color:#80ff80;border-color:#80ff80}
+.decree-class button[data-class="internal"].active{background:#3a3a1a;color:#f2c879;border-color:#f2c879}
+.decree-class button[data-class="secret"].active{background:#3a1a1a;color:#ff9e9e;border-color:#ff9e9e}
 .decree-log{margin-top:20px;border:1px solid var(--line);border-radius:12px;
 background:var(--panel);max-height:400px;overflow:auto}
 .decree-entry{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px}
@@ -25,6 +32,10 @@ background:var(--panel);max-height:400px;overflow:auto}
 .cat-directive{background:#3a3a1a;color:#f2c879}
 .decree-entry .ts{color:var(--muted);font-size:12px}
 .decree-entry .text{margin-top:4px;color:var(--text)}
+.decree-entry .cls{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;margin-left:8px;font-weight:bold}
+.cls-public{background:#1a3a1a;color:#80ff80}
+.cls-internal{background:#3a3a1a;color:#f2c879}
+.cls-secret{background:#3a1a1a;color:#ff9e9e}
 </style>
 </head><body>
 <div class="app-shell"><header class="topbar">
@@ -44,6 +55,12 @@ background:var(--panel);max-height:400px;overflow:auto}
 <button data-cat="prohibition">⛔ Запрет</button>
 <button data-cat="permission">✅ Разрешение</button>
 <button data-cat="observation">👁 Наблюдение</button>
+</div>
+
+<div class="decree-class" title="Классификация: кто из агентов увидит этот декрет. Public — все. Internal — только внутренние агенты. Secret — только агенты с clearance=secret (per ADR-0029 §7).">
+<button class="active" data-class="public">🌐 Public</button>
+<button data-class="internal">🔒 Internal</button>
+<button data-class="secret">🔐 Secret</button>
 </div>
 
 <textarea id="decreeInput" class="decree-textarea" placeholder="Например: никогда не использовать Google DNS" maxlength="5000"></textarea>
@@ -75,6 +92,7 @@ background:var(--panel);max-height:400px;overflow:auto}
 <ol class="fineprint" style="padding-left:20px;line-height:1.6">
 <li>Человек печатает декрет в текстовое поле</li>
 <li>Выбирает категорию: закон / запрет / разрешение / директива / наблюдение</li>
+<li>Выбирает классификацию: 🌐 public (все видят) / 🔒 internal / 🔐 secret (только агенты с clearance=secret, per ADR-0029 §7)</li>
 <li>Нажимает «ИЗДАТЬ ДЕКРЕТ»</li>
 <li>Декрет записывается в DecreeLog (SQLite, hash-chained, append-only)</li>
 <li>Ядро SINGULYAR EIR проверяет каждый Intent против активных декретов</li>
@@ -90,6 +108,7 @@ DECREE > ADR > code. Воля человека — supreme law.
 (()=>{
 'use strict';
 let category='directive';
+let classification='public'; // v3.18.0 — NSA compartmentalization (ADR-0029 §7)
 const $=s=>document.querySelector(s);
 const STORAGE_KEY='singulyar.decree.portal.v1';
 
@@ -97,6 +116,12 @@ document.querySelectorAll('.decree-cat button').forEach(b=>{
 b.onclick=()=>{
 document.querySelectorAll('.decree-cat button').forEach(x=>x.classList.remove('active'));
 b.classList.add('active');category=b.dataset.cat;
+};});
+
+document.querySelectorAll('.decree-class button').forEach(b=>{
+b.onclick=()=>{
+document.querySelectorAll('.decree-class button').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');classification=b.dataset.class;
 };});
 
 function loadLog(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}}
@@ -127,12 +152,12 @@ if(bridge){
 try{
 const decrees=await bridge.getDecrees();
 if(decrees && decrees.length){
-// Normalize: bridge returns decree_text, renderLog expects text
-return decrees.map(d=>({seq:d.seq,timestamp:d.timestamp,text:d.decree_text,category:d.category,scope:d.scope,source:'sqlite'}));
+// Normalize: bridge returns decree_text + classification, renderLog expects text + classification
+return decrees.map(d=>({seq:d.seq,timestamp:d.timestamp,text:d.decree_text,category:d.category,scope:d.scope,classification:d.classification||'public',source:'sqlite'}));
 }
 }catch(e){console.warn('[decree-portal] bridge.getDecrees failed, falling back:',e.message)}
 }
-return loadLog().map(d=>({...d,source:'local'}));
+return loadLog().map(d=>({...d,classification:d.classification||'public',source:'local'}));
 }
 
 function renderLog(log){
@@ -140,11 +165,13 @@ const view=$('#decreeLog');
 if(!log || !log.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
 view.innerHTML=log.map(d=>{
 const catClass='cat-'+d.category;
+const clsClass='cls-'+(d.classification||'public');
+const clsLabel=(d.classification||'public').toUpperCase();
 const src=d.source==='sqlite'?' <span style="color:var(--accent);font-size:10px">SQLite</span>':' <span style="color:var(--muted);font-size:10px">local</span>';
 // v3.14.0 NEW (per ADR-0028) — show Supersede button on law/prohibition decrees
 const canSupersede=(d.category==='law'||d.category==='prohibition')&&d.source==='sqlite';
 const supBtn=canSupersede?` <button class="sup-btn" data-seq="${d.seq}" style="font-size:10px;padding:2px 6px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:3px;cursor:pointer">Отозвать</button>`:'';
-return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span>${src}<span class="ts"> ${d.timestamp}</span>${supBtn}<div class="text">${esc(d.text)}</div></div>`;
+return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span><span class="cls ${clsClass}" title="Классификация (ADR-0029 §7)">${clsLabel}</span>${src}<span class="ts"> ${d.timestamp}</span>${supBtn}<div class="text">${esc(d.text)}</div></div>`;
 }).join('');
 // Attach supersede button handlers
 document.querySelectorAll('.sup-btn').forEach(b=>{
@@ -179,10 +206,10 @@ const bridge=getBridge();
 let entry;
 if(bridge){
 try{
-entry=await bridge.issueDecree(text,category);
+entry=await bridge.issueDecree(text,category,'all',classification);
 // normalize bridge shape -> portal shape
-entry={seq:entry.seq,timestamp:entry.timestamp,text:entry.decree_text,category:entry.category,scope:entry.scope,source:'sqlite'};
-toast(`⚡ Декрет #${entry.seq} записан в DecreeLog (SQLite). НАВСЕГДА.`);
+entry={seq:entry.seq,timestamp:entry.timestamp,text:entry.decree_text,category:entry.category,scope:entry.scope,classification:entry.classification||'public',source:'sqlite'};
+toast(`⚡ Декрет #${entry.seq} записан в DecreeLog (SQLite, ${entry.classification||'public'}). НАВСЕГДА.`);
 }catch(e){
 console.error('[decree-portal] bridge.issueDecree failed:',e);
 toast(`⚠ Bridge ошибся: ${e.message}. Сохраняю локально.`);
@@ -194,10 +221,10 @@ if(!entry){
 const log=loadLog();
 const seq=log.length+1;
 const ts=new Date().toISOString();
-entry={seq,timestamp:ts,text,category,source:'local'};
+entry={seq,timestamp:ts,text,category,classification,source:'local'};
 log.push(entry);
 saveLog(log);
-toast(`⚡ Декрет #${entry.seq} записан (localStorage). Bridge недоступен.`);
+toast(`⚡ Декрет #${entry.seq} записан (localStorage, ${classification}). Bridge недоступен.`);
 }
 $('#decreeInput').value='';
 // Re-render from authoritative source

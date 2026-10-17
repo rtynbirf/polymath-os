@@ -194,11 +194,19 @@ class AgentMesh:
         # Determine decree scope: caller override OR agent's default.
         scope = request.decree_scope_override or card.decree_scope
 
+        # v3.18.0 — Pull the target agent's clearance_level from its AgentCard
+        # and pass it to check_compliance(). Decrees whose classification
+        # exceeds this clearance are INVISIBLE to the agent (per ADR-0029 §7
+        # NSA compartmentalization). Default 'public' (most restrictive) when
+        # the card didn't set one — AgentCard's dataclass default already
+        # enforces 'public', so this fallback is belt-and-suspenders.
+        clearance = getattr(card, "clearance_level", "public") or "public"
+
         # DECREE GATE — check compliance BEFORE calling execute_fn.
         # This is the unique emergent property of Polymath-OS.
         if self.decree_log is not None:
             compliance = self.decree_log.check_compliance(
-                request.description, scope=scope
+                request.description, scope=scope, clearance=clearance
             )
             if not compliance.get("compliant", True):
                 violations = compliance.get("violations", [])
@@ -227,6 +235,7 @@ class AgentMesh:
                         "intent_id": request.intent_id,
                         "description": request.description,
                         "decree_scope": scope,
+                        "caller_clearance": clearance,
                         "block": block_response.to_dict(),
                     })
                     return IntentResponse(
@@ -243,6 +252,7 @@ class AgentMesh:
                 "intent_id": request.intent_id,
                 "description": request.description,
                 "decree_scope": scope,
+                "caller_clearance": clearance,
                 "result": result,
             })
             return IntentResponse(

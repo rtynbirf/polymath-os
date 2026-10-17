@@ -53,14 +53,21 @@ class DecreeBridge {
     });
   }
 
-  async issueDecree(text, category = "directive", scope = "all") {
+  async issueDecree(text, category = "directive", scope = "all", classification = "public") {
+    // v3.18.0 — `classification` parameter (per ADR-0029 §7 NSA compartmentalization).
+    //   'public'  → visible to all agents (default; backwards-compatible)
+    //   'internal'→ visible only to agents with clearance_level in {'internal','secret'}
+    //   'secret'  → visible only to agents with clearance_level='secret'
+    // Passed through to DecreeLog.issue(classification=...), stored on the decree row,
+    // enforced by check_compliance(clearance=...) which AgentMesh.send() sets from the
+    // target agent's AgentCard.clearance_level.
     const script = `
 import sys, json, os
 sys.path.insert(0, ${JSON.stringify(this.runtimeSrc)})
 from decree_log import DecreeLog
 os.makedirs(os.path.dirname(${JSON.stringify(this.dbPath)}), exist_ok=True)
 dl = DecreeLog(${JSON.stringify(this.dbPath)})
-result = dl.issue(${JSON.stringify(text)}, category=${JSON.stringify(category)}, scope=${JSON.stringify(scope)})
+result = dl.issue(${JSON.stringify(text)}, category=${JSON.stringify(category)}, scope=${JSON.stringify(scope)}, classification=${JSON.stringify(classification)})
 dl.close()
 print(json.dumps(result))
 `;
@@ -141,12 +148,15 @@ if (require.main === module) {
   if (cmd === "issue") {
     const text = process.argv[3];
     const cat = process.argv[4] || "directive";
+    const scope = process.argv[5] || "all";
+    // v3.18.0 — argv[6] is classification (public|internal|secret). Default 'public'.
+    const classification = process.argv[6] || "public";
     if (!text) {
-      console.error('Usage: node decree-bridge.js issue "text" [category]');
+      console.error('Usage: node decree-bridge.js issue "text" [category] [scope] [classification]');
       process.exit(1);
     }
     bridge
-      .issueDecree(text, cat)
+      .issueDecree(text, cat, scope, classification)
       .then((r) => {
         console.log(JSON.stringify(r, null, 2));
         process.exit(0);
@@ -217,7 +227,7 @@ if (require.main === module) {
     console.log("");
     console.log("Usage:");
     console.log(
-      '  node decree-bridge.js issue "decree text" [law|prohibition|permission|directive|observation]',
+      '  node decree-bridge.js issue "decree text" [law|prohibition|permission|directive|observation] [scope] [public|internal|secret]',
     );
     console.log("  node decree-bridge.js list");
     console.log('  node decree-bridge.js check "intent text to verify"');

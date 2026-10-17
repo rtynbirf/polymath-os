@@ -365,11 +365,22 @@ class Runtime:
         self._oneshot: Optional[str] = None
         self.decree_log = None  # set via set_decree_log(); supreme law above policy
         self.decree_scope: Optional[str] = None  # v0.6: optional scope filter
-        # v3.17.0: Circuit breaker (Stock Exchange pattern) — cascade failure protection
-        self._cb_threshold = 10  # max DECREE_BLOCK events before pause
-        self._cb_window = 60     # time window in seconds
-        self._cb_blocks = []     # list of timestamps of recent DECREE_BLOCK events
-        self._cb_paused = False  # when True, all Intents → WAITING_FOR_HUMAN
+        # v3.18.0: Martin Fowler 3-state circuit breaker (ADR-0029 §12 extended).
+        #   closed    — normal flow; counts DECREE_BLOCKs; trips to "open" at threshold
+        #   open      — ALL Intents → WAITING_FOR_HUMAN; after _cb_window → "half_open"
+        #   half_open — ONE test Intent bypasses; success → "closed", DECREE_BLOCK → "open"
+        # See: https://martinfowler.com/bliki/CircuitBreaker.html
+        # v3.17.0 had only 2 states (tripped / not); v3.18.0 adds the half-open
+        # recovery probe so the runtime self-heals instead of needing a human.
+        self._cb_threshold: int = 10  # max DECREE_BLOCK events before trip (closed → open)
+        self._cb_window: int = 60     # seconds in "open" before transitioning to "half_open"
+        self._cb_blocks: List[float] = []     # DECREE_BLOCK timestamps (meaningful in "closed")
+        self._cb_state: str = "closed"        # "closed" | "open" | "half_open"
+        self._cb_tripped_at: Optional[float] = None  # wall-clock of last closed→open transition
+        self._cb_test_in_flight: bool = False  # half_open: True while a test Intent is being tried
+        self._cb_test_failed: bool = False    # half_open: set True if test Intent hit DECREE_BLOCK
+        self._cb_test_intent_iid: Optional[str] = None  # iid of the in-flight test Intent
+        self._cb_trip_count: int = 0          # monotonic count of closed→open (and half_open→open) trips
         self._schema = load_schema("intent.schema.json")
         self._rehydrate()
 
@@ -393,38 +404,260 @@ class Runtime:
         self.decree_scope = scope
 
     def set_circuit_breaker(self, threshold: int = 10, window: int = 60) -> None:
-        """Configure circuit breaker (Stock Exchange pattern, per ADR-0029 §12).
+        """Configure the Martin Fowler 3-state circuit breaker (ADR-0029 §12).
 
-        When DECREE_BLOCK events exceed threshold within window seconds,
-        the system automatically pauses — all new Intents → WAITING_FOR_HUMAN.
-        The human decides: 'continue' or 'investigate'.
+        v3.18.0 implements the full Closed → Open → Half-Open → Closed cycle
+        described at https://martinfowler.com/bliki/CircuitBreaker.html:
 
-        This prevents cascade failures (like stock market circuit breakers
-        that halt trading when the market drops too fast).
+          * CLOSED    — normal flow. Counts DECREE_BLOCK events in a rolling
+                        window. When the count reaches `threshold` → OPEN.
+          * OPEN      — all new Intents short-circuit to WAITING_FOR_HUMAN
+                        (cascade-failure protection, like a stock-market halt).
+                        After `window` seconds → HALF-OPEN.
+          * HALF-OPEN — exactly ONE test Intent is allowed to bypass the
+                        breaker. If it succeeds (no DECREE_BLOCK) → CLOSED.
+                        If it fails (DECREE_BLOCK) → OPEN (timer restarted).
+
+        When the breaker trips (CLOSED → OPEN, or HALF-OPEN → OPEN), a
+        ``CIRCUIT_BREAKER_ALERT`` ledger event is emitted with the threshold,
+        window, block_count, and timestamp — for downstream alerting (Slack,
+        email, /healthz, etc.).
+
+        Args:
+          threshold: max DECREE_BLOCK events before CLOSE→OPEN transition.
+          window:    seconds the breaker stays OPEN before going HALF-OPEN.
         """
         self._cb_threshold = threshold
         self._cb_window = window
 
-    def _check_circuit_breaker(self) -> bool:
-        """Check if circuit breaker is tripped. Returns True if paused."""
-        import time
+    def _trip_to_open(self, *, reason: str, block_count: int) -> None:
+        """Internal: transition to (or restart) the OPEN state + emit alert.
+
+        Called from:
+          * _check_circuit_breaker()  when closed & threshold reached.
+          * _record_decree_block()   when half_open & test Intent failed.
+
+        Emits a ``CIRCUIT_BREAKER_ALERT`` ledger event containing the
+        threshold, window, block_count, and timestamp — per ADR-0029 §13
+        (alerting). The ``reason`` field distinguishes the two callers.
+        """
         now = time.time()
-        # Prune old entries outside the window
+        prev_state = self._cb_state
+        self._cb_state = "open"
+        self._cb_tripped_at = now
+        self._cb_test_in_flight = False
+        self._cb_test_failed = False
+        self._cb_test_intent_iid = None
+        self._cb_trip_count += 1
+        self.ledger.append("CIRCUIT_BREAKER_ALERT", {
+            "reason": reason,
+            "previous_state": prev_state,   # "closed" or "half_open"
+            "threshold": self._cb_threshold,
+            "window": self._cb_window,
+            "block_count": block_count,
+            "timestamp": now,
+            "trip_count": self._cb_trip_count,
+        })
+
+    def _check_circuit_breaker(self, intent_iid: str) -> bool:
+        """Martin Fowler's 3-state circuit breaker gate.
+
+        Returns True if the caller must BLOCK this Intent (WAITING_FOR_HUMAN).
+        Returns False ONLY when:
+          * state == "closed" and threshold not yet exceeded, OR
+          * state == "half_open" and this Intent is the ONE allowed test.
+
+        State transitions performed here:
+          closed → open      when len(_cb_blocks) >= threshold (also emits ALERT).
+          open   → half_open when (now - _cb_tripped_at) >= _cb_window.
+        (half_open → closed and half_open → open happen in
+        _settle_half_open_test() and _record_decree_block() respectively.)
+
+        Args:
+          intent_iid: the intent_id of the Intent being checked. Used to mark
+            the in-flight test Intent so _settle_half_open_test() can identify
+            it later (and ignore subsequent Intents that arrive while the test
+            is in flight).
+        """
+        now = time.time()
+        # Prune stale DECREE_BLOCK timestamps (only meaningful in "closed").
         self._cb_blocks = [t for t in self._cb_blocks if now - t < self._cb_window]
-        # Check if threshold exceeded
-        if len(self._cb_blocks) >= self._cb_threshold:
-            self._cb_paused = True
-        return self._cb_paused
+
+        if self._cb_state == "closed":
+            if len(self._cb_blocks) >= self._cb_threshold:
+                self._trip_to_open(reason="threshold_exceeded",
+                                   block_count=len(self._cb_blocks))
+                return True  # the tripping Intent is blocked too
+            return False  # closed & below threshold → normal flow
+
+        if self._cb_state == "open":
+            if self._cb_tripped_at is not None \
+                    and (now - self._cb_tripped_at) >= self._cb_window:
+                # Open window expired → probe with a single test Intent.
+                self._cb_state = "half_open"
+                self._cb_test_in_flight = False
+                self._cb_test_failed = False
+                self._cb_test_intent_iid = None
+                self.ledger.append("CIRCUIT_BREAKER_HALF_OPEN", {
+                    "reason": "open window expired; allowing one test Intent",
+                    "window": self._cb_window,
+                    "tripped_at": self._cb_tripped_at,
+                    "timestamp": now,
+                })
+                # fall through to half_open handling (same Intent is the test)
+            else:
+                return True  # still in open → block
+
+        if self._cb_state == "half_open":
+            if not self._cb_test_in_flight:
+                # Allow ONE test Intent through (bypass the breaker).
+                self._cb_test_in_flight = True
+                self._cb_test_failed = False
+                self._cb_test_intent_iid = intent_iid
+                self.ledger.append("CIRCUIT_BREAKER_TEST_INTENT", {
+                    "intent_id": intent_iid,
+                    "reason": "half_open: allowing one test Intent to bypass",
+                    "timestamp": now,
+                })
+                return False
+            # A test Intent is already in flight — block subsequent Intents
+            # until the test resolves (success → closed, failure → open).
+            return True
+
+        # Defensive: state should always be one of the three.
+        return False
 
     def _record_decree_block(self) -> None:
-        """Record a DECREE_BLOCK event for circuit breaker tracking."""
-        import time
-        self._cb_blocks.append(time.time())
+        """Record a DECREE_BLOCK event for circuit breaker tracking.
+
+        Behavior depends on breaker state:
+          closed    — append timestamp; if threshold is later reached, the
+                      next _check_circuit_breaker() will trip to OPEN.
+          half_open + test in flight — the test Intent just hit DECREE_BLOCK:
+                      treat as test FAILURE → immediately re-trip to OPEN
+                      (restart timer, emit ALERT with reason="half_open_test_failed").
+          open      — no-op (the breaker short-circuits before the decree
+                      gate is ever reached, so this branch is unreachable
+                      in normal flow; defensive guard only).
+        """
+        now = time.time()
+        if self._cb_state == "half_open" and self._cb_test_in_flight:
+            # Test Intent just FAILED → re-trip to OPEN, restart timer.
+            self._cb_test_failed = True
+            self._trip_to_open(reason="half_open_test_failed",
+                               block_count=len(self._cb_blocks) + 1)
+            return
+        if self._cb_state == "closed":
+            self._cb_blocks.append(now)
+        # "open": no-op (decree gate is unreachable while tripped)
+
+    def _settle_half_open_test(self, intent_iid: str) -> None:
+        """Resolve a half_open test Intent after _advance() returns.
+
+        Called from run()/resume() in a finally block (so it runs even if
+        _advance raised). Idempotent: no-op if this Intent was NOT the
+        in-flight test (e.g. a blocked-by-breaker Intent, or any Intent
+        in the closed/open states).
+
+        Outcomes when the Intent WAS the test:
+          * If _record_decree_block() already re-tripped to OPEN (state is
+            now "open", _cb_test_intent_iid cleared by _trip_to_open) →
+            nothing to do (failure path already handled).
+          * Otherwise the test did NOT trigger DECREE_BLOCK → success →
+            transition to CLOSED, clear block history, emit
+            CIRCUIT_BREAKER_CLOSED.
+
+        Per the spec ("If it fails (DECREE_BLOCK) → open"): only a DECREE_BLOCK
+        is a failure signal. Policy blocks, capability rejections, and even
+        adapter exceptions are NOT failures for breaker purposes — they
+        indicate the decree gate (what the breaker protects) is healthy.
+        """
+        if intent_iid != self._cb_test_intent_iid:
+            return  # this Intent was not the in-flight test; nothing to settle
+        # Clear the marker first so a recursive call cannot double-settle.
+        self._cb_test_intent_iid = None
+        self._cb_test_in_flight = False
+        if self._cb_state == "open":
+            # Already re-tripped by _record_decree_block() (failure path).
+            return
+        if self._cb_state != "half_open":
+            # Defensive: shouldn't happen, but be safe.
+            return
+        if self._cb_test_failed:
+            # Defensive: _record_decree_block should have already tripped.
+            self._trip_to_open(reason="half_open_test_failed_late",
+                               block_count=len(self._cb_blocks))
+            return
+        # Success → close the breaker, reset block history.
+        self._cb_state = "closed"
+        self._cb_blocks = []
+        self._cb_tripped_at = None
+        self._cb_test_failed = False
+        self.ledger.append("CIRCUIT_BREAKER_CLOSED", {
+            "reason": "half_open test Intent succeeded; breaker reset to closed",
+            "threshold": self._cb_threshold,
+            "window": self._cb_window,
+            "timestamp": time.time(),
+        })
 
     def resume_from_circuit_breaker(self) -> None:
-        """Human resets the circuit breaker (like resuming trading after a halt)."""
-        self._cb_paused = False
+        """Human override — force-close the breaker regardless of state.
+
+        Like resuming trading after a market halt. Clears all breaker state
+        (block history, trip timer, half-open flags) and resets to "closed".
+        Emits a CIRCUIT_BREAKER_RESET ledger event for auditability.
+        """
+        self._cb_state = "closed"
         self._cb_blocks = []
+        self._cb_tripped_at = None
+        self._cb_test_in_flight = False
+        self._cb_test_failed = False
+        self._cb_test_intent_iid = None
+        self.ledger.append("CIRCUIT_BREAKER_RESET", {
+            "reason": "human override via resume_from_circuit_breaker()",
+            "timestamp": time.time(),
+        })
+
+    def get_circuit_breaker_state(self) -> Dict[str, Any]:
+        """Snapshot the circuit breaker's current state + stats.
+
+        For dashboards, /healthz endpoints, and observability (ADR-0019).
+        All fields are JSON-serializable.
+
+        Returns:
+          {
+            "state":                  "closed" | "open" | "half_open",
+            "threshold":              int,   # max DECREE_BLOCKs before trip
+            "window":                 int,   # seconds in "open" before "half_open"
+            "block_count":             int,   # live DECREE_BLOCKs in rolling window
+            "trip_count":              int,   # monotonic count of trips (telemetry)
+            "tripped_at":              float|None,  # wall-clock of last trip
+            "test_in_flight":          bool,  # half_open: a test Intent is running
+            "seconds_since_trip":      float|None,  # open/half_open: age of trip
+            "seconds_until_half_open": float|None,  # open: countdown to half_open
+          }
+        """
+        now = time.time()
+        # Prune so block_count reflects only live entries (no state mutation).
+        live_blocks = [t for t in self._cb_blocks if now - t < self._cb_window]
+        seconds_since_trip = None
+        seconds_until_half_open = None
+        if self._cb_state in ("open", "half_open") and self._cb_tripped_at is not None:
+            seconds_since_trip = now - self._cb_tripped_at
+            if self._cb_state == "open":
+                seconds_until_half_open = max(
+                    0.0, self._cb_window - seconds_since_trip)
+        return {
+            "state": self._cb_state,
+            "threshold": self._cb_threshold,
+            "window": self._cb_window,
+            "block_count": len(live_blocks),
+            "trip_count": self._cb_trip_count,
+            "tripped_at": self._cb_tripped_at,
+            "test_in_flight": self._cb_test_in_flight,
+            "seconds_since_trip": seconds_since_trip,
+            "seconds_until_half_open": seconds_until_half_open,
+        }
 
     def set_decree_scope(self, scope: Optional[str]) -> None:
         """Change the decree scope filter at runtime (without re-attaching the log).
@@ -526,13 +759,22 @@ class Runtime:
             "fingerprint": self.fingerprints[intent.intent_id]})
         if fault_after_effect:
             self._oneshot = "after_adapter_return"
-        return self._advance(intent)
+        # try/finally: ensure half_open test Intent is settled even if
+        # _advance() raises (per Martin Fowler's pattern, only a DECREE_BLOCK
+        # is a failure signal — so an exception does NOT count as failure).
+        try:
+            return self._advance(intent)
+        finally:
+            self._settle_half_open_test(intent.intent_id)
 
     def resume(self, intent: Intent) -> State:
         self._check_fp(intent)
         if self.states[intent.intent_id] != State.WAITING_FOR_HUMAN:
             raise RuntimeErrorBase(f"resume requires WAITING_FOR_HUMAN, got {self.states[intent.intent_id].value}")
-        return self._advance(intent)
+        try:
+            return self._advance(intent)
+        finally:
+            self._settle_half_open_test(intent.intent_id)
 
     def recover(self, intent: Intent) -> State:
         self._check_fp(intent)
@@ -575,12 +817,17 @@ class Runtime:
             if self.states[iid] != State.WAITING_FOR_HUMAN:
                 self._transition(intent, State.WAITING_FOR_HUMAN, reason)
             return State.WAITING_FOR_HUMAN
-        # v3.17.0: CIRCUIT BREAKER — if tripped, all Intents → WAITING_FOR_HUMAN
-        if self._check_circuit_breaker():
+        # v3.18.0: Martin Fowler 3-state circuit breaker — when tripped
+        # (state="open") or a half_open test is in flight, block immediately.
+        # In half_open with no test in flight, the breaker lets ONE test
+        # Intent through (returns False → falls into decree/policy gates).
+        if self._check_circuit_breaker(iid):
             self.ledger.append('CIRCUIT_BREAKER_PAUSED', {
                 'intent_id': iid,
-                'reason': f'circuit breaker tripped: {len(self._cb_blocks)} blocks in {self._cb_window}s'})
-            return block('circuit breaker paused — too many DECREE_BLOCK events')
+                'state': self._cb_state,
+                'reason': f'circuit breaker state={self._cb_state}; '
+                          f'block_count={len(self._cb_blocks)} window={self._cb_window}s'})
+            return block(f'circuit breaker paused (state={self._cb_state})')
         # DECREE GATE — supreme law, checked BEFORE policy (per ADR-0021 + ADR-0022).
         # If a decree prohibits the action, block immediately. Default-deny:
         # if no decree log attached, skip this gate (other policy still applies).

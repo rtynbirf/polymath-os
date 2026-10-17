@@ -336,5 +336,169 @@ class AgentMeshMultiAgentTests(unittest.TestCase):
                          "storage_execute must not be called — decree gate blocks BEFORE execution")
 
 
+class AgentMeshClearanceTests(unittest.TestCase):
+    """v3.18.0 — AgentCard.clearance_level is now ENFORCED in AgentMesh.send().
+
+    Per ADR-0029 §7 (NSA compartmentalization pattern). When the mesh calls
+    DecreeLog.check_compliance on an intent bound for agent B, it now passes
+    `clearance=card.clearance_level` — pulled from agent B's AgentCard. A
+    decree whose `classification` exceeds this clearance is INVISIBLE to the
+    agent: it cannot cause a DECREE_BLOCK, and it doesn't count toward
+    `laws_checked`. This is the compartmentalization invariant — a 'secret'
+    decree cannot block an intent from a 'public'-cleared agent.
+    """
+
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.dl = DecreeLog(str(Path(self.tmpdir.name) / "decrees.db"))
+        # One prohibition at each classification tier. The terms are chosen
+        # to be unique per tier so we can tell which decree fired the block.
+        self.dl.issue("never use Google", category="prohibition",
+                      scope="all", classification="public")
+        self.dl.issue("never use Slack", category="prohibition",
+                      scope="all", classification="internal")
+        self.dl.issue("never use AWS", category="prohibition",
+                      scope="all", classification="secret")
+
+    def tearDown(self):
+        self.dl.close()
+        self.tmpdir.cleanup()
+
+    def test_agent_with_public_clearance_doesnt_see_secret_decrees(self):
+        """An agent with clearance='public' must NOT see 'secret' (or 'internal')
+        decrees. The 'AWS' prohibition is classified 'secret' — so an intent
+        mentioning AWS must PASS THROUGH the decree gate (no DECREE_BLOCK) and
+        execute_fn must be called exactly once. The agent literally doesn't
+        know the secret decree exists.
+
+        Belt-and-suspenders: we also call check_compliance() directly with
+        clearance='public' to assert laws_checked==1 (only the public 'Google'
+        decree is visible to a public-clearance caller).
+        """
+        mesh = AgentMesh(decree_log=self.dl)
+        exec_fn = _FakeExecute({"state": "CONFIRMED"})
+        # AgentCard.clearance_level defaults to 'public' — use an explicit card
+        # so the test is unambiguous about what it's checking.
+        public_card = AgentCard(
+            id="public.agent.local",
+            name="Public Agent",
+            description="Agent with clearance_level='public' — sees only 'public' decrees",
+            version="v0.1",
+            capabilities=["test.ping"],
+            decree_scope="all",
+            clearance_level="public",
+        )
+        mesh.register(public_card, exec_fn)
+
+        # Intent mentions 'AWS' — but the AWS decree is classified 'secret'.
+        # A public-clearance agent MUST NOT be blocked by it.
+        req = IntentRequest(
+            id="r-clearance-1",
+            params={
+                "intent_id": "i-clearance-1",
+                "description": "deploy on AWS for cost savings",
+                "operation": "test.ping",
+            },
+        )
+        resp = mesh.send("public.agent.local", req)
+        self.assertFalse(
+            resp.is_blocked(),
+            f"public-clearance agent MUST NOT be blocked by 'secret' AWS decree. Got: {resp.to_dict()}",
+        )
+        self.assertEqual(resp.result.get("state"), "CONFIRMED")
+        # CRITICAL — execute_fn must have been called exactly once (decree gate passed)
+        self.assertEqual(
+            len(exec_fn.calls), 1,
+            "execute_fn must be called — public-clearance agent doesn't see secret decree",
+        )
+
+        # Belt-and-suspenders: verify directly that check_compliance at
+        # clearance='public' only sees the 'public' Google decree (laws_checked==1).
+        direct = self.dl.check_compliance(
+            "deploy on AWS for cost savings", scope="all", clearance="public",
+        )
+        self.assertTrue(direct["compliant"], "AWS decree must be invisible at public clearance")
+        self.assertEqual(
+            direct["laws_checked"], 1,
+            f"public clearance must see exactly 1 law (the public 'Google' decree). Got: {direct}",
+        )
+
+    def test_agent_with_secret_clearance_sees_all_decrees(self):
+        """An agent with clearance='secret' sees ALL decrees (public + internal +
+        secret). The 'AWS' prohibition (classified 'secret') must be enforced —
+        an intent mentioning AWS must be DECREE_BLOCKed, execute_fn must NOT be
+        called, and the block's `laws_checked` must equal 3 (all 3 decrees
+        visible to a secret-clearance caller). The matched_term must be 'aws',
+        proving the secret decree itself (not just the public 'Google' one)
+        fired the block.
+        """
+        mesh = AgentMesh(decree_log=self.dl)
+        exec_fn = _FakeExecute({"state": "CONFIRMED"})
+        secret_card = AgentCard(
+            id="secret.agent.local",
+            name="Secret Agent",
+            description="Agent with clearance_level='secret' — sees all decrees",
+            version="v0.1",
+            capabilities=["test.ping"],
+            decree_scope="all",
+            clearance_level="secret",
+        )
+        mesh.register(secret_card, exec_fn)
+
+        # Intent mentions 'AWS' — secret decree is visible to a secret-clearance
+        # agent → MUST be blocked.
+        req = IntentRequest(
+            id="r-clearance-2",
+            params={
+                "intent_id": "i-clearance-2",
+                "description": "deploy on AWS for cost savings",
+                "operation": "test.ping",
+            },
+        )
+        resp = mesh.send("secret.agent.local", req)
+        self.assertTrue(
+            resp.is_blocked(),
+            f"secret-clearance agent MUST be blocked by 'secret' AWS decree. Got: {resp.to_dict()}",
+        )
+        self.assertEqual(resp.error.code, DECREE_BLOCK_ERROR_CODE)
+        self.assertEqual(
+            resp.error.data.get("matched_term"), "aws",
+            "block must come from the 'secret' AWS decree (not the public 'Google' one)",
+        )
+        self.assertEqual(
+            resp.error.data.get("decree_seq"), 3,
+            "block must come from decree #3 (the 'secret'-classified AWS decree)",
+        )
+        # CRITICAL — all 3 decrees are visible at secret clearance (public + internal + secret)
+        self.assertEqual(
+            resp.error.data.get("laws_checked"), 3,
+            "secret clearance must see all 3 decrees (public + internal + secret)",
+        )
+        # execute_fn must NOT have been called (decree gate blocked BEFORE execution)
+        self.assertEqual(
+            len(exec_fn.calls), 0,
+            "execute_fn must not be called when decree blocks the intent",
+        )
+
+        # Sanity — a clean intent (no prohibited terms) at secret clearance
+        # passes through and the agent executes. Confirms the gate is just
+        # filtering on classification, not blanket-blocking everything.
+        clean_req = IntentRequest(
+            id="r-clearance-3",
+            params={
+                "intent_id": "i-clearance-3",
+                "description": "deploy on Fastly for CDN",  # not prohibited by any decree
+                "operation": "test.ping",
+            },
+        )
+        clean_resp = mesh.send("secret.agent.local", clean_req)
+        self.assertFalse(
+            clean_resp.is_blocked(),
+            f"clean intent must pass decree gate at secret clearance. Got: {clean_resp.to_dict()}",
+        )
+        self.assertEqual(clean_resp.result.get("state"), "CONFIRMED")
+        self.assertEqual(len(exec_fn.calls), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

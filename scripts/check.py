@@ -469,13 +469,18 @@ def check_pattern_06_identity_backup_documented():
 # ============================================================
 # RUN ALL
 # ============================================================
-print()
-print("══════════════════════════════════════════════════════════════")
-print("  Polymath OS — make verify")
-print("  Every claim in this repo is reproducible by this script.")
-print("  If exit 0 — every claim holds. If non-zero — claim failed.")
-print("══════════════════════════════════════════════════════════════")
-print()
+# Wrap the banner + for-loop + summary in __main__ so scripts/check.py
+# can be imported by tests (e.g. runtime/tests/test_trust_anchor.py
+# imports the check_trust_anchor function) without printing the banner
+# or running the full make-verify dance on import.
+if __name__ == "__main__":
+    print()
+    print("══════════════════════════════════════════════════════════════")
+    print("  Polymath OS — make verify")
+    print("  Every claim in this repo is reproducible by this script.")
+    print("  If exit 0 — every claim holds. If non-zero — claim failed.")
+    print("══════════════════════════════════════════════════════════════")
+    print()
 
 
 
@@ -606,6 +611,57 @@ def check_manifest_json():
     except Exception as e:
         return False, f'MANIFEST.json parse error: {e}'
 
+# ============================================================
+# CHECK 25: External Trust Anchor (IAEA pattern, ADR-0029 §9)
+# ============================================================
+def check_trust_anchor():
+    """v3.x.0 NEW (Task 13-B / claim #25): External Trust Anchor.
+
+    Per ADR-0029 §9 (IAEA nuclear-safeguards pattern): the decree log's
+    internal hash chain proves internal integrity, but to prove the chain
+    hasn't been REBUILT from scratch, the last decree's hash must be
+    published to an out-of-band trust anchor (a JSON file the human can
+    print, copy to CD-R, send to a lawyer, ...). This check compares the
+    anchor's hash against the live decree log's hash at the anchor's seq.
+
+    Dormant (returns True) when no anchor file exists yet — i.e. nobody
+    has published a seal. The auto-publish hook in DecreeLog.issue() will
+    create the anchor automatically the next time a decree is issued to
+    the production database; in the meantime this check passes.
+
+    Resolution (matches runtime/src/trust_anchor.py):
+      anchor_path = $POLYMATH_OS_TRUST_ANCHOR_PATH or ~/.polymath-os/trust_anchor.json
+      db_path     = $POLYMATH_OS_DECREE_DB         or ~/.polymath-os/decrees.db
+    """
+    anchor_path = os.environ.get("POLYMATH_OS_TRUST_ANCHOR_PATH") \
+        or os.path.expanduser("~/.polymath-os/trust_anchor.json")
+    if not os.path.exists(anchor_path):
+        return True, "trust anchor not yet published (run trust_anchor.py publish)"
+    db_path = os.environ.get("POLYMATH_OS_DECREE_DB") \
+        or os.path.expanduser("~/.polymath-os/decrees.db")
+    if not os.path.exists(db_path):
+        # Anchor exists but the db is gone — the anchor references something
+        # the live system can't produce. That's a fail (TAMPER).
+        return False, f"TAMPER DETECTED — anchor exists but db missing: {db_path}"
+    sys.path.insert(0, str(REPO_ROOT / "runtime" / "src"))
+    try:
+        from decree_log import DecreeLog
+        from trust_anchor import verify_trust_anchor
+        dl = DecreeLog(db_path)
+        try:
+            result = verify_trust_anchor(dl, anchor_path=anchor_path)
+        finally:
+            dl.close()
+    finally:
+        # Restore sys.path so we don't leak runtime/src into other checks.
+        sys.path.pop(0)
+    if result.get("verified"):
+        return True, (
+            f"trust anchor verified — no tampering detected "
+            f"(seq={result.get('anchor_seq')}, hash={result.get('anchor_hash')})"
+        )
+    return False, f"TAMPER DETECTED — {result.get('message', 'unknown')}"
+
 # Append new checks to the checks list
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
@@ -620,6 +676,7 @@ extra_checks = [
     ("22. MANIFEST.json exists + valid (ADR-0020)", check_manifest_json),
     ("23. Token hygiene: no plaintext PATs in code (v0.6)", check_token_hygiene),
     ("24. Agent Card .well-known/agent.json valid (ADR-0023, v3.11.0)", check_agent_card),
+    ("25. Trust anchor: external tamper-evidence (ADR-0029 §9, v3.x.0)", check_trust_anchor),
 ]
 
 checks = [
@@ -637,29 +694,34 @@ checks = [
     ("12. CI workflow runs pnpm + turbo + gitleaks", check_ci_workflow),
 ] + extra_checks
 
-for name, fn in checks:
-    check(name, fn)
+# Wrap the auto-run in `if __name__ == "__main__":` so the check_*
+# functions (and the extra_checks / checks lists) can be imported by
+# tests (e.g. runtime/tests/test_trust_anchor.py::test_make_verify_claim_25)
+# WITHOUT triggering the full make-verify run on import.
+if __name__ == "__main__":
+    for name, fn in checks:
+        check(name, fn)
 
-# ============================================================
-# SUMMARY
-# ============================================================
-print()
-print("══════════════════════════════════════════════════════════════")
-passed = sum(1 for _, ok, _ in results if ok)
-failed = sum(1 for _, ok, _ in results if not ok)
-print(f"  Result: {passed} passed, {failed} failed (of {len(results)} claims)")
-if failed:
-    print()
-    print("  FAILED claims:")
-    for name, ok, detail in results:
-        if not ok:
-            print(f"    {FAIL} {name}")
-            print(f"       {detail}")
+    # ============================================================
+    # SUMMARY
+    # ============================================================
     print()
     print("══════════════════════════════════════════════════════════════")
-    sys.exit(1)
-print()
-print("  All claims verified. Repo is reproducible.")
-print("══════════════════════════════════════════════════════════════")
-sys.exit(0)
+    passed = sum(1 for _, ok, _ in results if ok)
+    failed = sum(1 for _, ok, _ in results if not ok)
+    print(f"  Result: {passed} passed, {failed} failed (of {len(results)} claims)")
+    if failed:
+        print()
+        print("  FAILED claims:")
+        for name, ok, detail in results:
+            if not ok:
+                print(f"    {FAIL} {name}")
+                print(f"       {detail}")
+        print()
+        print("══════════════════════════════════════════════════════════════")
+        sys.exit(1)
+    print()
+    print("  All claims verified. Repo is reproducible.")
+    print("══════════════════════════════════════════════════════════════")
+    sys.exit(0)
 
