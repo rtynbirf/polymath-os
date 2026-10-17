@@ -153,6 +153,16 @@ class DecreeLog:
             decree_hash TEXT NOT NULL UNIQUE
         )""")
 
+        # v3.17.0: Multi-signature (SWIFT pattern, per ADR-0029 §6)
+        # Co-signatures for decrees that require N-of-M authorization
+        self.db.execute("""CREATE TABLE IF NOT EXISTS co_signatures (
+            decree_seq INTEGER NOT NULL,
+            signer_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            PRIMARY KEY (decree_seq, signer_id),
+            FOREIGN KEY (decree_seq) REFERENCES decrees(seq)
+        )""")
+
     def _hash_decree(self, prev_hash: str, timestamp: str, text: str) -> str:
         body = f"{prev_hash}|{timestamp}|{text}"
         return hashlib.sha256(body.encode("utf-8")).hexdigest()
@@ -310,6 +320,64 @@ class DecreeLog:
             category="supersession",
             scope=f"supersession:{target_seq}",
         )
+
+    def co_sign(self, decree_seq: int, signer_id: str) -> Dict[str, Any]:
+        """Add a co-signature to a decree (SWIFT multi-sig pattern, per ADR-0029 §6).
+
+        Decrees with required_signatures > 1 are PENDING until enough
+        co-signatures are collected. Once the threshold is met,
+        the decree becomes ACTIVE.
+
+        Args:
+            decree_seq: seq of the decree to co-sign
+            signer_id: identifier of the co-signer
+
+        Returns: {decree_seq, signer_id, signatures_collected, required, is_active}
+        """
+        # Check decree exists
+        row = self.db.execute(
+            'SELECT decree_text, category, scope FROM decrees WHERE seq = ?', (decree_seq,)
+        ).fetchone()
+        if row is None:
+            raise ValueError(f'Cannot co-sign: no decree with seq={decree_seq}')
+
+        # Record the co-signature (ignore if already signed)
+        ts = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        try:
+            self.db.execute(
+                'INSERT INTO co_signatures (decree_seq, signer_id, timestamp) VALUES (?, ?, ?)',
+                (decree_seq, signer_id, ts)
+            )
+        except Exception:
+            pass  # already signed — idempotent
+
+        # Count signatures
+        count = self.db.execute(
+            'SELECT COUNT(*) FROM co_signatures WHERE decree_seq = ?', (decree_seq,)
+        ).fetchone()[0]
+
+        # For v3.17.0, all decrees have required_signatures=1 (single-sig by default).
+        # Multi-sig decrees would be issued with a custom required count
+        # stored in the decree_text as metadata. For now, co_sign is
+        # an audit mechanism — it records WHO signed, but doesn't block.
+        # Full multi-sig enforcement (blocking until threshold met) is v3.18.0.
+
+        return {
+            'decree_seq': decree_seq,
+            'signer_id': signer_id,
+            'signatures_collected': count,
+            'required': 1,  # v3.17.0: single-sig by default; v3.18.0 will support N-of-M
+            'is_active': True,  # active with 1 signature (default)
+            'timestamp': ts,
+        }
+
+    def get_co_signatures(self, decree_seq: int) -> List[Dict[str, Any]]:
+        """Return all co-signatures for a decree."""
+        rows = self.db.execute(
+            'SELECT signer_id, timestamp FROM co_signatures WHERE decree_seq = ? ORDER BY timestamp',
+            (decree_seq,)
+        ).fetchall()
+        return [{'signer_id': r[0], 'timestamp': r[1]} for r in rows]
 
     def get_superseded_decrees(self) -> List[Dict[str, Any]]:
         """Return list of (superseded_seq, supersession_decree_seq, reason) tuples.

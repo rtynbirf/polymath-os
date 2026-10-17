@@ -79,6 +79,8 @@ class AgentCard:
     version: str
     capabilities: List[str]
     decree_scope: str = "all"
+    # v3.17.0: Compartmentalization (NSA pattern, per ADR-0029 §7)
+    clearance_level: str = "public"  # 'public' < 'internal' < 'secret'
     protocol_version: str = "a2a/1.0 + mcp/1.0"
     endpoints: List[AgentEndpoint] = field(default_factory=list)
     auth: Dict[str, Any] = field(default_factory=lambda: {"type": "decree"})

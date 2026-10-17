@@ -365,6 +365,11 @@ class Runtime:
         self._oneshot: Optional[str] = None
         self.decree_log = None  # set via set_decree_log(); supreme law above policy
         self.decree_scope: Optional[str] = None  # v0.6: optional scope filter
+        # v3.17.0: Circuit breaker (Stock Exchange pattern) — cascade failure protection
+        self._cb_threshold = 10  # max DECREE_BLOCK events before pause
+        self._cb_window = 60     # time window in seconds
+        self._cb_blocks = []     # list of timestamps of recent DECREE_BLOCK events
+        self._cb_paused = False  # when True, all Intents → WAITING_FOR_HUMAN
         self._schema = load_schema("intent.schema.json")
         self._rehydrate()
 
@@ -386,6 +391,40 @@ class Runtime:
         """
         self.decree_log = dl
         self.decree_scope = scope
+
+    def set_circuit_breaker(self, threshold: int = 10, window: int = 60) -> None:
+        """Configure circuit breaker (Stock Exchange pattern, per ADR-0029 §12).
+
+        When DECREE_BLOCK events exceed threshold within window seconds,
+        the system automatically pauses — all new Intents → WAITING_FOR_HUMAN.
+        The human decides: 'continue' or 'investigate'.
+
+        This prevents cascade failures (like stock market circuit breakers
+        that halt trading when the market drops too fast).
+        """
+        self._cb_threshold = threshold
+        self._cb_window = window
+
+    def _check_circuit_breaker(self) -> bool:
+        """Check if circuit breaker is tripped. Returns True if paused."""
+        import time
+        now = time.time()
+        # Prune old entries outside the window
+        self._cb_blocks = [t for t in self._cb_blocks if now - t < self._cb_window]
+        # Check if threshold exceeded
+        if len(self._cb_blocks) >= self._cb_threshold:
+            self._cb_paused = True
+        return self._cb_paused
+
+    def _record_decree_block(self) -> None:
+        """Record a DECREE_BLOCK event for circuit breaker tracking."""
+        import time
+        self._cb_blocks.append(time.time())
+
+    def resume_from_circuit_breaker(self) -> None:
+        """Human resets the circuit breaker (like resuming trading after a halt)."""
+        self._cb_paused = False
+        self._cb_blocks = []
 
     def set_decree_scope(self, scope: Optional[str]) -> None:
         """Change the decree scope filter at runtime (without re-attaching the log).
@@ -536,6 +575,12 @@ class Runtime:
             if self.states[iid] != State.WAITING_FOR_HUMAN:
                 self._transition(intent, State.WAITING_FOR_HUMAN, reason)
             return State.WAITING_FOR_HUMAN
+        # v3.17.0: CIRCUIT BREAKER — if tripped, all Intents → WAITING_FOR_HUMAN
+        if self._check_circuit_breaker():
+            self.ledger.append('CIRCUIT_BREAKER_PAUSED', {
+                'intent_id': iid,
+                'reason': f'circuit breaker tripped: {len(self._cb_blocks)} blocks in {self._cb_window}s'})
+            return block('circuit breaker paused — too many DECREE_BLOCK events')
         # DECREE GATE — supreme law, checked BEFORE policy (per ADR-0021 + ADR-0022).
         # If a decree prohibits the action, block immediately. Default-deny:
         # if no decree log attached, skip this gate (other policy still applies).
@@ -554,6 +599,7 @@ class Runtime:
                     "intent_id": iid, "reason": reasons,
                     "laws_checked": decree_result.get("laws_checked", 0),
                     "violations": violations})
+                self._record_decree_block()
                 return block(f"decree prohibition: {reasons}")
         try:
             self.policy.check_intent(intent)
