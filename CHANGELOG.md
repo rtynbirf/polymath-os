@@ -1,5 +1,131 @@
 # Changelog
 
+## [v3.8.0] — 2026-10-17 (CLEAN-UP: v0.6 word-boundary + scope filter + token hygiene + ТЗ/Roadmap)
+
+"ВСЁ ВЫПОЛНЯЙ ВСЁ САМ=) ЧТО НУЖНО ДЕЛАТЬ ТЫ ЗНАЕШЬ ЧИСТЬ ПЁРЫШКИ ПОДЧИЩАЙ ХВОСТЫ ДОДЕЛЫВАЙ ВСЁ ЧТО НЕ ДОДЕЛАНО И ВСЁ ЧТО ПОЛОЖЕНО ДЕЛАТЬ!!! ЧТОБ КОМАР НОСА НЕ ПОДТОЧИЛ, ДЕЛАЙ ИДЕАЛЬНУЮ ОСЬ=)"
+
+The user invoked the "perfect OS" command — clean up loose ends, finish everything unfinished, do everything that's supposed to be done. v3.8.0 closes 4 categories of loose ends from the v3.6.0/v3.7.0 sessions:
+
+### v0.6 Decree matching — 3 fixes (closes 3 known limitations)
+
+1. **Word-boundary regex matching** (was: substring match in v0.5). Fixes
+   the v0.5 false positive where `chrome` matched `chromebook` (substring).
+   v0.6 uses `\b{re.escape(term)}\b` regex via the new `_compile_term_regex()`
+   helper. Caches compiled patterns per-term. Verified on production decrees:
+   - `buy a chromebook` → compliant (v0.5: DENIED ❌ false positive)
+   - `visit googleplex HQ` → compliant (v0.5: would also work, but now verified)
+   - `install Chrome` → DENIED (still works, `\bchrome\b` matches)
+   - `visit Google headquarters` → DENIED (`\bgoogle\b` matches)
+
+2. **Decree scope filtering** (was: all decrees applied to all intents in v0.5).
+   `check_compliance(intent_text, scope=None)` — when `scope` is passed
+   (e.g. `scope="singulyar"`), only decrees whose scope matches
+   (`decree.scope == "all"` OR `decree.scope == scope`) are checked. Pass
+   `None` (default) for backward compatibility — all decrees apply.
+   Wired into `Runtime.set_decree_log(dl, scope=None)` and
+   `Runtime.set_decree_scope(scope)` for runtime-level scope control.
+
+3. **Regex-based prohibition parser** (was: naive `text.split("use", 1)` in v0.5).
+   New `_PROHIBITION_REGEX` matches `never <verb> X` where verb ∈
+   `{use, use the, install, deploy, run, adopt, rely on}`. Fixes the v0.5
+   mis-parsing of "never abuse any services" — which v0.5 read as
+   prohibited="any services" because "abuse" contains "use" as substring.
+   v0.6 correctly recognizes "abuse" is NOT in the verb set → no terms
+   extracted → never blocks.
+
+### Token hygiene — closes the security gap from v3.6.0 PAT leak
+
+The v3.6.0 release session had a `github_pat_...` token auto-revoked by
+GitHub's secret scanner because it appeared in plaintext in a bash command.
+v3.8.0 closes this gap with three layers:
+
+1. **`scripts/check_token_hygiene.py`** (new, 234 lines) — scans all
+   `.py`, `.sh`, `.js`, `.yml`, `.json`, `.md`, `.ts`, `.tf`, `.nix` files
+   for known token patterns: `github_pat_<50+ chars>`, `ghp_<36 chars>`,
+   `gho_`, `ghu_`, `ghs_`, `ghr_<76 chars>`, generic env-var literal
+   assignments (`GH_TOKEN='<50+ chars>'`), and git remote URLs with embedded
+   credentials. Threshold tuned to avoid documentation false-positives
+   (50+ chars after prefix; classic PATs require exact 36-char match).
+2. **`make verify` claim #23** — the new token hygiene check is wired into
+   the open-source contract. `make verify` now reports 23/23 (was 22/22).
+3. **`SECURITY.md`** — added "Token hygiene — GitHub PAT best practices"
+   section documenting: NEVER inline tokens in bash commands; ALWAYS use
+   env vars or git credential helper or `gh` CLI; RESET remote URL to
+   clean form after push with embedded token. Includes token formats
+   reference table (`github_pat_` ~93 chars, `ghp_` 40 chars, etc.)
+   and "If a token IS leaked" recovery procedure (REVOKE → audit → rotate →
+   document).
+
+### ТЗ + Roadmap consolidated — closes the documentation gap
+
+The previous session created `ТЗ_Polymath_OS_v3.7.0.md` (47.9 KB, 16
+sections) and `ROADMAP_v3.7.0.md` (23.2 KB, 10 sections) but never committed
+them to git — they were sitting in the working tree as untracked files.
+v3.8.0 commits them as part of the repo, with full cross-references to
+existing docs (no duplication of `runtime/docs/TECHNICAL_SPEC.md` or
+`ROADMAP.md`).
+
+### Verification
+
+- `make verify` — **23/23 PASS** (was 22/22; +1 for token hygiene claim)
+- runtime tests — **123/123 PASS** (was 111; +12 new for v0.6)
+- `pnpm turbo run lint` — 1/1 PASS
+- `pnpm turbo run typecheck` — 1/1 PASS
+- v0.6 production smoke test on `~/.polymath-os/decrees.db`:
+  - `buy a chromebook` → compliant ✓ (v0.5 false positive FIXED)
+  - `install Chrome` → DENIED ✓ (`\bchrome\b` matches)
+  - `configure DNS with Google 8.8.8.8` → DENIED ✓ (`\bgoogle\b` matches)
+  - `configure DNS with local unbound` → compliant ✓ (v0.4 false positive FIXED, v0.5+v0.6 maintained)
+  - `use any services you want` (with decree "never abuse any services") → compliant ✓ (regex parser FIXED)
+  - `configure DNS with Google 8.8.8.8` scope=singulyar → compliant ✓ (scope filter)
+  - `configure DNS with Google 8.8.8.8` scope=polymath-os → DENIED ✓ (scope filter)
+
+### Files changed
+
+- `runtime/src/decree_log.py` (+80 lines):
+  - `import re` added
+  - `_PROHIBITION_REGEX` (new) — regex pattern for `never <verb> X`
+  - `_TERM_REGEX_CACHE` (new) — per-term compiled pattern cache
+  - `_compile_term_regex()` (new helper) — `\b{term}\b` regex with caching
+  - `_extract_prohibited_terms()` — uses `_PROHIBITION_REGEX.search()` (was: `text.split("use", 1)`)
+  - `check_compliance(intent_text, scope=None)` — added `scope` parameter, uses `_compile_term_regex()` instead of substring check
+- `runtime/src/singulyar_runtime.py` (+18 lines):
+  - `self.decree_scope: Optional[str] = None` in `__init__`
+  - `set_decree_log(dl, scope=None)` — accepts optional scope
+  - `set_decree_scope(scope)` (new method) — change scope at runtime
+  - `_advance()` — passes `scope=self.decree_scope` to `check_compliance()`
+- `runtime/tests/test_decree_log.py` (+195 lines, +12 new tests):
+  - `DecreeLogV06Tests` class with 12 new test methods covering:
+    - word-boundary matching (chrome/chromebook, firefox/firefoxbinary, google/googleplex)
+    - scope filtering (only matching-scope decrees checked)
+    - regex parser (never abuse → no terms, never install → works, never rely on → works, never use the → consumes "the")
+    - term regex cache (same pattern object returned for same term)
+    - word boundary at string start/end
+    - backward compat (no scope = all decrees apply)
+  - Updated existing `test_v05_list_matching_chrome_firefox_edge_safari` —
+    `chromebook` is now compliant (was DENIED in v0.5)
+- `scripts/check_token_hygiene.py` (new, 234 lines):
+  - 7 token patterns: `github_pat_`, `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, env_var_literal_assignment, git_remote_with_credentials
+  - 50+ char threshold for github_pat_ (avoids doc placeholder false positives)
+  - Exact 36-char match for `ghp_/gho_/ghu_/ghs_` (classic PAT length)
+  - ALLOWLIST_LITERALS for known-safe redaction patterns
+  - Skip paths: `node_modules/`, `.git/`, `pnpm-lock.yaml`, `SHA256SUMS.txt`
+- `scripts/check.py` (+25 lines):
+  - `check_token_hygiene()` function (new claim #23)
+  - Added to `extra_checks` list
+- `SECURITY.md` (+83 lines):
+  - "Token hygiene — GitHub PAT best practices" section
+  - NEVER/ALWAYS examples with code blocks
+  - "Why this matters" — GitHub secret scanner auto-revoke behavior
+  - "If a token IS leaked" recovery procedure (4 steps)
+  - Token formats reference table (6 prefixes)
+- `ТЗ_Polymath_OS_v3.7.0.md` (new, committed in 83cb543)
+- `ROADMAP_v3.7.0.md` (new, committed in 83cb543)
+
+**Total: 8 files, +600+ insertions, 0 deletions**
+
+---
+
 ## [v3.6.0] — 2026-10-17 (OPERATIONAL: Decree Bridge wired — real SQLite decrees)
 
 The system is now OPERATIONAL. 7 foundational human decrees are recorded

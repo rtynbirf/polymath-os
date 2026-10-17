@@ -31,6 +31,92 @@
 - **SAST:** Semgrep + CodeQL в CI.
 - **Container scan:** Trivy на images + filesystem.
 - **Secret scan:** gitleaks в pre-commit + CI.
+- **Token hygiene (v0.6):** `scripts/check_token_hygiene.py` — additional
+  scan beyond gitleaks, catches plaintext GitHub PATs (`github_pat_`,
+  `ghp_`, `gho_`, etc.) and env-var literal assignments in shell scripts.
+  Added as 23rd `make verify` claim.
+
+## Token hygiene — GitHub PAT best practices
+
+**Background:** in the polymath-os v3.6.0 release session (2026-10-17),
+a hardcoded `github_pat_...` token was embedded inline in a bash command.
+GitHub's secret scanner auto-detected and revoked the token within minutes.
+This section documents the lessons learned.
+
+### NEVER do this:
+
+```bash
+# ❌ FORBIDDEN — token is in plaintext in bash history + session logs
+GH_TOKEN='github_pat_PLACEHOLDER_EXAMPLE' \
+  git push origin main
+
+# ❌ FORBIDDEN — token persists in .git/config (anyone with read access can extract)
+git remote set-url origin https://rtynbirf:github_pat_xxx@github.com/rtynbirf/polymath-os.git
+```
+
+### ALWAYS do this:
+
+```bash
+# ✓ Token passed via env var (not inline in command string)
+export GH_TOKEN='github_pat_xxx'   # set once in shell session
+git push origin main               # uses remote URL with no token
+
+# ✓ If you must use token in remote URL (one-shot), reset afterwards:
+git remote set-url origin "https://rtynbirf:${GH_TOKEN}@github.com/rtynbirf/polymath-os.git"
+git push origin main
+git remote set-url origin "https://github.com/rtynbirf/polymath-os.git"  # CLEAN
+
+# ✓ Or use git credential helper (preferred for repeated use):
+echo "https://rtynbirf:${GH_TOKEN}@github.com" | git credential approve
+git push origin main  # credential helper injects auth transparently
+
+# ✓ Or use `gh` CLI (separate auth flow, no token in git config):
+gh auth login  # browser-based, no token in shell
+git push origin main
+```
+
+### Why this matters
+
+GitHub's secret scanner continuously scans:
+- Public git repos (commits, blobs, history)
+- GitHub Issues, PRs, Discussions
+- GitHub Actions logs
+- Other public GitHub surfaces
+
+If a PAT appears in plaintext in any of these, GitHub auto-revokes it
+within minutes (often <5 min). This is a security feature, but it means
+any leaked token becomes immediately unusable.
+
+For polymath-os specifically:
+- `scripts/check_token_hygiene.py` is added to `make verify` (claim #23)
+- It scans all `.py`, `.sh`, `.js`, `.yml`, `.md` files for known token patterns
+- Threshold: 50+ chars after `github_pat_` prefix (avoids false positives on
+  documentation examples like `github_pat_...` placeholder)
+- Pre-commit hook: gitleaks (already configured in `.pre-commit-config.yaml`)
+  catches staged files BEFORE they're committed
+- CI: gitleaks action (Step 13 of `ci.yml`) scans all tracked files
+
+### If a token IS leaked
+
+1. **REVOKE IMMEDIATELY** at https://github.com/settings/tokens
+   (click the token → Revoke)
+2. **Audit access logs** at https://github.com/settings/security-log
+   (look for unauthorized access in the leak window)
+3. **Rotate any dependent credentials** (e.g. if the PAT was used in CI
+   workflows, update those workflows to use a new PAT or OIDC)
+4. **Document the incident** in this file (add a new section below with
+   date, scope, root cause, mitigation)
+
+### Token formats reference
+
+| Prefix | Type | Total length |
+|--------|------|--------------|
+| `github_pat_` | Fine-grained PAT | ~93 chars |
+| `ghp_` | Classic PAT (user) | 40 chars |
+| `gho_` | OAuth token | 40 chars |
+| `ghu_` | User-to-server | 40 chars |
+| `ghs_` | Server-to-server | 40 chars |
+| `ghr_` | Refresh token | 80 chars |
 
 ## Audit checklist
 

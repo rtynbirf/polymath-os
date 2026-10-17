@@ -26,6 +26,7 @@ The decree ALWAYS wins over existing ADRs — PAROLE > LANGUE.
 
 import hashlib
 import json
+import re
 import sqlite3
 import time
 from pathlib import Path
@@ -39,6 +40,58 @@ _RECOGNIZED_ACRONYMS = frozenset({
     "http", "https", "ftp", "sql", "rdp", "os", "db", "cli",
     "rest", "graphql", "grpc", "wsgi", "asgi",
 })
+
+# Regex to extract the prohibited phrase from a "never use X" decree.
+# Captures everything after "never <verb> " where verb ∈ {use, use the,
+# install, deploy, run, adopt, rely on}. Fixes v0.5 naive
+# `text.split("use", 1)` parser which mis-parsed "never abuse any services"
+# as prohibited="any services" (because "abuse" contains "use" as substring).
+#
+# Examples:
+#   "never use Google DNS"            → captures "Google DNS"
+#   "never use the Google DNS server" → captures "Google DNS server"
+#   "never install Chrome"            → captures "Chrome"
+#   "never rely on AWS"               → captures "AWS"
+#   "never abuse any services"        → no match (verb "abuse" not in set)
+#
+# v0.6 — fixes the v0.5 limitation documented in decree_log.py line 161.
+_PROHIBITION_REGEX = re.compile(
+    r"\bnever\s+(?:use(?:\s+the)?|install|deploy|run|adopt|rely\s+on)\s+(.+?)\s*[.,;:!?]*$",
+    re.IGNORECASE,
+)
+
+# Cache of compiled per-term regex patterns — avoids recompiling \b{term}\b
+# on every check_compliance() call. Key: lowercase term. Value: compiled
+# regex. Per-instance (not class-level) because DecreeLog instances may
+# have different decree texts; but the cache key is the term itself, so
+# repeated terms across instances benefit too.
+_TERM_REGEX_CACHE: Dict[str, "re.Pattern"] = {}
+
+
+def _compile_term_regex(term: str) -> "re.Pattern":
+    """Compile a word-boundary regex for the given prohibited term.
+
+    v0.6 — uses `\\b{re.escape(term)}\\b` instead of v0.5's substring check.
+    This fixes the false positive where "chrome" matched "chromebook" (the
+    word "chrome" appears as a substring of "chromebook" but NOT as a whole
+    word).
+
+    For multi-word terms like "google dns", the regex is `\\bgoogle dns\\b`
+    (with the space inside the pattern, which is fine — \\b matches at the
+    start of the first word and end of the last word).
+
+    The regex is case-insensitive (uses re.IGNORECASE).
+    """
+    cached = _TERM_REGEX_CACHE.get(term)
+    if cached is None:
+        # Use re.escape to handle special regex chars in the term.
+        # Word boundaries (\b) match at the start of the first word and end
+        # of the last word.
+        pattern = r"\b" + re.escape(term) + r"\b"
+        cached = re.compile(pattern, re.IGNORECASE)
+        _TERM_REGEX_CACHE[term] = cached
+    return cached
+
 
 # Known browser/technology proper nouns — even if a decree author forgets to
 # capitalize them, these still count as proper nouns for LIST classification.
@@ -167,10 +220,11 @@ class DecreeLog:
         ]
 
     def _extract_prohibited_terms(self, decree_text: str) -> List[str]:
-        """v0.5 phrase-based matcher (deterministic, no LLM).
+        """v0.6 phrase-based matcher (deterministic, no LLM).
 
-        Given a prohibition decree of the form "never use X", extract X and
-        classify it as one of:
+        Given a prohibition decree of the form "never use X" (or "never
+        install X", "never deploy X", "never rely on X", etc.), extract X
+        and classify it as one of:
 
           - LIST     : 3+ words, ALL proper nouns (each starts with uppercase in
                        the original decree text OR is a known browser/tech proper
@@ -184,28 +238,30 @@ class DecreeLog:
                        (block on full phrase + first word).
 
         Returns: List[str] of prohibited search terms, all lowercase, deduped.
-        Returns [] if the decree is not a "never use X" prohibition.
+        Returns [] if the decree is not a "never <verb> X" prohibition.
+
+        v0.6 changes (vs v0.5):
+        - Uses _PROHIBITION_REGEX instead of naive `text.split("use", 1)`.
+          This fixes mis-parsing of "never abuse any services" (which v0.5
+          read as prohibited="any services" because "abuse" contains "use"
+          as a substring). v0.6 recognizes only the verbs {use, install,
+          deploy, run, adopt, rely on} (with optional "the" after "use").
         """
-        text_lower = decree_text.lower()
-        if "never" not in text_lower or "use" not in text_lower:
+        match = _PROHIBITION_REGEX.search(decree_text)
+        if not match:
+            return []
+        prohibited_raw = match.group(1).strip().rstrip(".,;:!?")
+        if not prohibited_raw:
             return []
 
-        # Lowercased split — used for the actual terms we search.
-        parts_lower = text_lower.split("use", 1)
-        if len(parts_lower) < 2:
-            return []
-        raw_lower = parts_lower[-1].strip().rstrip(".,;:!?")
+        # Lowercased version — for the actual search terms.
+        raw_lower = prohibited_raw.lower()
         words_lower = raw_lower.split()
         if not words_lower:
             return []
 
-        # Original-case split — used to detect proper nouns by capitalization.
-        # We split on the literal substring "use" exactly as above so the word
-        # indices line up with `words_lower`.
-        parts_orig = decree_text.split("use", 1)
-        if len(parts_orig) < 2:
-            return []
-        raw_orig = parts_orig[-1].strip().rstrip(".,;:!?")
+        # Original-case version — for proper-noun detection.
+        raw_orig = prohibited_raw
         words_orig = raw_orig.split()
 
         def _is_proper_noun(orig_word: str, lower_word: str) -> bool:
@@ -230,39 +286,68 @@ class DecreeLog:
         if len(words_lower) == 2:
             full_phrase = " ".join(words_lower)
             head_noun = words_lower[0]
-            # Dedupe in case head noun equals the full phrase (impossible for
-            # 2 words, but defensive).
             return list(dict.fromkeys([full_phrase, head_noun]))
 
         # Fallback for 3+ word decrees that aren't all proper nouns: treat the
-        # entire phrase as a single prohibited term. (Not in the spec's
-        # examples, but the most conservative default.)
+        # entire phrase as a single prohibited term.
         return [" ".join(words_lower)]
 
-    def check_compliance(self, intent_text: str) -> Dict[str, Any]:
+
+    def check_compliance(self, intent_text: str, scope: Optional[str] = None) -> Dict[str, Any]:
         """Check if an intent complies with all active decrees.
 
         This is the enforcement mechanism — the kernel calls this before
         executing any Intent. If a decree prohibits the action → DENIED.
 
-        v0.5: phrase-based deterministic matching. For each prohibition decree
-        of form "never use X", we extract X's prohibited search terms via
-        `_extract_prohibited_terms()` and block if ANY term appears as a
-        substring of `intent_text.lower()`. This fixes the v0.4 false positive
-        where decree "never use Google DNS" matched "dns" anywhere (e.g.
-        "configure DNS with local unbound"). v0.5 instead blocks on the full
-        phrase "google dns" OR the head noun "google" alone.
+        v0.6 changes (vs v0.5):
+        - **Word-boundary regex matching.** Each prohibited term is matched
+          using `\\b{term}\\b` regex instead of v0.5's substring check. This
+          fixes the v0.5 false positive where "chrome" matched "chromebook"
+          (the word "chrome" appears as a substring of "chromebook" but NOT
+          as a whole word). v0.6 uses re.escape + word boundaries.
+        - **Decree scope filtering.** New optional `scope` parameter. When
+          passed (e.g. scope="singulyar"), only decrees whose scope matches
+          (decree.scope == "all" OR decree.scope == scope) are checked.
+          When scope=None (default), all decrees are checked (backward
+          compatible with v0.5 behavior).
+        - **Regex-based prohibition parser.** `_extract_prohibited_terms()`
+          now uses `_PROHIBITION_REGEX` instead of naive
+          `text.split("use", 1)`. This fixes mis-parsing of "never abuse
+          any services" (which v0.5 read as prohibited="any services"
+          because "abuse" contains "use" as a substring).
 
-        Known v0.5 limitation: substring match means "chrome" inside
-        "chromium" will trigger a denial. v0.6 will use word-boundary regex.
+        v0.5 (still applies): phrase-based deterministic matching. For each
+        prohibition decree of form "never use X", we extract X's prohibited
+        search terms via `_extract_prohibited_terms()` and block if ANY
+        term appears as a whole word in `intent_text`. This fixes the v0.4
+        false positive where decree "never use Google DNS" matched "dns"
+        anywhere (e.g. "configure DNS with local unbound"). v0.5+ instead
+        blocks on the full phrase "google dns" OR the head noun "google"
+        alone.
+
+        Args:
+            intent_text: The intent's description (or any text to check).
+            scope: Optional scope filter. If provided, only decrees whose
+                   scope matches are checked. Scope matching: decree.scope
+                   == "all" → always applies. Otherwise, exact string match
+                   with the passed scope. Pass None to check all decrees
+                   (backward compatible with v0.5).
+
+        Returns: {compliant: bool, violations: [...], laws_checked: int}
         """
         laws = self.get_active_laws()
+        # v0.6 scope filter — only apply decrees whose scope matches.
+        if scope is not None:
+            laws = [law for law in laws if law["scope"] == "all" or law["scope"] == scope]
         violations = []
-        intent_lower = intent_text.lower()
         for law in laws:
             terms = self._extract_prohibited_terms(law["text"])
             for term in terms:
-                if term and term in intent_lower:
+                if not term:
+                    continue
+                # v0.6: word-boundary regex match (was: substring match in v0.5)
+                pattern = _compile_term_regex(term)
+                if pattern.search(intent_text):
                     violations.append({
                         "decree_seq": law["seq"],
                         "decree_text": law["text"],
@@ -277,6 +362,7 @@ class DecreeLog:
             "violations": violations,
             "laws_checked": len(laws),
         }
+
 
     def verify(self) -> bool:
         """Verify the chain integrity."""

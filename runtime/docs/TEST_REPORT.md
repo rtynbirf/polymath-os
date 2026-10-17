@@ -29,6 +29,30 @@ test_v05_phrase_matching_google_dns_does_not_block_unbound (test_decree_log.Decr
 v0.5 fix: decree 'never use Google DNS' must NOT block an intent ... ok
 test_v05_single_word_prohibition_still_blocks (test_decree_log.DecreeLogTests.test_v05_single_word_prohibition_still_blocks)
 v0.5 SINGLE classification: 'never use Cloudflare' → prohibited ... ok
+test_v06_backward_compat_no_scope (test_decree_log.DecreeLogV06Tests.test_v06_backward_compat_no_scope)
+v0.6 backward compatibility: check_compliance() without scope ... ok
+test_v06_regex_parser_handles_never_abuse (test_decree_log.DecreeLogV06Tests.test_v06_regex_parser_handles_never_abuse)
+v0.6 FIX: 'never abuse any services' was mis-parsed by v0.5 ... ok
+test_v06_regex_parser_handles_never_install (test_decree_log.DecreeLogV06Tests.test_v06_regex_parser_handles_never_install)
+v0.6: 'never install X' should extract X (was: only 'never use' worked). ... ok
+test_v06_regex_parser_handles_never_rely_on (test_decree_log.DecreeLogV06Tests.test_v06_regex_parser_handles_never_rely_on)
+v0.6: 'never rely on X' should extract X. ... ok
+test_v06_regex_parser_use_the (test_decree_log.DecreeLogV06Tests.test_v06_regex_parser_use_the)
+v0.6: 'never use the X' should extract X (the 'the' is consumed). ... ok
+test_v06_scope_filter_only_matching_decrees (test_decree_log.DecreeLogV06Tests.test_v06_scope_filter_only_matching_decrees)
+v0.6 NEW: scope parameter filters decrees. ... ok
+test_v06_scope_filter_with_runtime (test_decree_log.DecreeLogV06Tests.test_v06_scope_filter_with_runtime)
+v0.6: realistic Runtime use case. ... ok
+test_v06_term_regex_cache_works (test_decree_log.DecreeLogV06Tests.test_v06_term_regex_cache_works)
+v0.6: _compile_term_regex caches compiled patterns across calls. ... ok
+test_v06_word_boundary_at_string_boundaries (test_decree_log.DecreeLogV06Tests.test_v06_word_boundary_at_string_boundaries)
+v0.6: \bchrome\b should match at start/end of string. ... ok
+test_v06_word_boundary_chrome_does_not_match_chromebook (test_decree_log.DecreeLogV06Tests.test_v06_word_boundary_chrome_does_not_match_chromebook)
+v0.6 FIX: 'chrome' is a whole word, not a substring. ... ok
+test_v06_word_boundary_firefox_does_not_match_firefoxbinary (test_decree_log.DecreeLogV06Tests.test_v06_word_boundary_firefox_does_not_match_firefoxbinary)
+v0.6: 'firefoxbinary' has no word boundary after 'firefox' → no match. ... ok
+test_v06_word_boundary_google_does_not_match_googleplex (test_decree_log.DecreeLogV06Tests.test_v06_word_boundary_google_does_not_match_googleplex)
+v0.6: 'googleplex' (single word) doesn't match \bgoogle\b. ... ok
 test_no_decree_log_allows_all (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_no_decree_log_allows_all) ... ok
 test_permission_decree_allows (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_permission_decree_allows) ... ok
 test_prohibition_decree_blocks_intent (test_decree_runtime_integration.DecreeRuntimeIntegrationTests.test_prohibition_decree_blocks_intent) ... ok
@@ -160,7 +184,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 111 tests in 5.830s
+Ran 123 tests in 7.162s
 
 OK (skipped=4)
 ```

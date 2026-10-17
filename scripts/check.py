@@ -508,6 +508,33 @@ def check_freedom_no_tier3():
 
 
 
+# ============================================================
+# CHECK 23: Token hygiene — no plaintext PATs in scripts/code
+# ============================================================
+def check_token_hygiene():
+    """v0.6 NEW (Task ID 4): scan all .py/.sh/.js/.yml/.md files for
+    plaintext GitHub PATs (github_pat_, ghp_, gho_, ...) and other
+    known secret patterns. Catches leaks that gitleaks (pre-commit)
+    might miss — e.g. tokens in shell scripts that export env vars
+    with literal values. The previous polymath-os session had a
+    github_pat_... token auto-revoked by GitHub's secret scanner
+    because it appeared in plaintext in a bash command. This check
+    would have caught it BEFORE the bash command was run."""
+    script = REPO_ROOT / "scripts" / "check_token_hygiene.py"
+    if not script.exists():
+        return False, "scripts/check_token_hygiene.py missing"
+    r = subprocess.run(
+        ["python3", str(script)],
+        cwd=str(REPO_ROOT),
+        capture_output=True, text=True, timeout=60,
+    )
+    if r.returncode == 0:
+        return True, "no plaintext tokens found"
+    # Extract just the findings count from stderr
+    findings = [l for l in r.stderr.splitlines() if "plaintext token leak" in l]
+    detail = findings[0] if findings else r.stderr.strip().split("\n")[-1]
+    return False, f"plaintext tokens found: {detail}"
+
 def check_manifest_json():
     m = REPO_ROOT / 'MANIFEST.json'
     if not m.exists():
@@ -533,6 +560,7 @@ extra_checks = [
     ("20. Pattern: identity backup documented (S37)", check_pattern_06_identity_backup_documented),
     ("21. Freedom: zero Tier 3 benefactors in code", check_freedom_no_tier3),
     ("22. MANIFEST.json exists + valid (ADR-0020)", check_manifest_json),
+    ("23. Token hygiene: no plaintext PATs in code (v0.6)", check_token_hygiene),
 ]
 
 checks = [

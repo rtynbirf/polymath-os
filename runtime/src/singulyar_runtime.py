@@ -364,18 +364,39 @@ class Runtime:
         self.fingerprints: Dict[str, str] = {}
         self._oneshot: Optional[str] = None
         self.decree_log = None  # set via set_decree_log(); supreme law above policy
+        self.decree_scope: Optional[str] = None  # v0.6: optional scope filter
         self._schema = load_schema("intent.schema.json")
         self._rehydrate()
 
-    def set_decree_log(self, dl) -> None:
+    def set_decree_log(self, dl, scope: Optional[str] = None) -> None:
         """Attach a DecreeLog (or None to detach). Per ADR-0021 + ADR-0022:
         the decree log is the human's supreme law layer — ABOVE policy.
         Once attached, every Intent's description is checked against active
         decrees (law + prohibition) before any policy/capability check.
         If a decree prohibits the action → block (WAITING_FOR_HUMAN),
         do NOT downgrade to a softer state. Default-deny: None = no decrees,
-        no decree-based block (other policy still applies)."""
+        no decree-based block (other policy still applies).
+
+        v0.6 NEW: optional `scope` parameter. When set (e.g. scope="singulyar"),
+        only decrees whose scope matches (decree.scope == "all" OR
+        decree.scope == scope) are enforced. This allows different runtimes
+        (Singulyar EIR vs Polymath-OS browser vs cell65-host) to apply
+        different decree subsets without duplicating the DecreeLog.
+        Pass None (default) for backward compatibility — all decrees apply.
+        """
         self.decree_log = dl
+        self.decree_scope = scope
+
+    def set_decree_scope(self, scope: Optional[str]) -> None:
+        """Change the decree scope filter at runtime (without re-attaching the log).
+
+        v0.6: useful when the same Runtime is reused for different scopes
+        (e.g. a multi-purpose adapter that sometimes processes singulyar
+        intents, sometimes polymath-os intents). Pass None to clear the
+        filter (all decrees apply).
+        """
+        self.decree_scope = scope
+
 
     # -- helpers
     def fp(self, obj) -> str:
@@ -518,8 +539,11 @@ class Runtime:
         # DECREE GATE — supreme law, checked BEFORE policy (per ADR-0021 + ADR-0022).
         # If a decree prohibits the action, block immediately. Default-deny:
         # if no decree log attached, skip this gate (other policy still applies).
+        # v0.6: pass decree_scope so only matching-scope decrees are checked.
         if self.decree_log is not None:
-            decree_result = self.decree_log.check_compliance(intent.description)
+            decree_result = self.decree_log.check_compliance(
+                intent.description, scope=self.decree_scope
+            )
             if not decree_result.get("compliant", True):
                 violations = decree_result.get("violations", [])
                 reasons = "; ".join(
