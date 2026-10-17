@@ -16,7 +16,9 @@
 Берём лучшее от каждой корпорации, перецентрируем на Человека,
 синтезируем в уникальное эмержентное сингулярное.
 
-## Analysis — Best Practices from Each Corporation
+## Decision
+
+Synthesize the best security practice from each corporation, reorient from corporation-centric to human-centric. The Decision IS the synthesis below — each corporation's best practice mapped to an existing СИНГУЛЯР feature.
 
 ### Oracle — Zero Trust Packet Routing (ZPR)
 
