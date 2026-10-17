@@ -96,6 +96,18 @@ else:
 `;
     return this._runPython(script);
   }
+
+  async getAgents() {
+    // v3.11.0 NEW (per ROADMAP_v4.0.0 task 4.3) — return list of
+    // default Agent Cards. Per ADR-0023 — Agent Card Protocol.
+    const script = `
+import sys, json
+sys.path.insert(0, ${JSON.stringify(this.runtimeSrc)})
+from agent_card import ALL_DEFAULT_CARDS
+print(json.dumps([c.to_dict() for c in ALL_DEFAULT_CARDS]))
+`;
+    return this._runPython(script);
+  }
 }
 
 // CLI
@@ -138,6 +150,18 @@ if (require.main === module) {
     }
     bridge
       .checkCompliance(text)
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 2));
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(1);
+      });
+  } else if (cmd === "agents") {
+    // v3.11.0 NEW — list default Agent Cards (per ADR-0023)
+    bridge
+      .getAgents()
       .then((r) => {
         console.log(JSON.stringify(r, null, 2));
         process.exit(0);

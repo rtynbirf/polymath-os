@@ -57,6 +57,19 @@ background:var(--panel);max-height:400px;overflow:auto}
 </div>
 </div>
 
+<div id="agentsSection" style="margin-top:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:17px;margin:0">🤖 Зарегистрированные агенты <span id="agentsCount" style="color:var(--muted);font-size:14px;font-weight:normal"></span></h2>
+<button class="button" id="refreshAgentsBtn" style="font-size:13px;padding:6px 12px">Обновить</button>
+</div>
+<div id="agentsList" style="display:grid;grid-template-columns:1fr;gap:8px">
+<div style="color:var(--muted);text-align:center;padding:16px">Загрузка агентов...</div>
+</div>
+<p class="fineprint" style="margin-top:12px;color:var(--muted)">
+Каждый агент имеет <b>decree_scope</b> — какие декреты к нему применяются. Per ADR-0023 (Agent Card Protocol) + ADR-0024 (Decree-Enforced Multi-Agent Communication).
+</p>
+</div>
+
 <div style="margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)">
 <h2 style="font-size:17px;margin:0 0 8px">Как это работает</h2>
 <ol class="fineprint" style="padding-left:20px;line-height:1.6">
@@ -171,6 +184,59 @@ renderLog(all);
 
 // Initial render — bridge-first if available
 fetchAllDecrees().then(renderLog);
+
+// v3.11.0 NEW — Agents section
+async function fetchAgents() {
+  const bridge = getBridge();
+  if (bridge && bridge.getAgents) {
+    try {
+      const agents = await bridge.getAgents();
+      if (agents && agents.length) return agents;
+    } catch (e) { console.warn('[agents] bridge.getAgents failed:', e); }
+  }
+  // Fallback: empty (no agents loaded without bridge)
+  return [];
+}
+
+function renderAgents(agents) {
+  const view = $('#agentsList');
+  const count = $('#agentsCount');
+  if (!agents || !agents.length) {
+    count.textContent = '';
+    view.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">Агенты не зарегистрированы. Bridge недоступен (нужен Node/Electron).</div>';
+    return;
+  }
+  count.textContent = `(${agents.length})`;
+  view.innerHTML = agents.map((a) => {
+    const scopeClass = a.decree_scope === 'all' ? 'var(--accent)' : 'var(--muted)';
+    return `<div style="border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--panel2)">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+        <div>
+          <div style="font-weight:bold;color:var(--text)">${esc(a.name)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(a.id)} · ${esc(a.version)}</div>
+        </div>
+        <span style="font-size:11px;padding:2px 8px;border-radius:3px;background:var(--panel);color:${scopeClass}">scope: ${esc(a.decree_scope)}</span>
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-top:6px">${esc(a.description)}</div>
+      <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+        <b>Capabilities:</b> ${(a.capabilities || []).map(esc).join(', ')}
+      </div>
+      ${a.endpoints && a.endpoints.length ? `<div style="margin-top:4px;font-size:11px;color:var(--muted)"><b>Endpoints:</b> ${a.endpoints.map((e) => esc(e.type)).join(', ')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function refreshAgents() {
+  const agents = await fetchAgents();
+  renderAgents(agents);
+}
+
+$('#refreshAgentsBtn').onclick = () => {
+  toast('Загрузка агентов...');
+  refreshAgents().then(() => toast('Агенты обновлены'));
+};
+
+refreshAgents(); // initial load
 })();
 </script>
 </body></html>

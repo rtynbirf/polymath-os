@@ -6,6 +6,33 @@ Run: 2026-10-17 · Python 3.12.15 · Linux
 Exit code: 0
 
 ```text
+test_check_outbound_with_decree_log_compliant (test_a2a_client.A2AClientBasicTests.test_check_outbound_with_decree_log_compliant) ... ok
+test_check_outbound_with_decree_log_violation (test_a2a_client.A2AClientBasicTests.test_check_outbound_with_decree_log_violation) ... ok
+test_default_scope_is_outbound (test_a2a_client.A2AClientBasicTests.test_default_scope_is_outbound) ... ok
+test_no_decree_log_skips_outbound_gate (test_a2a_client.A2AClientBasicTests.test_no_decree_log_skips_outbound_gate)
+When decree_log is None, A2AClient just does plain HTTP POST. ... ok
+test_discover_http_error_raises_a2a_client_error (test_a2a_client.A2AClientDiscoverTests.test_discover_http_error_raises_a2a_client_error) ... ok
+test_discover_invalid_card_raises_a2a_client_error (test_a2a_client.A2AClientDiscoverTests.test_discover_invalid_card_raises_a2a_client_error) ... ok
+test_discover_parses_valid_agent_card (test_a2a_client.A2AClientDiscoverTests.test_discover_parses_valid_agent_card) ... ok
+test_full_scenario_blocked_outbound (test_a2a_client.A2AClientFullRoundTripTests.test_full_scenario_blocked_outbound)
+PII in description → OUTBOUND_DECREE_BLOCK, no network request. ... ok
+test_full_scenario_compliant_proceeds (test_a2a_client.A2AClientFullRoundTripTests.test_full_scenario_compliant_proceeds)
+Clean intent → outbound decree passes → network request made. ... ok
+test_caller_can_override_scope (test_a2a_client.A2AClientOutboundDecreeGateTests.test_caller_can_override_scope)
+Caller can pass scope= in params to override default 'outbound'. ... ok
+test_compliant_intent_proceeds_to_network (test_a2a_client.A2AClientOutboundDecreeGateTests.test_compliant_intent_proceeds_to_network)
+When intent is clean, A2AClient SHOULD make the HTTP request. ... ok
+test_outbound_decree_block_events_recorded (test_a2a_client.A2AClientOutboundDecreeGateTests.test_outbound_decree_block_events_recorded)
+OUTBOUND_DECREE_BLOCK event should be in the client's event log. ... ok
+test_outbound_decree_blocks_before_network_request (test_a2a_client.A2AClientOutboundDecreeGateTests.test_outbound_decree_blocks_before_network_request)
+CRITICAL: when intent mentions Google, A2AClient must NOT make ... ok
+test_outbound_decree_blocks_pii_to_external (test_a2a_client.A2AClientOutboundDecreeGateTests.test_outbound_decree_blocks_pii_to_external)
+The 'never send PII to external services' decree (scope=outbound) ... ok
+test_remote_returns_decree_block_error (test_a2a_client.A2AClientResponseParsingTests.test_remote_returns_decree_block_error)
+When remote A2A server returns DECREE_BLOCK, A2AClient parses it. ... ok
+test_remote_returns_invalid_json (test_a2a_client.A2AClientResponseParsingTests.test_remote_returns_invalid_json) ... ok
+test_remote_returns_network_error (test_a2a_client.A2AClientResponseParsingTests.test_remote_returns_network_error)
+Network errors are wrapped in IntentResponse with error field. ... ok
 test_extra_unknown_fields_ignored (test_agent_card.AgentCardSerializationTests.test_extra_unknown_fields_ignored)
 Forward-compatible — unknown fields don't fail validation. ... ok
 test_from_file (test_agent_card.AgentCardSerializationTests.test_from_file) ... ok
@@ -223,7 +250,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 156 tests in 5.776s
+Ran 173 tests in 6.202s
 
 OK (skipped=4)
 ```

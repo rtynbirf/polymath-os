@@ -41,22 +41,29 @@ _RECOGNIZED_ACRONYMS = frozenset({
     "rest", "graphql", "grpc", "wsgi", "asgi",
 })
 
-# Regex to extract the prohibited phrase from a "never use X" decree.
+# Regex to extract the prohibited phrase from a "never <verb> X" decree.
 # Captures everything after "never <verb> " where verb ∈ {use, use the,
-# install, deploy, run, adopt, rely on}. Fixes v0.5 naive
-# `text.split("use", 1)` parser which mis-parsed "never abuse any services"
-# as prohibited="any services" (because "abuse" contains "use" as substring).
+# install, deploy, run, adopt, rely on, send, share, transmit, expose}.
+# Fixes v0.5 naive `text.split("use", 1)` parser which mis-parsed
+# "never abuse any services" as prohibited="any services" (because "abuse"
+# contains "use" as substring).
+#
+# v0.6.1 (v3.11.0) extension: added "send", "share", "transmit", "expose"
+# to recognize data-flow prohibitions like "never send PII to external
+# services" — needed for ADR-0025 outbound decree enforcement.
 #
 # Examples:
 #   "never use Google DNS"            → captures "Google DNS"
 #   "never use the Google DNS server" → captures "Google DNS server"
 #   "never install Chrome"            → captures "Chrome"
 #   "never rely on AWS"               → captures "AWS"
+#   "never send PII to external"      → captures "PII to external" (v0.6.1 NEW)
+#   "never share user data"           → captures "user data" (v0.6.1 NEW)
+#   "never transmit credentials"      → captures "credentials" (v0.6.1 NEW)
+#   "never expose secrets externally" → captures "secrets externally" (v0.6.1 NEW)
 #   "never abuse any services"        → no match (verb "abuse" not in set)
-#
-# v0.6 — fixes the v0.5 limitation documented in decree_log.py line 161.
 _PROHIBITION_REGEX = re.compile(
-    r"\bnever\s+(?:use(?:\s+the)?|install|deploy|run|adopt|rely\s+on)\s+(.+?)\s*[.,;:!?]*$",
+    r"\bnever\s+(?:use(?:\s+the)?|install|deploy|run|adopt|rely\s+on|send|share|transmit|expose)\s+(.+?)\s*[.,;:!?]*$",
     re.IGNORECASE,
 )
 

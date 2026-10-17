@@ -541,6 +541,58 @@ def check_token_hygiene():
     detail = findings[0] if findings else r.stderr.strip().split("\n")[-1]
     return False, f"plaintext tokens found: {detail}"
 
+# ============================================================
+# CHECK 24: Agent Card (.well-known/agent.json) valid per ADR-0023
+# ============================================================
+def check_agent_card():
+    """v3.11.0 NEW (per ROADMAP_v4.0.0 task 4.4): validate .well-known/agent.json
+    against the Agent Card JSON Schema (ADR-0023). Catches missing fields,
+    invalid id format, malformed endpoints, etc. before they break A2A
+    discovery."""
+    import json as _json
+    agent_card_path = REPO_ROOT / ".well-known" / "agent.json"
+    if not agent_card_path.exists():
+        return False, ".well-known/agent.json missing (per ADR-0023)"
+    try:
+        with open(agent_card_path, "r", encoding="utf-8") as f:
+            data = _json.load(f)
+    except Exception as e:
+        return False, f"cannot parse .well-known/agent.json: {e}"
+    # Check required fields.
+    required = {"id", "name", "description", "version", "capabilities", "decree_scope"}
+    missing = required - set(data.keys())
+    if missing:
+        return False, f"agent.json missing required fields: {sorted(missing)}"
+    # Check id format.
+    import re as _re
+    if not _re.match(r"^[a-z0-9][a-z0-9.\-]{0,63}$", data["id"]):
+        return False, f"agent.json id invalid: {data['id']}"
+    # Check decree_scope non-empty.
+    if not data.get("decree_scope"):
+        return False, "agent.json decree_scope empty (use 'all' for global)"
+    # Check capabilities non-empty list.
+    if not isinstance(data.get("capabilities"), list) or not data["capabilities"]:
+        return False, "agent.json capabilities must be non-empty list"
+    # Check endpoints (if present).
+    for i, ep in enumerate(data.get("endpoints", [])):
+        if not isinstance(ep, dict) or "type" not in ep:
+            return False, f"agent.json endpoint[{i}] missing 'type'"
+        valid_types = {"http", "https", "websocket", "webrtc", "stdio", "in-process"}
+        if ep["type"] not in valid_types:
+            return False, f"agent.json endpoint[{i}] type '{ep['type']}' not in {sorted(valid_types)}"
+    # Verify against runtime/src/agent_card.py validation (use the actual class)
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "runtime" / "src"))
+        from agent_card import AgentCard, AgentCardError
+        try:
+            AgentCard.from_dict(data)
+        except AgentCardError as e:
+            return False, f"agent.json fails AgentCard validation: {e}"
+    finally:
+        # Clean up sys.path
+        sys.path.pop(0)
+    return True, f"agent.json valid: id={data['id']}, scope={data['decree_scope']}, {len(data['capabilities'])} capabilities"
+
 def check_manifest_json():
     m = REPO_ROOT / 'MANIFEST.json'
     if not m.exists():
@@ -567,6 +619,7 @@ extra_checks = [
     ("21. Freedom: zero Tier 3 benefactors in code", check_freedom_no_tier3),
     ("22. MANIFEST.json exists + valid (ADR-0020)", check_manifest_json),
     ("23. Token hygiene: no plaintext PATs in code (v0.6)", check_token_hygiene),
+    ("24. Agent Card .well-known/agent.json valid (ADR-0023, v3.11.0)", check_agent_card),
 ]
 
 checks = [
