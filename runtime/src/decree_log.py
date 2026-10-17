@@ -124,9 +124,19 @@ class DecreeLog:
     Per ADR-0009: default-deny — if no decree permits an action, it's denied.
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, check_same_thread: bool = True):
+        """Open the DecreeLog.
+
+        Args:
+            path: path to SQLite database file
+            check_same_thread: passed to sqlite3.connect(). Set to False
+                for use in threaded servers (e.g. AgentMeshServer per ADR-0027).
+                Default True (safe — single-thread only). With False, the
+                caller is responsible for ensuring no concurrent writes
+                (WAL mode allows concurrent readers + 1 writer).
+        """
         self.path = str(path)
-        self.db = sqlite3.connect(self.path, isolation_level=None)
+        self.db = sqlite3.connect(self.path, isolation_level=None, check_same_thread=check_same_thread)
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute("PRAGMA synchronous=FULL")
         self._init_schema()
