@@ -31,9 +31,5 @@
   "maintainer": "polymath-os",
   "license": "MIT",
   "homepage": "https://github.com/rtynbirf/polymath-os",
-  "tags": [
-    "layer-5",
-    "execution-kernel",
-    "decree-enforced"
-  ]
+  "tags": ["layer-5", "execution-kernel", "decree-enforced"]
 }
