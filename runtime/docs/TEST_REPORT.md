@@ -33,6 +33,30 @@ When remote A2A server returns DECREE_BLOCK, A2AClient parses it. ... ok
 test_remote_returns_invalid_json (test_a2a_client.A2AClientResponseParsingTests.test_remote_returns_invalid_json) ... ok
 test_remote_returns_network_error (test_a2a_client.A2AClientResponseParsingTests.test_remote_returns_network_error)
 Network errors are wrapped in IntentResponse with error field. ... ok
+test_amend_does_not_modify_original_adr_file (test_adr_amender.AdrAmenderAmendTests.test_amend_does_not_modify_original_adr_file) ... ok
+test_amend_log_entry (test_adr_amender.AdrAmenderAmendTests.test_amend_log_entry) ... ok
+test_amend_returns_result (test_adr_amender.AdrAmenderAmendTests.test_amend_returns_result) ... ok
+test_create_does_not_overwrite_existing (test_adr_amender.AdrAmenderCreateTests.test_create_does_not_overwrite_existing) ... ok
+test_create_generates_adr_file (test_adr_amender.AdrAmenderCreateTests.test_create_generates_adr_file) ... ok
+test_create_log_entry_format (test_adr_amender.AdrAmenderCreateTests.test_create_log_entry_format) ... ok
+test_deprecate_log_entry (test_adr_amender.AdrAmenderDeprecateTests.test_deprecate_log_entry) ... ok
+test_deprecate_returns_result (test_adr_amender.AdrAmenderDeprecateTests.test_deprecate_returns_result) ... ok
+test_full_amendment_workflow (test_adr_amender.AdrAmenderEndToEndTests.test_full_amendment_workflow) ... ok
+test_prohibition_decree_not_recognized_as_amendment (test_adr_amender.AdrAmenderErrorTests.test_prohibition_decree_not_recognized_as_amendment) ... ok
+test_unrecognized_decree_raises (test_adr_amender.AdrAmenderErrorTests.test_unrecognized_decree_raises) ... ok
+test_multiple_log_entries_append (test_adr_amender.AdrAmenderLogTests.test_multiple_log_entries_append) ... ok
+test_process_and_log_writes_to_file (test_adr_amender.AdrAmenderLogTests.test_process_and_log_writes_to_file) ... ok
+test_read_empty_log (test_adr_amender.AdrAmenderLogTests.test_read_empty_log) ... ok
+test_supersede_generates_new_adr (test_adr_amender.AdrAmenderSupersedeTests.test_supersede_generates_new_adr) ... ok
+test_supersede_log_entry (test_adr_amender.AdrAmenderSupersedeTests.test_supersede_log_entry) ... ok
+test_format_adr_id (test_adr_amender.DecreeParsingTests.test_format_adr_id) ... ok
+test_parse_amend (test_adr_amender.DecreeParsingTests.test_parse_amend) ... ok
+test_parse_case_insensitive (test_adr_amender.DecreeParsingTests.test_parse_case_insensitive) ... ok
+test_parse_create (test_adr_amender.DecreeParsingTests.test_parse_create) ... ok
+test_parse_create_no_leading_zeros (test_adr_amender.DecreeParsingTests.test_parse_create_no_leading_zeros) ... ok
+test_parse_deprecate (test_adr_amender.DecreeParsingTests.test_parse_deprecate) ... ok
+test_parse_no_match_raises (test_adr_amender.DecreeParsingTests.test_parse_no_match_raises) ... ok
+test_parse_supersede (test_adr_amender.DecreeParsingTests.test_parse_supersede) ... ok
 test_extra_unknown_fields_ignored (test_agent_card.AgentCardSerializationTests.test_extra_unknown_fields_ignored)
 Forward-compatible — unknown fields don't fail validation. ... ok
 test_from_file (test_agent_card.AgentCardSerializationTests.test_from_file) ... ok
@@ -156,7 +180,11 @@ test_read_state_absent_for_never_executed_key (test_http_adapter.HTTPAdapterTest
 test_s15_partial_cache_miss_does_not_pollute_sibling (test_http_adapter.HTTPAdapterTests.test_s15_partial_cache_miss_does_not_pollute_sibling)
 ADR-0010 S15 cross-check for HTTPAdapter. ... ok
 test_runtime_with_http_adapter_get (test_http_adapter.IntegrationWithRuntimeTests.test_runtime_with_http_adapter_get)
-Runtime with HTTPAdapter — execute a GET via kernel. ... ok
+Runtime with HTTPAdapter — execute a GET via kernel. ... <frozen os>:734: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=22, family=2, type=1, proto=6>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen os>:734: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=23, family=2, type=1, proto=6>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
 test_runtime_with_llm_local_adapter_command (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_command)
 Execute a known command via the full Runtime → LLMLocalAdapter path. ... ok
 test_runtime_with_llm_local_adapter_free_speech_unknown (test_llm_local_adapter.IntegrationWithRuntimeTests.test_runtime_with_llm_local_adapter_free_speech_unknown)
@@ -250,7 +278,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 173 tests in 6.202s
+Ran 197 tests in 6.253s
 
 OK (skipped=4)
 ```
