@@ -89,13 +89,39 @@ b.classList.add('active');category=b.dataset.cat;
 function loadLog(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}}
 function saveLog(log){localStorage.setItem(STORAGE_KEY,JSON.stringify(log.slice(-100)))}
 
-function renderLog(){
-const log=loadLog();
+// Bridge detection: in Node/Electron context, require('./decree-bridge.js') works.
+// In pure browser context, fall back to localStorage.
+function getBridge(){
+try{
+if(typeof require==='function'){
+const m=require('./decree-bridge.js');
+return new m.DecreeBridge();
+}
+}catch(e){console.warn('[decree-portal] bridge unavailable, using localStorage:',e.message)}
+return null;
+}
+
+async function fetchAllDecrees(){
+const bridge=getBridge();
+if(bridge){
+try{
+const decrees=await bridge.getDecrees();
+if(decrees && decrees.length){
+// Normalize: bridge returns decree_text, renderLog expects text
+return decrees.map(d=>({seq:d.seq,timestamp:d.timestamp,text:d.decree_text,category:d.category,scope:d.scope,source:'sqlite'}));
+}
+}catch(e){console.warn('[decree-portal] bridge.getDecrees failed, falling back:',e.message)}
+}
+return loadLog().map(d=>({...d,source:'local'}));
+}
+
+function renderLog(log){
 const view=$('#decreeLog');
-if(!log.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
+if(!log || !log.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
 view.innerHTML=log.map(d=>{
 const catClass='cat-'+d.category;
-return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span><span class="ts"> ${d.timestamp}</span><div class="text">${esc(d.text)}</div></div>`;
+const src=d.source==='sqlite'?' <span style="color:var(--accent);font-size:10px">SQLite</span>':' <span style="color:var(--muted);font-size:10px">local</span>';
+return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span>${src}<span class="ts"> ${d.timestamp}</span><div class="text">${esc(d.text)}</div></div>`;
 }).join('');
 }
 
@@ -103,21 +129,41 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 
 function toast(msg){const t=$('#toast');t.textContent=msg;t.className='toast show';setTimeout(()=>t.className='toast',3000)}
 
-$('#issueBtn').onclick=()=>{
+$('#issueBtn').onclick=async()=>{
 const text=$('#decreeInput').value.trim();
 if(!text){toast('Декрет не может быть пустым');return}
+const bridge=getBridge();
+let entry;
+if(bridge){
+try{
+entry=await bridge.issueDecree(text,category);
+// normalize bridge shape -> portal shape
+entry={seq:entry.seq,timestamp:entry.timestamp,text:entry.decree_text,category:entry.category,scope:entry.scope,source:'sqlite'};
+toast(`⚡ Декрет #${entry.seq} записан в DecreeLog (SQLite). НАВСЕГДА.`);
+}catch(e){
+console.error('[decree-portal] bridge.issueDecree failed:',e);
+toast(`⚠ Bridge ошибся: ${e.message}. Сохраняю локально.`);
+// fall through to localStorage path
+entry=null;
+}
+}
+if(!entry){
 const log=loadLog();
 const seq=log.length+1;
 const ts=new Date().toISOString();
-const entry={seq,timestamp:ts,text,category};
+entry={seq,timestamp:ts,text,category,source:'local'};
 log.push(entry);
 saveLog(log);
+toast(`⚡ Декрет #${entry.seq} записан (localStorage). Bridge недоступен.`);
+}
 $('#decreeInput').value='';
-renderLog();
-toast(`⚡ Декрет #${seq} издан. ${category.toUpperCase()}. Записан навсегда.`);
+// Re-render from authoritative source
+const all=await fetchAllDecrees();
+renderLog(all);
 };
 
-renderLog();
+// Initial render — bridge-first if available
+fetchAllDecrees().then(renderLog);
 })();
 </script>
 </body></html>

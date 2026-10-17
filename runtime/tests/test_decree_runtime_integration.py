@@ -13,7 +13,7 @@ class DecreeRuntimeIntegrationTests(unittest.TestCase):
             dl = DecreeLog(str(Path(tmp) / "decrees.db"))
             dl.issue("never use Google", category="prohibition")
             dl.issue("never use Cloudflare", category="prohibition")
-            caps = [Capability("c1", "send", "mem", "low", True, True)]
+            caps = [Capability("c1", "send", "memory", "low", True, True)]
             rt = Runtime(caps, [MemoryAdapter()], Policy({"send"}), redaction_key=b"k")
             rt.set_decree_log(dl)
             intent = Intent("d1", "send data to Google API", "send", {"v": "x"}, {"v": "x"})
@@ -21,7 +21,7 @@ class DecreeRuntimeIntegrationTests(unittest.TestCase):
             self.assertNotEqual(st, State.CONFIRMED, "prohibition decree must block Google")
 
     def test_no_decree_log_allows_all(self):
-        caps = [Capability("c1", "send", "mem", "low", True, True)]
+        caps = [Capability("c1", "send", "memory", "low", True, True)]
         rt = Runtime(caps, [MemoryAdapter()], Policy({"send"}), redaction_key=b"k")
         rt.set_decree_log(None)  # explicitly None
         intent = Intent("d2", "test", "send", {"v": "x"}, {"v": "x"})
@@ -32,7 +32,7 @@ class DecreeRuntimeIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dl = DecreeLog(str(Path(tmp) / "decrees.db"))
             dl.issue("allow local unbound DNS", category="permission")
-            caps = [Capability("c1", "send", "mem", "low", True, True)]
+            caps = [Capability("c1", "send", "memory", "low", True, True)]
             rt = Runtime(caps, [MemoryAdapter()], Policy({"send"}), redaction_key=b"k")
             rt.set_decree_log(dl)
             intent = Intent("d3", "configure local unbound DNS", "send", {"v": "x"}, {"v": "x"})

@@ -363,8 +363,19 @@ class Runtime:
         self.attempts: Dict[str, int] = {}
         self.fingerprints: Dict[str, str] = {}
         self._oneshot: Optional[str] = None
+        self.decree_log = None  # set via set_decree_log(); supreme law above policy
         self._schema = load_schema("intent.schema.json")
         self._rehydrate()
+
+    def set_decree_log(self, dl) -> None:
+        """Attach a DecreeLog (or None to detach). Per ADR-0021 + ADR-0022:
+        the decree log is the human's supreme law layer — ABOVE policy.
+        Once attached, every Intent's description is checked against active
+        decrees (law + prohibition) before any policy/capability check.
+        If a decree prohibits the action → block (WAITING_FOR_HUMAN),
+        do NOT downgrade to a softer state. Default-deny: None = no decrees,
+        no decree-based block (other policy still applies)."""
+        self.decree_log = dl
 
     # -- helpers
     def fp(self, obj) -> str:
@@ -504,6 +515,22 @@ class Runtime:
             if self.states[iid] != State.WAITING_FOR_HUMAN:
                 self._transition(intent, State.WAITING_FOR_HUMAN, reason)
             return State.WAITING_FOR_HUMAN
+        # DECREE GATE — supreme law, checked BEFORE policy (per ADR-0021 + ADR-0022).
+        # If a decree prohibits the action, block immediately. Default-deny:
+        # if no decree log attached, skip this gate (other policy still applies).
+        if self.decree_log is not None:
+            decree_result = self.decree_log.check_compliance(intent.description)
+            if not decree_result.get("compliant", True):
+                violations = decree_result.get("violations", [])
+                reasons = "; ".join(
+                    f"decree#{v.get('decree_seq', '?')}: {v.get('violation', '')}"
+                    for v in violations[:3]
+                ) or "decree prohibition"
+                self.ledger.append("DECREE_BLOCK", {
+                    "intent_id": iid, "reason": reasons,
+                    "laws_checked": decree_result.get("laws_checked", 0),
+                    "violations": violations})
+                return block(f"decree prohibition: {reasons}")
         try:
             self.policy.check_intent(intent)
         except PolicyBlocked as exc:
