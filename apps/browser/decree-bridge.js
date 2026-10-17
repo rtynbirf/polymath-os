@@ -152,7 +152,9 @@ if (require.main === module) {
     // v3.18.0 — argv[6] is classification (public|internal|secret). Default 'public'.
     const classification = process.argv[6] || "public";
     if (!text) {
-      console.error('Usage: node decree-bridge.js issue "text" [category] [scope] [classification]');
+      console.error(
+        'Usage: node decree-bridge.js issue "text" [category] [scope] [classification]',
+      );
       process.exit(1);
     }
     bridge
