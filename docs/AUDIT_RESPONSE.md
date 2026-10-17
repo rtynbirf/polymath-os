@@ -51,3 +51,5 @@ SINGULYAR команда сама провела самоаудит v0.2 и ус
 | **0020-manifest-driven-architecture** | Hash not verified at loader (AUDIT_CELL65_LLM L4). No HoloManifest pattern. Version-marker  lets equal through. | ADR-0020 (Accepted, v2.8.0) — hash-pin-at-loader (verify_model_hash), PREPARED verdict (documented), HoloManifest pattern (documented), version-marker strict , eir:// URI scheme (documented). | `docs/adr/0020-manifest-driven-architecture.md` |
 
 | **0021-decree-as-supreme-law** | Human's will (PAROLE) not recorded as binding law. ADRs written by AI, not by human's raw expression. | ADR-0021 (Accepted, v3.2.0) — Decree Log: SQLite append-only hash-chained journal of human's raw expressions. DECREE > ADR > code. check_compliance() enforces prohibition decrees. 8 tests. | `docs/adr/0021-decree-as-supreme-law.md` |
+
+| **0022-decree-portal-as-human-interface** | Human needs direct decree interface. | ADR-0022 (Accepted). apps/browser/decree-portal.html. | `docs/adr/0022-decree-portal-as-human-interface.md` |
