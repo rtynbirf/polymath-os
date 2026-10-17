@@ -438,6 +438,137 @@ class DecreeLogV06Tests(unittest.TestCase):
             dl.close()
 
 
+class DecreeLogSupersessionTests(unittest.TestCase):
+    """v0.7 (v3.14.0) — Decree Supersession tests (per ADR-0028).
+
+    Decrees can be superseded — the original remains in the log (immutable,
+    hash-chained) but get_active_laws() skips it.
+    """
+
+    def test_supersede_marks_target_as_inactive(self):
+        """After supersede(), the target decree is no longer in get_active_laws()."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Google DNS", category="prohibition")
+            d2 = dl.issue("never use Cloudflare", category="prohibition")
+            # Verify both are active initially
+            active = dl.get_active_laws()
+            self.assertEqual(len(active), 2)
+            # Supersede d1
+            d3 = dl.supersede(target_seq=d1["seq"], reason="now using unbound DNS locally")
+            self.assertEqual(d3["category"], "supersession")
+            self.assertEqual(d3["scope"], f"supersession:{d1['seq']}")
+            # d1 no longer in active_laws
+            active = dl.get_active_laws()
+            self.assertEqual(len(active), 1, f"Expected 1 active law after supersede, got {len(active)}")
+            self.assertEqual(active[0]["seq"], d2["seq"])
+            dl.close()
+
+    def test_supersede_changes_check_compliance_behavior(self):
+        """Superseding a prohibition decree means check_compliance no longer blocks."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            dl.issue("never use Google DNS", category="prohibition", scope="all")
+            # Initial — Google is blocked
+            r = dl.check_compliance("configure DNS with Google 8.8.8.8")
+            self.assertFalse(r["compliant"])
+            self.assertEqual(r["laws_checked"], 1)
+            # Supersede the decree
+            dl.supersede(target_seq=1, reason="migrated to local unbound — Google DNS allowed now")
+            # After supersede — Google is no longer blocked
+            r = dl.check_compliance("configure DNS with Google 8.8.8.8")
+            self.assertTrue(r["compliant"], f"Expected compliant after supersede, got: {r}")
+            self.assertEqual(r["laws_checked"], 0, "Superseded decree should not be checked")
+            dl.close()
+
+    def test_supersede_nonexistent_target_raises(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            with self.assertRaises(ValueError):
+                dl.supersede(target_seq=999, reason="nonexistent target")
+            dl.close()
+
+    def test_supersede_a_supersession_decree_raises(self):
+        """Cannot supersede a supersession decree (would create confusing chain)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use WebRTC", category="prohibition")
+            d2 = dl.supersede(target_seq=d1["seq"], reason="WebRTC now needed for cell65-llm")
+            # Try to supersede d2 — should raise
+            with self.assertRaises(ValueError) as ctx:
+                dl.supersede(target_seq=d2["seq"], reason="re-instate WebRTC prohibition")
+            self.assertIn("already a supersession decree", str(ctx.exception))
+            dl.close()
+
+    def test_supersede_preserves_immutability_invariant(self):
+        """Original decree text/hash must be unchanged after supersede."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Chrome", category="prohibition")
+            original_text = d1["decree_text"]
+            original_hash = d1["decree_hash"]
+            # Supersede
+            dl.supersede(target_seq=d1["seq"], reason="switched to firefox only")
+            # Get the original decree back via get_all
+            all_decrees = dl.get_all()
+            d1_after = next(d for d in all_decrees if d["seq"] == d1["seq"])
+            self.assertEqual(d1_after["decree_text"], original_text)
+            self.assertEqual(d1_after["decree_hash"], original_hash)
+            # Verify chain integrity still OK
+            self.assertTrue(dl.verify())
+            dl.close()
+
+    def test_get_superseded_decrees(self):
+        """get_superseded_decrees() returns list of supersession records."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Google DNS", category="prohibition")
+            d2 = dl.issue("never use Cloudflare", category="prohibition")
+            d3 = dl.supersede(target_seq=d1["seq"], reason="migrated to local unbound")
+            d4 = dl.supersede(target_seq=d2["seq"], reason="Cloudflare no longer used")
+            superseded = dl.get_superseded_decrees()
+            self.assertEqual(len(superseded), 2)
+            seqs_superseded = {r["superseded_seq"] for r in superseded}
+            self.assertEqual(seqs_superseded, {d1["seq"], d2["seq"]})
+            # Verify reason extracted correctly for each entry
+            for entry in superseded:
+                self.assertIn(
+                    entry["reason"],
+                    ["migrated to local unbound", "Cloudflare no longer used"],
+                    f"Unexpected reason: {entry['reason']!r}"
+                )
+            dl.close()
+
+    def test_supersede_affects_scope_filtered_check(self):
+        """Superseding with scope filter — superseded decrees skipped."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use WebRTC", category="prohibition", scope="singulyar")
+            d2 = dl.issue("never use Cloudflare", category="prohibition", scope="all")
+            # Initial: WebRTC decree applies when scope=singulyar
+            r = dl.check_compliance("use WebRTC for video", scope="singulyar")
+            self.assertFalse(r["compliant"])
+            self.assertEqual(r["laws_checked"], 2)  # all + singulyar
+            # Supersede d1 (the singulyar-scoped WebRTC decree)
+            dl.supersede(target_seq=d1["seq"], reason="WebRTC now needed for cell65-llm P2P")
+            # After supersede: WebRTC decree no longer applies
+            r = dl.check_compliance("use WebRTC for video", scope="singulyar")
+            self.assertTrue(r["compliant"])
+            self.assertEqual(r["laws_checked"], 1, "only 'all'-scoped Cloudflare remains")
+            dl.close()
+
+    def test_supersession_decree_not_in_active_laws(self):
+        """Supersession decrees themselves are not in get_active_laws()."""
+        with tempfile.TemporaryDirectory() as tmp:
+            dl = DecreeLog(Path(tmp) / "decrees.db")
+            d1 = dl.issue("never use Google DNS", category="prohibition")
+            d2 = dl.supersede(target_seq=d1["seq"], reason="test")
+            active = dl.get_active_laws()
+            # Should be empty — d1 is superseded, d2 is supersession (meta)
+            self.assertEqual(len(active), 0)
+            dl.close()
+
+
 if __name__ == "__main__":
     import sqlite3
     unittest.main()

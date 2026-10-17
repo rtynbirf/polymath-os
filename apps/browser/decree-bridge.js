@@ -108,6 +108,30 @@ print(json.dumps([c.to_dict() for c in ALL_DEFAULT_CARDS]))
 `;
     return this._runPython(script);
   }
+
+  async supersedeDecree(targetSeq, reason) {
+    // v3.14.0 NEW (per ADR-0028) — supersede a decree by issuing a new
+    // supersession decree. The original decree remains in the log
+    // (immutable, hash-chained) but get_active_laws() skips it.
+    const script = `
+import sys, json, os
+sys.path.insert(0, ${JSON.stringify(this.runtimeSrc)})
+from decree_log import DecreeLog
+db_path = ${JSON.stringify(this.dbPath)}
+if not os.path.exists(db_path):
+    print(json.dumps({"error": "decrees.db not found at " + db_path}))
+else:
+    dl = DecreeLog(db_path)
+    try:
+        result = dl.supersede(target_seq=${parseInt(targetSeq, 10)}, reason=${JSON.stringify(reason)})
+        dl.close()
+        print(json.dumps(result))
+    except ValueError as e:
+        dl.close()
+        print(json.dumps({"error": str(e)}))
+`;
+    return this._runPython(script);
+  }
 }
 
 // CLI
@@ -162,6 +186,24 @@ if (require.main === module) {
     // v3.11.0 NEW — list default Agent Cards (per ADR-0023)
     bridge
       .getAgents()
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 2));
+        process.exit(0);
+      })
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(1);
+      });
+  } else if (cmd === "supersede") {
+    // v3.14.0 NEW — supersede a decree (per ADR-0028)
+    const targetSeq = process.argv[3];
+    const reason = process.argv[4] || "no reason provided";
+    if (!targetSeq) {
+      console.error('Usage: node decree-bridge.js supersede <seq> "reason"');
+      process.exit(1);
+    }
+    bridge
+      .supersedeDecree(targetSeq, reason)
       .then((r) => {
         console.log(JSON.stringify(r, null, 2));
         process.exit(0);

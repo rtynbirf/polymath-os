@@ -141,8 +141,31 @@ if(!log || !log.length){view.innerHTML='<div class="decree-entry" style="color:v
 view.innerHTML=log.map(d=>{
 const catClass='cat-'+d.category;
 const src=d.source==='sqlite'?' <span style="color:var(--accent);font-size:10px">SQLite</span>':' <span style="color:var(--muted);font-size:10px">local</span>';
-return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span>${src}<span class="ts"> ${d.timestamp}</span><div class="text">${esc(d.text)}</div></div>`;
+// v3.14.0 NEW (per ADR-0028) — show Supersede button on law/prohibition decrees
+const canSupersede=(d.category==='law'||d.category==='prohibition')&&d.source==='sqlite';
+const supBtn=canSupersede?` <button class="sup-btn" data-seq="${d.seq}" style="font-size:10px;padding:2px 6px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:3px;cursor:pointer">Отозвать</button>`:'';
+return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span>${src}<span class="ts"> ${d.timestamp}</span>${supBtn}<div class="text">${esc(d.text)}</div></div>`;
 }).join('');
+// Attach supersede button handlers
+document.querySelectorAll('.sup-btn').forEach(b=>{
+b.onclick=async()=>{
+const seq=parseInt(b.dataset.seq,10);
+const reason=prompt(`Отозвать декрет #${seq}?\n\nПричина отзыва (будет записана в DecreeLog):`);
+if(!reason)return;
+const bridge=getBridge();
+if(bridge&&bridge.supersedeDecree){
+try{
+const result=await bridge.supersedeDecree(seq,reason);
+if(result&&result.error){toast(`⚠ Ошибка: ${result.error}`);return;}
+toast(`⚡ Декрет #${seq} отозван. Supersession decree #${result.seq} записан.`);
+const all=await fetchAllDecrees();
+renderLog(all);
+}catch(e){toast(`⚠ Bridge ошибся: ${e.message}`);}
+}else{
+toast('⚠ Bridge недоступен (нужен Node/Electron для отзыва)');
+}
+};
+});
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}

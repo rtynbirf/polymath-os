@@ -226,7 +226,18 @@ class DecreeLog:
         ]
 
     def get_active_laws(self) -> List[Dict[str, Any]]:
-        """Return all 'law' and 'prohibition' decrees — the binding rules."""
+        """Return all 'law' and 'prohibition' decrees that are NOT superseded — the binding rules.
+
+        Per ADR-0028 (v3.14.0): decrees with category='supersession' and
+        scope='supersession:N' mark decree #N as superseded. Such decrees
+        are excluded from the active_laws list (the supersession decree
+        itself is also excluded — it's a meta-decree, not a law to enforce).
+        """
+        # Build the set of superseded seqs by scanning for supersession decrees.
+        # A supersession decree has category='supersession' and scope='supersession:N'
+        # where N is the seq of the target decree.
+        superseded_set = self._build_superseded_set()
+
         rows = self.db.execute(
             "SELECT seq, timestamp, decree_text, category, scope FROM decrees "
             "WHERE category IN ('law', 'prohibition') ORDER BY seq"
@@ -234,7 +245,101 @@ class DecreeLog:
         return [
             {"seq": r[0], "timestamp": r[1], "text": r[2], "category": r[3], "scope": r[4]}
             for r in rows
+            if r[0] not in superseded_set  # v3.14.0: skip superseded decrees
         ]
+
+    def _build_superseded_set(self) -> set:
+        """Build the set of seqs of decrees that have been superseded.
+
+        Per ADR-0028 — a decree is superseded if there exists a
+        supersession decree (category='supersession') with scope matching
+        'supersession:<seq>' pointing at it.
+
+        Returns: set of int seqs that are superseded.
+        """
+        rows = self.db.execute(
+            "SELECT scope FROM decrees WHERE category = 'supersession'"
+        ).fetchall()
+        superseded = set()
+        for (scope,) in rows:
+            if scope and scope.startswith("supersession:"):
+                try:
+                    target_seq = int(scope.split(":", 1)[1].strip())
+                    superseded.add(target_seq)
+                except (ValueError, IndexError):
+                    # Malformed scope — skip silently (defensive)
+                    pass
+        return superseded
+
+    def supersede(self, target_seq: int, reason: str) -> Dict[str, Any]:
+        """Issue a new decree that supersedes an existing one.
+
+        Per ADR-0028 (v3.14.0): the original decree remains in the log
+        (immutable, hash-chained), but get_active_laws() will skip it.
+
+        Args:
+            target_seq: the seq of the decree to supersede
+            reason: human-readable reason for supersession
+
+        Returns:
+            The new supersession decree record.
+
+        Raises:
+            ValueError: if target_seq doesn't exist
+        """
+        # Validate target_seq exists
+        row = self.db.execute(
+            "SELECT seq, decree_text, category FROM decrees WHERE seq = ?", (target_seq,)
+        ).fetchone()
+        if row is None:
+            raise ValueError(f"Cannot supersede: no decree with seq={target_seq}")
+
+        target_text, target_category = row[1], row[2]
+        if target_category == "supersession":
+            # Don't allow superseding a supersession decree (would create
+            # confusing chain — the original target would be un-superseded
+            # but still in the log as superseded).
+            raise ValueError(
+                f"Cannot supersede decree #{target_seq}: it's already a supersession decree. "
+                f"To undo a supersession, issue a new decree with the original text."
+            )
+
+        # Issue a new supersession decree with scope='supersession:<target_seq>'.
+        return self.issue(
+            text=f"Supersede decree #{target_seq} ({target_text[:80]}{'...' if len(target_text) > 80 else ''}). Reason: {reason}",
+            category="supersession",
+            scope=f"supersession:{target_seq}",
+        )
+
+    def get_superseded_decrees(self) -> List[Dict[str, Any]]:
+        """Return list of (superseded_seq, supersession_decree_seq, reason) tuples.
+
+        For audit / UI display — shows which decrees have been superseded
+        and the supersession decrees that revoked them.
+        """
+        rows = self.db.execute(
+            "SELECT seq, timestamp, decree_text, scope FROM decrees "
+            "WHERE category = 'supersession' ORDER BY seq"
+        ).fetchall()
+        result = []
+        for sup_seq, sup_ts, sup_text, sup_scope in rows:
+            if sup_scope and sup_scope.startswith("supersession:"):
+                try:
+                    target_seq = int(sup_scope.split(":", 1)[1].strip())
+                    # Extract just the 'reason' portion from sup_text
+                    # (the text format is: "Supersede decree #N (...). Reason: <reason>")
+                    reason = sup_text
+                    if "Reason:" in sup_text:
+                        reason = sup_text.split("Reason:", 1)[1].strip()
+                    result.append({
+                        "superseded_seq": target_seq,
+                        "supersession_seq": sup_seq,
+                        "timestamp": sup_ts,
+                        "reason": reason,
+                    })
+                except (ValueError, IndexError):
+                    pass
+        return result
 
     def _extract_prohibited_terms(self, decree_text: str) -> List[str]:
         """v0.6 phrase-based matcher (deterministic, no LLM).
