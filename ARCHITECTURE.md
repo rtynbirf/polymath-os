@@ -133,7 +133,7 @@ PID=1 как метафора допустима (человек — init-про
 
 ## 6. ADR (Architecture Decision Records)
 
-Все архитектурные решения документируются в `docs/adr/`. **28 ADRs создано** (0001-0028) после аудита SINGULYAR EIR v0.6.1 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0:
+Все архитектурные решения документируются в `docs/adr/`. **29 ADRs создано** (0001-0029, 0031) после аудита SINGULYAR EIR v0.6.1 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0 + provenance v3.20.0:
 
 | ADR | Тема | Audit response | Реализовано |
 |---|---|---|---|
@@ -165,6 +165,7 @@ PID=1 как метафора допустима (человек — init-про
 | `0026` | **Decree-Driven ADR Amendment Mechanism** (closes ADR-0016) | (extension) | ✓ (v3.12.0) |
 | `0027` | **Decree-Enforced HTTP JSON-RPC Server** (inbound HTTP) | (extension) | ✓ (v3.13.0) |
 | `0028` | **Decree Supersession Mechanism** (decrees can be revoked) | (extension) | ✓ (v3.14.0) |
+| `0031` | **Decree Cryptographic Signing** (Ed25519 authorship, pure stdlib) | (extension of ADR-0021) | ✓ (v3.20.0) |
 
 ADR — immutable после Accepted. Новые решения создаются superseding ADR'ом со ссылкой на старый. Соответствие замечаний аудита → действиям — в `docs/AUDIT_RESPONSE.md`.
 
@@ -177,6 +178,7 @@ ADR-0023 through ADR-0028 — образуют **СИНГУЛЯР architecture**
 - **ADR-0026** Decree-Driven ADR Amendment Mechanism (meta-architecture)
 - **ADR-0027** Decree-Enforced HTTP JSON-RPC Server (inbound HTTP)
 - **ADR-0028** Decree Supersession Mechanism (decree revocation)
+- **ADR-0031** Decree Cryptographic Signing (provenance: who issued, not just integrity)
 
 Все 6 ADRs (0023-0028) реализованы и покрыты тестами (220 total). Decree enforcement сейчас работает в 4 направлениях: inbound in-process + inbound HTTP + outbound + meta-architecture.
 

@@ -663,6 +663,54 @@ def check_trust_anchor():
     return False, f"TAMPER DETECTED — {result.get('message', 'unknown')}"
 
 # Append new checks to the checks list
+
+# CHECK 26: Decree Cryptographic Signing (ADR-0031, v3.20.0)
+# ============================================================
+def check_decree_signing():
+    """v3.20.0 NEW (claim #26): decree signatures prove AUTHORSHIP.
+
+    Per ADR-0031: the hash chain (claim: verify()) proves INTEGRITY —
+    a decree was not altered. A signature proves AUTHORSHIP — the PID=1
+    key holder issued exactly this decree. Implementation contract:
+
+      - runtime/src/decree_signing.py exists and is PURE PYTHON stdlib
+        (Ed25519 per RFC 8032 — zero third-party deps, matching the
+        repo's "no installation required" sovereignty contract)
+      - honest-verification API: sign_decree / issue_signed /
+        verify_decree_signature / provenance_report
+      - OpenSSH key parsing (ssh-keygen-compatible, unencrypted)
+      - RFC 8032 test vectors + tamper/foreign-key tests in
+        runtime/tests/test_decree_signing.py
+    """
+    src = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "runtime", "src", "decree_signing.py")
+    if not os.path.exists(src):
+        return False, f"missing runtime/src/decree_signing.py"
+    code = open(src, encoding="utf-8").read()
+    for needle in ("def ed25519_sign", "def ed25519_verify",
+                   "def sign_decree", "def issue_signed",
+                   "def verify_decree_signature", "def provenance_report",
+                   "def load_signing_key", "def parse_public_key",
+                   "CREATE TABLE IF NOT EXISTS decree_signatures"):
+        if needle not in code:
+            return False, f"decree_signing.py missing: {needle}"
+    third_party = [m for m in ("import cryptography", "import nacl",
+                               "from cryptography", "from nacl",
+                               "import ecdsa", "import pynacl")
+                   if m in code]
+    if third_party:
+        return False, f"third-party crypto imports found: {third_party}"
+    test = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "runtime", "tests",
+        "test_decree_signing.py")
+    if not os.path.exists(test):
+        return False, "missing runtime/tests/test_decree_signing.py"
+    tcode = open(test, encoding="utf-8").read()
+    if "9d61b19deffd5a60" not in tcode:
+        return False, "RFC 8032 test vector missing from test suite"
+    return True, "pure-python Ed25519 + OpenSSH keys + honest verify"
+
+
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
     ("14. Pattern: counter-from-source (S2)", check_pattern_02_counter_from_source),
@@ -677,6 +725,7 @@ extra_checks = [
     ("23. Token hygiene: no plaintext PATs in code (v0.6)", check_token_hygiene),
     ("24. Agent Card .well-known/agent.json valid (ADR-0023, v3.11.0)", check_agent_card),
     ("25. Trust anchor: external tamper-evidence (ADR-0029 §9, v3.x.0)", check_trust_anchor),
+    ("26. Decree signing: Ed25519 authorship, pure stdlib (ADR-0031, v3.20.0)", check_decree_signing),
 ]
 
 checks = [
