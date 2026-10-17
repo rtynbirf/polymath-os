@@ -123,7 +123,7 @@ if not os.path.exists(db_path):
 else:
     dl = DecreeLog(db_path)
     try:
-        result = dl.supersede(target_seq=${parseInt(targetSeq, 10)}, reason=${JSON.stringify(reason)})
+        result = dl.supersede(target_seq=${Number.parseInt(targetSeq, 10)}, reason=${JSON.stringify(reason)})
         dl.close()
         print(json.dumps(result))
     except ValueError as e:
