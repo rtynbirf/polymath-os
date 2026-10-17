@@ -39,7 +39,7 @@ def check(name, fn):
         results.append((name, False, str(e)))
 
 # ============================================================
-# CHECK 1: SINGULYAR EIR v0.3 — все 40 тестов проходят
+# CHECK 1: SINGULYAR EIR v0.6 — все тесты проходят (123 tests, was 40 in v0.3, was 106 in v0.4, was 111 in v0.5)
 # ============================================================
 def check_singulyar_tests():
     runtime = REPO_ROOT / "runtime"
@@ -228,16 +228,22 @@ def check_no_pycache():
     return True, "__pycache__/ and *.pyc in .gitignore, none tracked in git"
 
 # ============================================================
-# CHECK 11: 12 ADRs созданы (0001-0012)
+# CHECK 11: 22 ADRs созданы (0001-0022) — v0.3 had 12, v3.5.0+ has 22
 # ============================================================
 def check_12_adrs():
+    """Check that all 22 ADRs (0001-0022) are present.
+
+    Function name kept as `check_12_adrs` for backward compatibility
+    (it's referenced by name in test files and CI). The check itself
+    is updated to verify all 22 ADRs since v3.5.0.
+    """
     adr_dir = REPO_ROOT / "docs" / "adr"
-    expected = [f"{i:04d}" for i in range(1, 13)]
+    expected = [f"{i:04d}" for i in range(1, 23)]  # 0001-0022 (22 ADRs)
     actual = [f.stem.split("-")[0] for f in adr_dir.glob("0*.md") if f.name != "template.md"]
     missing = [e for e in expected if e not in actual]
     if missing:
         return False, f"missing ADRs: {missing}"
-    return True, "ADRs 0001-0012 all present"
+    return True, f"ADRs 0001-0022 all present ({len(actual)} total)"
 
 # ============================================================
 # CHECK 12: CI workflow существует и запускает verify
@@ -564,9 +570,9 @@ extra_checks = [
 ]
 
 checks = [
-    ("01. SINGULYAR EIR — all 40 tests pass", check_singulyar_tests),
+    ("01. SINGULYAR EIR v0.6 — all 123 tests pass", check_singulyar_tests),
     ("02. JSON Schemas (Intent/Capability/Evidence) valid", check_schemas),
-    ("03. ADRs (0001-0012) well-formed", check_12_adrs),
+    ("03. ADRs (0001-0022) well-formed — 22 ADRs total", check_12_adrs),
     ("04. ADRs follow template (Date/Status/Context/Decision/Consequences)", check_adrs),
     ("05. AUDIT_RESPONSE.md cross-references all ADRs", check_audit_response),
     ("06. Sovereignty Registry covers package.json deps", check_sovereignty_coverage),

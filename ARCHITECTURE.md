@@ -29,11 +29,13 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ┌────────────────────────────────────────────────────────────────┐
 │   CROSS-CUTTING:  Security (cosign/SLSA/SBOM)  │  OTel  │  Git │
 ├────────────────────────────────────────────────────────────────┤
-│  Layer 5: Execution Kernel (SINGULYAR EIR v0.3)             │
-│  ─ Intent → Capability → Adapter → Observation → Evidence     │
+│  Layer 5: Execution Kernel (SINGULYAR EIR v0.6)             │
+│  ─ Intent → (Decree Gate) → Capability → Adapter → Observation → Evidence │
 │  Цель: сохранить намерение при смене исполнителя;             │
 │       не объявлять успех без подтверждённого состояния        │
 │       (честный UNKNOWN вместо «наверное получилось»)          │
+│  v0.6: Decree Gate ABOVE policy (ADR-0021) — DECREE_BLOCK    │
+│        event, word-boundary regex matching, scope filter      │
 ├────────────────────────────────────────────────────────────────┤
 │  Layer 4: DevEx / CI / IaC / Dotfiles / Observability          │
 │  ─ OpenTofu, Nix Flakes, chezmoi, GitHub Actions, Tilt, OTel   │
@@ -131,24 +133,36 @@ PID=1 как метафора допустима (человек — init-про
 
 ## 6. ADR (Architecture Decision Records)
 
-Все архитектурные решения документируются в `docs/adr/`. **12 ADRs создано** (0001-0012) после аудита SINGULYAR EIR v0.3:
+Все архитектурные решения документируются в `docs/adr/`. **22 ADRs создано** (0001-0022) после аудита SINGULYAR EIR v0.3 + multiagent v3.7.0 + clean-up v3.8.0:
 
-| ADR | Тема | Audit response |
-|---|---|---|
-| `0001` | Записываем архитектурные решения (bootstrap) | — |
-| `0002` | Sovereignty Registry — двухъярусный реестр зависимостей | A1 |
-| `0003` | Exit gates вместо календарной длины фаз | A2 |
-| `0004` | SLSA Build L2 как цель v1.0, L3 только с builder isolation | A3 |
-| `0005` | Раздельные цели отката — код/миграции/данные | A4 |
-| `0006` | Falsifiable self-* properties (каждое с отрицательным тестом) | A5 |
-| `0007` | Multi-agent — research=parallel, execution=single+verifier | A7 |
-| `0008` | MCP — тонкий внутренний адаптер, версия закреплена | A8 |
-| `0009` | Default-deny публикация vault — из экспорта, не из репо | A9 |
-| `0010` | Мутационный контроль для критичных путей | A10 |
-| `0011` | Container runtime — colima/podman/containerd+nerdctl | A11 |
-| `0012` | SINGULYAR EIR как Layer 5 — Execution Kernel | интеграция |
+| ADR | Тема | Audit response | Реализовано |
+|---|---|---|---|
+| `0001` | Записываем архитектурные решения (bootstrap) | — | ✓ |
+| `0002` | Sovereignty Registry — двухъярусный реестр зависимостей | A1 | ✓ |
+| `0003` | Exit gates вместо календарной длины фаз | A2 | ✓ |
+| `0004` | SLSA Build L2 как цель v1.0, L3 только с builder isolation | A3 | ✓ L2 |
+| `0005` | Раздельные цели отката — код/миграции/данные | A4 | ✓ |
+| `0006` | Falsifiable self-* properties (каждое с отрицательным тестом) | A5 | ✓ |
+| `0007` | Multi-agent — research=parallel, execution=single+verifier | A7 | partial |
+| `0008` | MCP — тонкий внутренний адаптер, версия закреплена | A8 | ✓ |
+| `0009` | Default-deny публикация vault — из экспорта, не из репо | A9 | ✓ |
+| `0010` | Мутационный контроль для критичных путей | A10 | ✓ |
+| `0011` | Container runtime — colima/podman/containerd+nerdctl | A11 | partial |
+| `0012` | SINGULYAR EIR как Layer 5 — Execution Kernel | интеграция | ✓ |
+| `0013` | SLSA Build L3 target | (extension) | target v1.0 |
+| `0014` | WebRTC adapter as Tier 2 dependency | (extension) | ✓ |
+| `0015` | Real LLM inference in CI | (extension) | target v1.0 |
+| `0016` | Self-rewriting ADR mechanism | (extension) | target v1.0 |
+| `0017` | Ecosystem governance protocol | (extension) | ✓ |
+| `0018` | Genomic architecture | (extension) | partial |
+| `0019` | Observability-first | (extension) | ✓ |
+| `0020` | Manifest-driven architecture | (extension) | ✓ |
+| `0021` | **Decree as supreme law** (v3.6.0 OPERATIONAL) | (extension) | ✓ |
+| `0022` | **Decree Portal as human interface** (v3.5.0+) | (extension) | ✓ |
 
 ADR — immutable после Accepted. Новые решения создаются superseding ADR'ом со ссылкой на старый. Соответствие замечаний аудита → действиям — в `docs/AUDIT_RESPONSE.md`.
+
+ADR-0021 + ADR-0022 — выделяются особо: они описывают **decree system** — supreme law layer, над всеми ADRs. Декрет, написанный человеком в Decree Portal, может supersede существующий ADR (per ADR-0016 self-rewriting mechanism). Это материализация тезиса `PAROLE > LANGUE` — индивидуальное слово выше коллективного договора.
 
 ## 7. Эмерджентность — проверяемая гипотеза
 

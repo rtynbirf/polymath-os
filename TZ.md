@@ -2,6 +2,8 @@
 
 > **Polymath OS: LFS-style rebuild личной операционной системы.**
 > Цель: rebuild с нуля, без предсобранных бинарников, по лучшим мировым практикам 2024-2026.
+>
+> **Текущая версия: v3.8.0** (commit `3f279c0`, 2026-10-17). Полная консолидированная спецификация — в [`ТЗ_Polymath_OS_v3.7.0.md`](./ТЗ_Polymath_OS_v3.7.0.md) (47.9 KB, 16 разделов). Этот файл — историческая спецификация Layers 1-4, написанная до того, как Layer 5 (SINGULYAR EIR) и Decree Log были добавлены. Актуальная архитектура — в [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ---
 
@@ -13,22 +15,27 @@
 - AI-рабочие процессы (Layer 2)
 - личную базу знаний / second brain (Layer 3)
 - devex / CI / IaC / dotfiles / observability (Layer 4)
-- cross-cutting: security, OTel, git (вертикальный слой)
+- **execution kernel SINGULYAR EIR v0.6 (Layer 5, добавлен в v3.6.0+)** — runtime, который сохраняет намерение человека при смене исполнителя
+- **Decree Log (supreme law layer, v3.6.0+)** — SQLite, hash-chained, append-only; воля человека = закон, выше ADR и кода (ADR-0021)
+- cross-cutting: security, OTel, git, token hygiene (вертикальный слой)
 
-Репозиторий должен быть **самодостаточным**: `git clone` + одна команда `make bootstrap` → готовое рабочее окружение на новой машине за ≤30 минут.
+Репозиторий должен быть **самодостаточным**: `git clone` + одна команда `make bootstrap` → готовое рабочее окружение на новой машине за ≤30 минут. После bootstrap: `make verify` → 23/23 PASS — открытый контракт с пользователем.
 
 ### 1.2. Задачи
-1. Зафиксировать архитектурные принципы (4 слоя + cross-cutting) в ADR.
+1. Зафиксировать архитектурные принципы (**5+1 слоёв + Decree Log**) в ADR. На v3.8.0 — 22 ADRs (0001-0022).
 2. Внедрить trunk-based development с merge queue + CODEOWNERS + branch protection.
-3. Настроить CI: lint, typecheck, test, security scan, SBOM, cosign signing, SLSA provenance.
+3. Настроить CI: lint, typecheck, test, security scan, SBOM, cosign signing, SLSA provenance. На v3.8.0 — 5 CI check-runs (lint+typecheck+test+build+security, make verify, CodeQL JS, CodeQL Python, Build+SBOM+cosign+Release).
 4. Внедрить Changesets для управления версиями в монорепо.
-5. Настроить MCP-нативный AI-стек: Claude Code + Aider + Cursor + локальный fallback на Ollama.
+5. Настроить MCP-нативный AI-стек: Claude Code + Aider + Cursor + локальный fallback на Ollama. На v3.8.0 — 4 MCP adapters (filesystem, git, postgres, web_search).
 6. Развернуть Obsidian vault с git-sync, Smart Connections, Copilot+Ollama.
-8. Инициализировать Quartz v4 для публикации digital garden.
-9. Настроить chezmoi + age + 1Password CLI для dotfiles.
-10. Развернуть self-host observability stack (Grafana LGTM + Sentry/Glitchtip).
-11. Настроить OpenTofu для personal-cloud инфраструктуры.
-12. Внедрить feature flags (Unleash self-hosted) для trunk-based dev.
+7. ~~Инициализировать Quartz v4 для публикации digital garden.~~ **(done in v1.0.0)** — `apps/garden/`, default-deny filter (ADR-0009) + canary test.
+8. Настроить chezmoi + age + 1Password CLI для dotfiles.
+9. Развернуть self-host observability stack (Grafana LGTM + Sentry/Glitchtip).
+10. Настроить OpenTofu для personal-cloud инфраструктуры.
+11. **(v3.6.0+) Implement DecreeLog + Decree Portal + Runtime.set_decree_log()** — supreme law layer. 7 foundational decrees recorded. ✅ done.
+12. **(v3.7.0+) Electron desktop wrapper** for Decree Portal. ✅ done.
+13. **(v3.8.0) v0.6 word-boundary regex matching** + scope filter + token hygiene automation. ✅ done.
+14. Внедрить feature flags (Unleash self-hosted) для trunk-based dev.
 
 ## 2. Технические требования
 
