@@ -1,5 +1,111 @@
 # Changelog
 
+## [v3.6.0] — 2026-10-17 (OPERATIONAL: Decree Bridge wired — real SQLite decrees)
+
+The system is now OPERATIONAL. 7 foundational human decrees are recorded
+in a real SQLite DecreeLog (`~/.polymath-os/decrees.db`), hash-chained and
+append-only. The decree log is the human's supreme law layer — above every
+ADR, above the kernel, above the code.
+
+### The 7 foundational decrees
+
+| # | Category | Text |
+|---|----------|------|
+| 1 | law | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека. |
+| 2 | law | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. |
+| 3 | prohibition | never use Google DNS |
+| 4 | prohibition | never use Cloudflare |
+| 5 | prohibition | never use Chrome Firefox Edge Safari |
+| 6 | law | UNKNOWN first-class. Таймаут не равен failure не равен success. |
+| 7 | law | Default-deny. Публикуется только явное publish:true. |
+
+### Enforcement — `check_compliance()` now operates on real decrees
+
+- "configure DNS with Google 8.8.8.8" → **DENIED** (decree #3, "google")
+- "install Chrome as default browser" → **DENIED** (decree #5, "chrome")
+- "use Cloudflare for CDN" → **DENIED** (decree #4, "cloudflare")
+- "publish note about default-deny" → compliant (no prohibition matches)
+
+### Added
+
+- **`apps/browser/decree-bridge.js`** (new, 144 lines) — Node bridge
+  between the Decree Portal HTML UI and the Python `DecreeLog` SQLite
+  store. Three operations: `issueDecree()`, `getDecrees()`,
+  `checkCompliance()`. Each spawns a Python subprocess that opens the
+  real `~/.polymath-os/decrees.db`. CLI: `node decree-bridge.js
+  issue|list|check`. DB path resolved via `os.homedir()`.
+
+- **`apps/browser/decree-portal.html`** — bridge-first / localStorage
+  fallback. `getBridge()` detects Node/Electron context (typeof require
+  === 'function') and constructs a `DecreeBridge`. `fetchAllDecrees()`
+  queries the bridge first; if the bridge is unavailable (pure browser
+  context without Node), it falls back to `localStorage`. Each decree
+  entry now carries a source badge: `SQLite` (real, hash-chained) or
+  `local` (localStorage fallback). Toast confirms: "⚡ Декрет записан
+  в DecreeLog (SQLite). НАВСЕГДА."
+
+- **`Runtime.set_decree_log(dl)`** (in
+  `runtime/src/singulyar_runtime.py`) — attaches a `DecreeLog` instance
+  to the SINGULYAR EIR Runtime. Per ADR-0021 + ADR-0022, the decree log
+  is checked BEFORE policy in `_advance()`. If a decree prohibits the
+  intent's description, the runtime emits a `DECREE_BLOCK` ledger event
+  and transitions to `WAITING_FOR_HUMAN` (never downgrades to a softer
+  state). Default-deny: `dl=None` skips the decree gate; other policy
+  still applies.
+
+### Fixed
+
+- **`runtime/tests/test_decree_runtime_integration.py`** —
+  `Capability("c1", "send", "mem", ...)` had `adapter_id="mem"` but
+  `MemoryAdapter.adapter_id = "memory"`. Mismatch caused `KeyError
+  'mem'` in `_execute_once()` and two tests failed. Now uses
+  `"memory"`. All 3 decree-runtime integration tests pass:
+  `test_prohibition_decree_blocks_intent`,
+  `test_no_decree_log_allows_all`,
+  `test_permission_decree_allows`.
+
+- **Pre-existing `make verify` failure** (was 21/22, now 22/22):
+  `Runtime.set_decree_log()` was referenced by tests but never
+  implemented. Now implemented and wired into the runtime.
+
+### Migration / Operational notes
+
+- The DB is created at `~/.polymath-os/decrees.db` on first
+  `issueDecree()` call. The directory `~/.polymath-os/` is created
+  if missing.
+- The decree log is **append-only**. Re-running the issue script will
+  duplicate decrees (the log's design — recanting a decree requires a
+  new superseding decree, not deletion).
+- The simple keyword-matching `check_compliance()` has a known false
+  positive: decree #3 ("never use Google DNS") contains the word "DNS",
+  so any intent containing "dns" is denied. Acknowledged in
+  `decree_log.py` line 161 — scheduled for v0.5 NLP-based matching.
+
+### Verification
+
+- `python3 /home/z/my-project/scripts/issue_decrees.py` issues the 7
+  decrees, runs compliance checks, verifies chain integrity.
+- `node apps/browser/decree-bridge.js list` shows all 7 (or more).
+- `node apps/browser/decree-bridge.js check "configure DNS with Google
+  8.8.8.8"` returns `{"compliant": false, ...}`.
+- `make verify` — 22/22 claims pass (was 21/22 before this release).
+- `python3 -m unittest discover -s runtime/tests` — 106/106 pass
+  (4 skipped, expected).
+
+### Token hygiene note
+
+The previous session's bash command had a hardcoded `github_pat_...`
+token embedded inline. That PAT was auto-revoked by GitHub's secret
+scanner (likely because it appeared in plaintext in command history /
+session logs). Git push still works via the credential stored in the
+remote URL, but the REST API for creating GitHub "Release" notes is
+currently unavailable. The git tag `v3.6.0` is force-moved to this
+commit (SHA `ead85ee`). GitHub "Release" notes attached to the old
+`v3.6.0` tag (if any) will need to be created manually at
+https://github.com/rtynbirf/polymath-os/releases/new?tag=v3.6.0.
+
+---
+
 ## [1.1.0] — 2026-10-16 (post-Gate-1 CI green)
 
 First push (v1.0.0, commit dc97f41) introduced the polymath-os v1.0
