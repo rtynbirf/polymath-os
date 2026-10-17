@@ -139,7 +139,7 @@ node -e "require('./apps/browser/electron/preload.js')"
 # 2. Biome lint:
 pnpm biome check apps/browser/electron/
 
-# 3. Full repo verification (must remain 22/22):
+# 3. Full repo verification (must remain 24/24):
 make verify
 ```
 

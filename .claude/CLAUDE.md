@@ -13,7 +13,7 @@
 
 | Layer | Что | Где |
 |---|---|---|
-| **5** | Execution Kernel — SINGULYAR EIR v0.3 | `runtime/` |
+| **5** | Execution Kernel — SINGULYAR EIR v0.6.1 | `runtime/` |
 | **4** | DevEx / CI / IaC / Dotfiles / Observability | `Makefile`, `flake.nix`, `.github/workflows/` |
 | **3** | Second Brain (PKM) — markdown-first, git-synced | `vault/` (private, gitignored) |
 | **2** | AI Workflows — MCP-native, version-pinned | `tooling/agents/` (to be created) |
@@ -59,7 +59,7 @@ make verify   # запускает 12 проверок через scripts/check.
 
 ## ADRs — читать в этом порядке
 
-`docs/adr/` — 12 ADRs (0001-0012). Если времени мало, читай эти 4 первыми:
+`docs/adr/` — 28 ADRs (0001-0028). Если времени мало, читай эти 4 первыми:
 
 1. **ADR-0002** Sovereignty Registry — Tier 1+2+3 реестр зависимостей. Основа
    для всех решений «что добавить в flake.nix», «что взять в SaaS».
@@ -81,12 +81,12 @@ ADR — immutable после Accepted. Новые решения → superseding
 
 | Путь | Назначение |
 |---|---|
-| `runtime/` | Layer 5: SINGULYAR EIR v0.3. Python stdlib only, без deps. |
+| `runtime/` | Layer 5: SINGULYAR EIR v0.6.1. Python stdlib only, без deps. |
 | `scripts/check.py` | 12 проверок `make verify`. |
 | `Makefile` | Single entry point (`make verify`, `make bootstrap`, `make dev`). |
 | `flake.nix` | Reproducible dev-shell (Tier 1+2 tools, см. `docs/05-devex-ci.md`). |
 | `.envrc` | direnv hook (`use flake` + `.env.local`). |
-| `docs/adr/` | 12 ADRs + `template.md`. |
+| `docs/adr/` | 28 ADRs + `template.md`. |
 | `docs/0N-*.md` | Документация по слоям (01-principles, 02-repo-structure, etc). |
 | `.github/workflows/ci.yml` | CI: verify → lint → typecheck → test → build → security. |
 | `.github/workflows/` | Reusable workflows. |
@@ -132,5 +132,5 @@ make clean      # clean build artifacts
 - `docs/05-devex-ci.md` — Layer 4 детали (Nix, chezmoi, SOPS, cosign, Tilt)
 - `docs/AUDIT_RESPONSE.md` — audit findings A1-A11 → ADR mapping
 - `docs/runbook/RUNBOOK.md` — hardened operations runbook
-- `runtime/README.md` — SINGULYAR EIR v0.3
+- `runtime/README.md` — SINGULYAR EIR v0.6.1
 - `runtime/docs/LIMITATIONS.md` — что НЕ доказано (честность)

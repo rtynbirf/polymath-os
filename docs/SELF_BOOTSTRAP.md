@@ -38,7 +38,7 @@ make verify
 Expected output (verified on this commit):
 
 ```
-→ 01. SINGULYAR EIR — all 40 tests pass... ✓
+→ 01. SINGULYAR EIR — all 220 tests pass... ✓
 → 02. JSON Schemas (Intent/Capability/Evidence) valid... ✓
 → 03. ADRs (0001-0012) well-formed... ✓
 → 04. ADRs follow template... ✓

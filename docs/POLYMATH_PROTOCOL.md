@@ -42,8 +42,8 @@ Verdict tri-state: PASS/FAIL/INCONCLUSIVE.
 ## 12 линз
 
 1. **Архитектура** — 5 слоёв + cross-cutting. ARCHITECTURE.md.
-2. **Решения** — 16 ADRs (ADR-0001 to ADR-0016). docs/adr/.
-3. **Ядро** — SINGULYAR EIR v0.3. runtime/src/singulyar_runtime.py.
+2. **Решения** — 28 ADRs (ADR-0001 to ADR-0016). docs/adr/.
+3. **Ядро** — SINGULYAR EIR v0.6.1. runtime/src/singulyar_runtime.py.
 4. **Адаптеры** — 3 real consumers: LLMLocal, HTTP, WebRTC. runtime/src/adapters/.
 5. **CI** — 20 checks в make verify + weekly sovereignty drill. scripts/check.py.
 6. **Суверенитет** — Tier 1/2/3 registry + quarterly drill. ADR-0002 + scripts/sovereignty_drill.py.

@@ -19,7 +19,7 @@ Open-source LFS-style rebuild персональной операционной 
 2. **AI Workflows** — MCP-native, version pinned 2026-07-28 (ADR-0008)
 3. **Second Brain (PKM)** — vault/ (PARA+MOC), Obsidian config, Quartz v4 garden
 4. **DevEx / CI / IaC** — OpenTofu + Nix Flakes + cosign/SLSA L2 + OIDC trust
-5. **Execution Kernel** — SINGULYAR EIR v0.3 in `runtime/`
+5. **Execution Kernel** — SINGULYAR EIR v0.6.1 in `runtime/`
 
 Cross-cutting: Security (cosign/SLSA/SBOM) + OpenTelemetry + git.
 

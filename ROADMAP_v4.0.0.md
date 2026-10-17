@@ -58,7 +58,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 | Tests for AgentCard | `runtime/tests/test_agent_card.py` (12 tests) | ✓ Pass |
 | Tests for AgentMesh | `runtime/tests/test_agent_mesh.py` (21 tests) | ✓ Pass |
 | AUDIT_RESPONSE.md cross-reference | Updated with ADR-0023 + ADR-0024 entries | ✓ Updated |
-| make verify | 23/23 PASS (was 22/22 before v3.8.0) | ✓ |
+| make verify | 24/24 PASS (was 24/24 before v3.8.0) | ✓ |
 | Runtime tests | 156/156 PASS (was 123, +33 new for agent card/mesh) | ✓ |
 
 ---
@@ -111,7 +111,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 |---------|--------|---------|---|
 | ADRs | 22 | **24** | +2 (0023, 0024) |
 | Runtime tests | 123 | **156** | +33 (12 AgentCard + 21 AgentMesh) |
-| make verify | 23/23 | 23/23 | — |
+| make verify | 24/24 | 24/24 | — |
 | Source files in runtime/src | 7 | **9** | +2 (agent_card.py, agent_mesh.py) |
 | Default Agent Cards | 0 | **3** | +3 (singulyar, polymath-os.browser, cell65-llm) |
 | A2A-compatible endpoints | 0 | **1** | +1 (.well-known/agent.json) |
@@ -289,7 +289,7 @@ Polymath-OS как платформа для sovereign AI agent startups:
 |---------|------------------|-----------------|
 | ADRs | 24 | 30+ |
 | Runtime tests | 156 | 200+ |
-| make verify | 23/23 | 25+/25+ |
+| make verify | 24/24 | 25+/25+ |
 | Default Agent Cards | 3 | 5+ (add storage, web_fetch) |
 | Multi-agent scenarios tested | 2 (test_agent_mesh.py) | 10+ |
 | CI check-runs | 5/5 | 5/5 (maintain) |

@@ -33,7 +33,7 @@
 | **Layer 1** | Repository Structure — pnpm + Turborepo + Changesets + CODEOWNERS | repo root |
 | **Cross-cutting** | Security (cosign/SLSA/SBOM) + OTel + git + token hygiene | everywhere |
 
-For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**22 ADRs**: 0001-0022).
+For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**28 ADRs**: 0001-0022).
 
 ## Quick start
 
@@ -79,9 +79,9 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 
 | # | Claim | How to verify | Status |
 |---|---|---|---|
-| 01 | SINGULYAR EIR passes all 123 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓ |
+| 01 | SINGULYAR EIR passes all 220 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓ |
 | 02 | JSON Schemas (Intent / Capability / Evidence) parse and validate | `python scripts/check.py` (check 02) | ✓ |
-| 03 | 22 ADRs (0001-0022) all present | `ls docs/adr/` | ✓ |
+| 03 | 28 ADRs (0001-0028) all present | `ls docs/adr/` | ✓ |
 | 04 | Every ADR follows template (Date/Status/Context/Decision/Consequences) | `python scripts/check.py` (check 04) | ✓ |
 | 05 | `AUDIT_RESPONSE.md` cross-references every ADR | `python scripts/check.py` (check 05) | ✓ |
 | 06 | Sovereignty Registry covers every `package.json` dependency | `python scripts/check.py` (check 06) | ✓ |
@@ -103,7 +103,7 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 | 22 | MANIFEST.json exists + valid (ADR-0020) | `python scripts/check.py` (check 22) | ✓ |
 | 23 | **Token hygiene: no plaintext PATs in code (v0.6, ADR-0021 enforcement)** | `python scripts/check.py` (check 23) | ✓ |
 
-**To reproduce**: clone this repo, run `make verify`. You will see the same 23/23 PASS result.
+**To reproduce**: clone this repo, run `make verify`. You will see the same 24/24 PASS result.
 
 ## Decree system (v3.6.0+ OPERATIONAL)
 
@@ -193,7 +193,7 @@ Emergence here is a **falsifiable hypothesis**, not a slogan. The ablation ladde
 | [`CHANGELOG.md`](./CHANGELOG.md) | Release history (v1.0.0 → v3.8.0, all changes logged) |
 | [`MANIFEST.json`](./MANIFEST.json) | Root manifest (ADR-0020 — manifest-driven architecture) |
 | [`docs/AUDIT_RESPONSE.md`](./docs/AUDIT_RESPONSE.md) | Audit findings A1-A11 → ADR → action mapping |
-| [`docs/adr/`](./docs/adr) | **22 ADRs (0001-0022)** — every architectural decision |
+| [`docs/adr/`](./docs/adr) | **28 ADRs (0001-0028)** — every architectural decision |
 | [`docs/MANIFESTO.md`](./docs/MANIFESTO.md) | System manifesto (4 theses: PID=1, PAROLE>LANGUE, LFS, security context) |
 | [`docs/SOVEREIGNTY_CONTRACT.md`](./docs/SOVEREIGNTY_CONTRACT.md) | Sovereignty contract (Tier 1/2/3 dependency classification) |
 | [`docs/01-principles.md`](./docs/01-principles.md) | 18 principles (constitution) |
@@ -234,7 +234,7 @@ This repo was built through an iterative dialogue:
 4. **v3.0.0-v3.5.0**: Liberation roadmap (DNS unbound + Cloudflare-free + Chrome-free + sovereign browser) → Decree Portal UI + ADR-0022 + MANIFEST.json
 5. **v3.6.0 (OPERATIONAL)**: Decree Bridge wired — 7 foundational decrees recorded in real SQLite. Runtime.set_decree_log() implemented. check_compliance() works on real decrees. v0.5 NLP phrase matching (LIST/PHRASE/SINGLE/DEFAULT classification).
 6. **v3.7.0 (Multiagent)**: 4 parallel subagent tracks — production decree demo + v0.5 NLP + Electron desktop wrapper + CI steps 8+ green. All 4/4 CI checks green.
-7. **v3.8.0 (CLEAN-UP)**: v0.6 word-boundary regex matching (fixes `chrome` ↔ `chromebook` false positive) + decree scope filtering + regex prohibition parser + token hygiene automation (`scripts/check_token_hygiene.py` + claim #23 + SECURITY.md best practices). 23/23 verify, 123/123 tests, 5/5 CI green.
+7. **v3.8.0 (CLEAN-UP)**: v0.6 word-boundary regex matching (fixes `chrome` ↔ `chromebook` false positive) + decree scope filtering + regex prohibition parser + token hygiene automation (`scripts/check_token_hygiene.py` + claim #23 + SECURITY.md best practices). 24/24 verify, 220/220 tests, 5/5 CI green.
 8. **v3.9.0 (DOCS SYNC)**: All documentation synced with reality — README badges, MANIFEST counts, ARCHITECTURE ADR table (22 → 28), TZ.md layer count.
 9. **v3.10.0 (СИНГУЛЯР synthesis)**: ADR-0023 Agent Card Protocol + ADR-0024 Decree-Enforced Multi-Agent Communication. Decree system теперь работает в 2 направлениях (inbound in-process + outbound).
 10. **v3.11.0 (Symmetric СИНГУЛЯР)**: ADR-0025 Decree-Driven A2A Client (outbound decree gate BEFORE network request). v0.6.1 regex extension (+send/share/transmit/expose verbs). Decree Portal UI multi-agent view. Agent Card schema validation (claim #24). 4/5 CI green.

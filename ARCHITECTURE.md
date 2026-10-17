@@ -133,7 +133,7 @@ PID=1 как метафора допустима (человек — init-про
 
 ## 6. ADR (Architecture Decision Records)
 
-Все архитектурные решения документируются в `docs/adr/`. **28 ADRs создано** (0001-0028) после аудита SINGULYAR EIR v0.3 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0:
+Все архитектурные решения документируются в `docs/adr/`. **28 ADRs создано** (0001-0028) после аудита SINGULYAR EIR v0.6.1 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0:
 
 | ADR | Тема | Audit response | Реализовано |
 |---|---|---|---|

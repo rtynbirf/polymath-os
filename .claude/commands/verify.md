@@ -11,7 +11,7 @@ Run the open-source contract check.
 
 `make verify` runs `python3 scripts/check.py` — 12 independent checks:
 
-1. SINGULYAR EIR — all 40 tests pass (in `runtime/`)
+1. SINGULYAR EIR — all 220 tests pass (in `runtime/`)
 2. JSON Schemas (Intent / Capability / Evidence) valid
 3. ADRs 0001-0012 present
 4. ADRs follow template (Date/Status/Context/Decision/Consequences)

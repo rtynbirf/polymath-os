@@ -112,7 +112,7 @@ All on one VPS. All Tier 1 (the human owns the VPS).
            └───────────┬───────────┘
                        │
            ┌───────────┴───────────┐
-           │   SINGULYAR EIR v0.3   │
+           │   SINGULYAR EIR v0.6.1   │
            │   (intent kernel)      │
            │   Python↔JS bridge     │
            └───────────┬───────────┘

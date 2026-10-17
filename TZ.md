@@ -19,10 +19,10 @@
 - **Decree Log (supreme law layer, v3.6.0+)** — SQLite, hash-chained, append-only; воля человека = закон, выше ADR и кода (ADR-0021)
 - cross-cutting: security, OTel, git, token hygiene (вертикальный слой)
 
-Репозиторий должен быть **самодостаточным**: `git clone` + одна команда `make bootstrap` → готовое рабочее окружение на новой машине за ≤30 минут. После bootstrap: `make verify` → 23/23 PASS — открытый контракт с пользователем.
+Репозиторий должен быть **самодостаточным**: `git clone` + одна команда `make bootstrap` → готовое рабочее окружение на новой машине за ≤30 минут. После bootstrap: `make verify` → 24/24 PASS — открытый контракт с пользователем.
 
 ### 1.2. Задачи
-1. Зафиксировать архитектурные принципы (**5+1 слоёв + Decree Log**) в ADR. На v3.8.0 — 22 ADRs (0001-0022).
+1. Зафиксировать архитектурные принципы (**5+1 слоёв + Decree Log**) в ADR. На v3.8.0 — 28 ADRs (0001-0028).
 2. Внедрить trunk-based development с merge queue + CODEOWNERS + branch protection.
 3. Настроить CI: lint, typecheck, test, security scan, SBOM, cosign signing, SLSA provenance. На v3.8.0 — 5 CI check-runs (lint+typecheck+test+build+security, make verify, CodeQL JS, CodeQL Python, Build+SBOM+cosign+Release).
 4. Внедрить Changesets для управления версиями в монорепо.

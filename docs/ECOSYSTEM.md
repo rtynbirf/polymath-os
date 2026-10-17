@@ -34,7 +34,7 @@ is the **single source of truth** for which repo does what.
                     │   polymath-os    │
                     │   (OS / intent)   │
                     │    532 KB        │
-                    │   16 ADRs        │
+                    │   28 ADRs        │
                     │   3 adapters     │
                     │   9 patterns     │
                     │   v2.0.0         │
@@ -48,7 +48,7 @@ is the **single source of truth** for which repo does what.
 | **singulyar** | Product | Tier 1 (offline core) + Tier 2 (Nostr/STUN/mempool) | Offline karaoke universe PWA — 64 songs, 200 languages, 17 modules, 44 doors. One HTML = entire platform (offline). Air-gapped WebRTC, ECDSA identity, local LLM. |
 | **singulyar-llm** | Model | Tier 1 (weights Apache-2.0) + Tier 2 (HuggingFace CDN for first download) | Qwen2.5-0.5B-Instruct GGUF q4_k_m, 6 parts ≤100MB, instruction layer (ПРАВИЛА_СИНГУЛЯРА.txt, 17 rules v0.6). Weights run in browser via wllama (WASM). |
 | **cell65-host** | Infrastructure | Tier 1 (sing-box binary) + Tier 2 (VPS, Cloudflare, DDNS) | Personal anti-censorship kit: 3 transports (VLESS+Reality, VLESS+WS+CF, Hysteria2) with auto-rotation, RU/non-RU split. |
-| **polymath-os** | OS / Intent | Tier 1 (Python stdlib, SQLite, git, markdown) + Tier 2 (GitHub Actions, cosign, Pages) | Sovereign media-OS umbrella: SINGULYAR EIR v0.3 (intent-preserving kernel), 3 real adapters (LLMLocal, HTTP, WebRTC), 16 ADRs, 9 machine-checked patterns, 4 audit documents (3 levels), weekly sovereignty drill. |
+| **polymath-os** | OS / Intent | Tier 1 (Python stdlib, SQLite, git, markdown) + Tier 2 (GitHub Actions, cosign, Pages) | Sovereign media-OS umbrella: SINGULYAR EIR v0.6.1 (intent-preserving kernel), 3 real adapters (LLMLocal, HTTP, WebRTC), 28 ADRs, 9 machine-checked patterns, 4 audit documents (3 levels), weekly sovereignty drill. |
 
 ## Current versions
 
@@ -57,7 +57,7 @@ is the **single source of truth** for which repo does what.
 | singulyar | такт v11.50 «НАПОЛНЕНИЕ», s15-orkestrator-v200 | 2026-10-16T09:35:32Z | live, 2.3 GB |
 | singulyar-llm | v0.6 (106 voice commands, 17 rules) | 2026-10-15T03:50:22Z | live, 466 MB |
 | cell65-host | (no version tag, sovereign-node/ README) | 2026-10-11T08:02:22Z | live, 66 KB |
-| polymath-os | v2.0.0 (16 ADRs, 3 adapters, 20 CI checks) | 2026-10-16T16:57:01Z | live, 532 KB |
+| polymath-os | v2.0.0 (28 ADRs, 3 adapters, 20 CI checks) | 2026-10-16T16:57:01Z | live, 532 KB |
 
 ## Dependencies between repos
 

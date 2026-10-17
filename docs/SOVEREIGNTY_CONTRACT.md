@@ -43,7 +43,7 @@ The system is built on **four philosophical theses** (ARCHITECTURE.md §1):
 | 2. AI Workflows | MCP-native, version pinned (ADR-0008) | `tooling/agents/mcp/` |
 | 3. Second Brain (PKM) | Obsidian vault + Quartz v4 garden + default-deny publish | `vault/`, `apps/garden/` |
 | 4. DevEx / CI / IaC | OpenTofu + Nix Flakes + cosign/SLSA L2 + OIDC trust | `infra/`, `.github/workflows/` |
-| 5. Execution Kernel | SINGULYAR EIR v0.3 — Intent → Capability → Adapter → Observation → Evidence | `runtime/` |
+| 5. Execution Kernel | SINGULYAR EIR v0.6.1 — Intent → Capability → Adapter → Observation → Evidence | `runtime/` |
 | Cross-cutting | Security (cosign/SLSA/SBOM) + OpenTelemetry + git | everywhere |
 
 ## §3. The 15 ADRs (architecture decisions)

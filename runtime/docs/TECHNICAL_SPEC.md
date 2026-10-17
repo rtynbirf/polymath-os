@@ -1,4 +1,4 @@
-# Technical Specification — SINGULYAR EIR v0.3
+# Technical Specification — SINGULYAR EIR v0.6.1
 
 ## 1. Goal
 Preserve a person's declared intent across interchangeable execution methods; make every completion claim depend on inspectable evidence of the required final state; treat "cannot tell" as a first-class outcome.
