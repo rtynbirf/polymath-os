@@ -1,5 +1,5 @@
 {
-  "version": "3.14.0",
+  "version": "3.20.0",
   "released": "2026-10-17",
   "commit": "6030791",
   "adapters": [
@@ -50,8 +50,8 @@
       "capabilities": ["search", "fetch_page"]
     }
   ],
-  "adrs": 28,
-  "adr_ids": ["0001-0028"],
+  "adrs": 29,
+  "adr_ids": ["0001-0029", "0031"],
   "patterns": 9,
   "contracts": [
     "sovereignty",
@@ -69,7 +69,7 @@
     "decree-amendment",
     "decree-enforced-mesh"
   ],
-  "tests": 220,
+  "tests": 273,
   "tests_detail": "220 pass, 4 skipped (3 LLM integration + 1 WebRTC aiortc). +8 v0.5 NLP, +12 v0.6 word-boundary, +33 v3.10 AgentCard+AgentMesh, +17 v3.11 A2AClient, +24 v3.12 AdrAmender, +15 v3.13 AgentMeshServer, +8 v3.14 supersession",
   "ci_checks": 24,
   "ci_check_runs": 5,
@@ -91,7 +91,8 @@
     "v0.6.1 extension: +{send, share, transmit, expose} verbs for data-flow prohibitions (ADR-0025)",
     "decree supersession (v3.14.0, ADR-0028 — decrees can be revoked without breaking append-only invariant)",
     "Runtime integration via set_decree_log() (checked BEFORE policy per ADR-0021)",
-    "decree_scope parameter on check_compliance() for outbound filtering (ADR-0025)"
+    "decree_scope parameter on check_compliance() for outbound filtering (ADR-0025)",
+    "decree cryptographic signing (ADR-0031, v3.20.0 — Ed25519 provenance, pure stdlib)"
   ],
   "runtime_version": "v0.6.1",
   "runtime_features": [

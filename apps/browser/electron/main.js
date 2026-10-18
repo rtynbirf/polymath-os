@@ -22,6 +22,11 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
+      // Electron 31: renderer sandbox is ON by default. A sandboxed preload
+      // can require() only a fixed builtin whitelist — preload.js needs
+      // require("../decree-bridge.js"), so sandbox must stay OFF here.
+      // contextIsolation still separates renderer from Node (ADR-0022).
+      sandbox: false,
     },
   });
 

@@ -1,0 +1,69 @@
+# .github/workflows/llm-integration.yml — Real LLM Inference in CI
+# Per ADR-0015 (v3.20.0 implementation): weekly real Qwen2.5-0.5B
+# inference on a CPU runner — LIMITATIONS item 9 closed.
+# Sovereignty: local model, no OpenAI/Anthropic APIs (ADR-0002 Tier 2).
+
+name: LLM Integration
+
+on:
+  schedule:
+    # Monday 04:00 UTC — after the sovereignty drill window
+    - cron: '0 4 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: llm-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qwen-cpu:
+    name: Qwen2.5-0.5B real inference (CPU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache model + llama-cpp wheel
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/polymath-os
+            ~/.cache/pip
+          key: llm-int-qwen0.5b-q5km-v1
+
+      - name: Install llama-cpp-python (CPU)
+        run: |
+          python3 -m pip install --upgrade pip
+          CMAKE_ARGS="-DGGML_NATIVE=off" \
+            python3 -m pip install llama-cpp-python
+
+      - name: Download Qwen2.5-0.5B-Instruct GGUF (q5_k_m)
+        run: |
+          mkdir -p ~/.cache/polymath-os
+          GGUF=~/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf
+          if [ ! -f "$GGUF" ]; then
+            curl -L --fail --retry 3 -o "$GGUF" \
+              "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q5_k_m.gguf"
+          fi
+          ls -la "$GGUF"
+
+      - name: Run real-LLM integration tests
+        env:
+          LLM_MODEL_PATH: ~/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf
+        run: |
+          cd runtime
+          python3 -m unittest tests.test_llm_local_adapter_integration -v
+
+      - name: Report
+        if: failure()
+        run: |
+          echo "ADR-0015 sovereignty regression: real-LLM integration failed."
+          echo "Open an issue with label P0 (per ADR-0015 failure mode)."

@@ -1,7 +1,7 @@
 # ADR-0015 — Real LLM Inference in CI (CPU runner)
 
 **Date:** 2026-10-16 (Gate-7 creativity)
-**Status:** Proposed
+**Status:** Accepted (implemented v3.20.0 — `.github/workflows/llm-integration.yml`)
 **Deciders:** @USER
 **Supersedes:** None
 
@@ -66,7 +66,7 @@ on GitHub Actions CPU runner.
    ADR-0002 Tier 2 (network-dependent, account-required). Local model
    is the sovereignty thesis.
 
-## Verification (deferred to v2.0)
+## Verification (implemented v3.20.0)
 
 - `LLM_MODEL_PATH` env var set in `llm-integration.yml` workflow
 - 3 tests in `tests/test_llm_local_adapter_integration.py` all pass

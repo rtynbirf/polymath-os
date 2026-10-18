@@ -1,5 +1,47 @@
 # Changelog
 
+## [v3.20.0] — 2026-10-17 (FULLY OPERATIONAL — ADR-0031 decree signing)
+
+Decrees now carry the human's cryptographic authorship. CI red → green.
+
+### Added
+
+- **ADR-0031 — Decree Cryptographic Signing (Provenance)**:
+  `runtime/src/decree_signing.py` — pure-python Ed25519 (RFC 8032),
+  stdlib only, zero third-party deps (sovereignty contract kept)
+- OpenSSH key parsing (ssh-keygen-compatible, unencrypted keys);
+  encrypted keys rejected with honest error
+- Signatures cover the decree chain hash → authorship bound to the
+  exact entry AND its chain position
+- Separate append-only `decree_signatures` table — the decrees chain
+  and ADR-0029 §9 trust anchor are untouched
+- Honest verification: `integrity_failed` / `not_signed` /
+  `signature_mismatch` / `decree_not_found` — never fake passes
+- `provenance_report()` — per-decree signed/unsigned status
+- 20 new tests (RFC 8032 vectors, tamper/foreign-key/multisig probes,
+  optional interop with the `cryptography` reference lib when present)
+- **make verify: 25 → 26 claims** (claim #26 pins the ADR-0031 contract)
+- Production decrees.db: all 7 foundational decrees signed with the
+  PID=1 Ed25519 key; chain OK; trust anchor VERIFIED
+
+### Fixed
+
+- **CI on main was red**: biome lint failure in
+  `apps/browser/decree-bridge.js` (long console.error line) — the only
+  blocking lint error; wrapped
+- **Electron 31 portal showed no decrees via `npm start`**: renderer
+  sandbox blocked preload's `require('../decree-bridge.js')`;
+  `main.js` now sets `sandbox: false` (contextIsolation stays true)
+- MANIFEST.json version synced (was stale at 3.14.0) → 3.20.0, 29 ADRs,
+  273 tests
+
+### Deferred (unchanged)
+
+- WebRTC P2P transport for AgentMesh (needs live aiortc peers) → v0.7+
+- cell65-llm host hookup (needs cell65-host server) → v1.0
+
+---
+
 ## [v3.15.0] — 2026-10-17 (ALL GAPS CLOSED — bugs → features via СИНГУЛЯР)
 
 All audit findings closed. Production DB reset, docs synced,
