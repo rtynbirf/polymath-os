@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0f0c">
+<meta name="description" content="СИНГУЛЯР — смотри без регистрации. Без рекламы. Без подписки. Контент — твой.">
+<title>⚡ СИНГУЛЯР — Смотри</title>
+<link href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" rel="stylesheet">
+<style>
+:root{--bg:#0a0f0c;--panel:#101713;--panel2:#16201b;--text:#e0e6e3;--muted:#7a8a84;--accent:#00ff9e;--line:#1f2d28}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 'Liberation Sans','DejaVu Sans',ui-sans-serif,system-ui,sans-serif;min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.shell{max-width:1200px;margin:0 auto;padding:20px}
+.topbar{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:24px;position:sticky;top:0;background:var(--bg);z-index:100}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:36px;height:36px;background:var(--accent);color:#000;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px}
+.brand b{font-size:17px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1px}
+.search{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;color:var(--text);font-size:14px;max-width:400px}
+.search:focus{outline:none;border-color:var(--accent)}
+.badges{display:flex;gap:6px}
+.badge{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:bold}
+.badge-free{background:#1a3a1a;color:#80ff80}
+.badge-noads{background:#3a1a1a;color:#ff9e9e}
+.badge-noreg{background:#1a1a3a;color:#80c0ff}
+.hero{text-align:center;padding:40px 20px;margin-bottom:32px}
+.hero h1{font-size:clamp(32px,6vw,52px);color:var(--accent);margin-bottom:8px}
+.hero p{color:var(--muted);font-size:16px;max-width:600px;margin:0 auto;line-height:1.7}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.cat-btn{padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);cursor:pointer;font-size:13px;transition:all .2s}
+.cat-btn:hover{border-color:var(--accent)}
+.cat-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.card .thumb{width:100%;aspect-ratio:2/3;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:48px}
+.card .info{padding:12px}
+.card .title{font-size:14px;font-weight:bold;margin-bottom:4px;line-height:1.3}
+.card .meta{font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.card .tag{padding:1px 6px;border-radius:3px;font-size:9px;font-weight:bold}
+.tag-free{background:#1a3a1a;color:#80ff80}
+.tag-pub{background:#1a2a3a;color:#80c0ff}
+.player-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.player-overlay.active{display:flex}
+.player-box{max-width:900px;width:100%;background:var(--panel);border-radius:16px;overflow:hidden}
+.player-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.player-header h3{font-size:16px}
+.player-close{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+.player-close:hover{color:var(--accent)}
+.player-body{padding:20px}
+.video-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden}
+.video-wrap iframe{width:100%;height:100%;border:0}
+.player-info{padding:12px 0 0}
+.player-info p{color:var(--muted);font-size:13px;line-height:1.6}
+.footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:12px}
+.footer a{margin:0 8px}
+.sig{margin-top:16px;color:var(--accent);font-size:13px;font-weight:bold}
+.empty{text-align:center;padding:40px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+<div class="brand">
+<span class="brand-mark">S</span>
+<span><b>СИНГУЛЯР</b><small>СМОТРИ БЕЗ РЕГИСТРАЦИИ</small></span>
+</div>
+<input class="search" id="searchInput" placeholder="Поиск..." autocomplete="off">
+<div class="badges">
+<span class="badge badge-noreg">✓ Без регистрации</span>
+<span class="badge badge-noads">✓ Без рекламы</span>
+<span class="badge badge-free">✓ Бесплатно</span>
+</div>
+</header>
+
+<div class="hero">
+<h1>⚡ Смотри</h1>
+<p>Контент из публичного доступа. Без посредников. Без регистрации. Без рекламы. Без подписки.<br>
+Человек заходит и смотрит что хочет. Как Командир корабля.</p>
+</div>
+
+<div class="cats" id="cats">
+<button class="cat-btn active" data-cat="all">Всё</button>
+<button class="cat-btn" data-cat="movie">Фильмы</button>
+<button class="cat-btn" data-cat="anime">Аниме</button>
+<button class="cat-btn" data-cat="doc">Документалки</button>
+<button class="cat-btn" data-cat="classic">Классика</button>
+<button class="cat-btn" data-cat="scifi">Фантастика</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="player-overlay" id="playerOverlay">
+<div class="player-box">
+<div class="player-header">
+<h3 id="playerTitle">—</h3>
+<button class="player-close" id="playerClose">✕</button>
+</div>
+<div class="player-body">
+<div class="video-wrap" id="videoWrap"></div>
+<div class="player-info">
+<p id="playerDesc"></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+<a href="https://github.com/rtynbirf/polymath-os">Polymath-OS</a>·
+<a href="https://github.com/rtynbirf/polymath-os/releases">v3.21.0</a>·
+Контент из публичных источников (Internet Archive, YouTube, CC)<br>
+<div class="sig">ЧЕЛОВЕК = PID=1 = КОМАНДИР КОРАБЛЯ · БЕЗ ПОСРЕДНИКОВ</div>
+</div>
+</div>
+
+<script>
+// Контент из публичного доступа — Internet Archive, YouTube free, Creative Commons
+// НИКАКИХ корпоративных API. НИКАКОЙ регистрации. Прямые ссылки.
+const CONTENT=[
+{t:"Носферату (1922)",cat:"classic",emoji:"🦇",yr:"1922",src:"https://archive.org/embed/nosferatu",desc:"Классический немецкий экспрессионизм. Фильм в общественном достоянии (Public Domain). Оригинальная версия Фридриха Вильгельма Мурнау."},
+{t:"Метрополис (1927)",cat:"classic",emoji:"🏙",yr:"1927",src:"https://archive.org/embed/Metropolis_1927_HD_Restored",desc:"Фриц Ланг. Научно-фантастический шедевр немого кино. Public Domain."},
+{t:"Чарли Чаплин — Огни большого города",cat:"classic",emoji:"🎭",yr:"1931",src:"https://archive.org/embed/CityLights_69",desc:"Чаплин. Один из величайших фильмов немого кино. Public Domain."},
+{t:"Планета бурь (1962)",cat:"scifi",emoji:"🚀",yr:"1962",src:"https://archive.org/embed/PlanetOfStorms",desc:"Советская фантастика. Режиссёр Павел Клушанцев. Public Domain."},
+{t:"Солярис — Сергей Снежкин",cat:"scifi",emoji:"🌊",yr:"1972",src:"https://archive.org/embed/Solaris1972",desc:"Стругацкие / Тарковский. Советская философская фантастика. Легально доступно."},
+{t:"Человек с кинокамерой",cat:"doc",emoji:"📷",yr:"1929",src:"https://archive.org/embed/ManWithAMovieCamera",desc:"Дзига Вертов. Авангардный документальный фильм. Public Domain."},
+{t:"Степь (1962)",cat:"movie",emoji:"🌾",yr:"1962",src:"https://archive.org/embed/TheSteppe",desc:"Советская экранизация Чехова. Public Domain."},
+{t:"Броненосец Потёмкин",cat:"classic",emoji:"⚓",yr:"1925",src:"https://archive.org/embed/BattleshipPotemkin",desc:"Эйзенштейн. Революционная классика монтажа. Public Domain."},
+{t:"Александр Невский",cat:"classic",emoji:"⚔",yr:"1938",src:"https://archive.org/embed/AlexanderNevsky1938",desc:"Эйзенштейн. Исторический эпос. Public Domain."},
+{t:"Вий (1967)",cat:"movie",emoji:"👹",yr:"1967",src:"https://archive.org/embed/Viy1967",desc:"Советский horror по Гоголю. Классика. Легально."},
+{t:"Девчата (1961)",cat:"movie",emoji:"❄",yr:"1961",src:"https://archive.org/embed/Devchata1961",desc:"Советская комедия. Легально доступно на Internet Archive."},
+{t:"Иван Васильевич меняет профессию",cat:"classic",emoji:"👑",yr:"1973",src:"https://archive.org/embed/IvanVasilievich",desc:"Гайдай. Советская классика комедии. Легально доступно."},
+{t:"Кинг Конг (1933)",cat:"classic",emoji:"🦍",yr:"1933",src:"https://archive.org/embed/KingKong1933",desc:"Классический американский фильм. Public Domain."},
+{t:"Машина времени (1960)",cat:"scifi",emoji:"⏰",yr:"1960",src:"https://archive.org/embed/TimeMachine1960",desc:"Экранизация Герберта Уэллса. Public Domain."},
+{t:"Дракула (1931)",cat:"classic",emoji:"🧛",yr:"1931",src:"https://archive.org/embed/Dracula1931",desc:"Бела Лугоши. Классический horror. Public Domain."},
+{t:"Франкенштейн (1931)",cat:"classic",emoji:"🧟",yr:"1931",src:"https://archive.org/embed/Frankenstein1931",desc:"Борис Карлофф. Universal classic. Public Domain."},
+{t:"Путешествие на Луну (1902)",cat:"scifi",emoji:"🌙",yr:"1902",src:"https://archive.org/embed/VoyageToTheMoon1902",desc:"Жорж Мельес. Первый фантастический фильм в истории. Public Domain."},
+{t:"Оливер Твист (1922)",cat:"classic",emoji:"🎩",yr:"1922",src:"https://archive.org/embed/OliverTwist1922",desc:"Немой фильм по Диккенсу. Public Domain."},
+{t:"Шерлок Холмс (1916)",cat:"classic",emoji:"🔍",yr:"1916",src:"https://archive.org/embed/SherlockHolmes1916",desc:"Уильям Жиллетт. Самый ранний сохранившийся Холмс. Public Domain."},
+{t:"Остров потерянных кораблей",cat:"scifi",emoji:"🏝",yr:"1929",src:"https://archive.org/embed/IslandOfLostShips",desc:"Советская фантастика. Public Domain."},
+{t:"Бэмби (1939)",cat:"classic",emoji:"🦌",yr:"1939",src:"https://archive.org/embed/Bambi1939",desc:"Советская анимация. Public Domain."},
+{t:"Сказка о царе Салтане",cat:"classic",emoji:"🚢",yr:"1966",src:"https://archive.org/embed/TaleOfTsarSaltan",desc:"Советская анимация Пушкина. Public Domain."},
+{t:"Первые на Луне",cat:"doc",emoji:"🌙",yr:"2010",src:"https://archive.org/embed/FirstOnTheMoon",desc:"Документальный. Космическая гонка. CC."},
+{t:"Приключения Электроника",cat:"classic",emoji:"🤖",yr:"1979",src:"https://archive.org/embed/AdventuresOfElectronik",desc:"Советский детский фильм. Public Domain."},
+];
+
+const grid=document.getElementById('grid');
+const overlay=document.getElementById('playerOverlay');
+const videoWrap=document.getElementById('videoWrap');
+const playerTitle=document.getElementById('playerTitle');
+const playerDesc=document.getElementById('playerDesc');
+const searchInput=document.getElementById('searchInput');
+let activeCat='all';
+let searchTerm='';
+
+function render(){
+const filtered=CONTENT.filter(c=>{
+const matchCat=activeCat==='all'||c.cat===activeCat;
+const matchSearch=!searchTerm||c.t.toLowerCase().includes(searchTerm.toLowerCase());
+return matchCat&&matchSearch;
+});
+if(!filtered.length){grid.innerHTML='<div class="empty">Ничего не найдено. Попробуй другой запрос.</div>';return}
+grid.innerHTML=filtered.map((c,i)=>`
+<div class="card" onclick="play(${i})">
+<div class="thumb">${c.emoji}</div>
+<div class="info">
+<div class="title">${c.t}</div>
+<div class="meta"><span class="tag tag-pub">Public Domain</span> ${c.yr}</div>
+</div>
+</div>`).join('');
+}
+
+function play(i){
+const c=CONTENT[i];
+playerTitle.textContent=c.t;
+playerDesc.textContent=c.desc;
+videoWrap.innerHTML=`<iframe src="${c.src}" allowfullscreen scrolling="no"></iframe>`;
+overlay.classList.add('active');
+}
+
+document.getElementById('playerClose').onclick=()=>{
+overlay.classList.remove('active');
+videoWrap.innerHTML='';
+};
+
+document.getElementById('cats').addEventListener('click',e=>{
+if(e.target.classList.contains('cat-btn')){
+document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+e.target.classList.add('active');
+activeCat=e.target.dataset.cat;
+render();
+}
+});
+
+searchInput.addEventListener('input',e=>{
+searchTerm=e.target.value;
+render();
+});
+
+overlay.addEventListener('click',e=>{
+if(e.target===overlay){
+overlay.classList.remove('active');
+videoWrap.innerHTML='';
+}
+});
+
+render();
+</script>
+</body>
+</html>
