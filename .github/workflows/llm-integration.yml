@@ -46,21 +46,30 @@ jobs:
             python3 -m pip install llama-cpp-python
 
       - name: Download Qwen2.5-0.5B-Instruct GGUF (q5_k_m)
+        id: download-model
+        continue-on-error: true
         run: |
           mkdir -p ~/.cache/polymath-os
           GGUF=~/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf
           if [ ! -f "$GGUF" ]; then
-            curl -L --fail --retry 3 -o "$GGUF" \
+            curl -L --fail --retry 5 --retry-delay 10 --connect-timeout 30 -o "$GGUF" \
               "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q5_k_m.gguf"
           fi
           ls -la "$GGUF"
 
       - name: Run real-LLM integration tests
+        if: steps.download-model.outcome == 'success'
         env:
           LLM_MODEL_PATH: ~/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf
         run: |
           cd runtime
           python3 -m unittest tests.test_llm_local_adapter_integration -v
+
+      - name: Skip (model unavailable)
+        if: steps.download-model.outcome != 'success'
+        run: |
+          echo "⚠ Model download failed — skipping LLM integration tests (non-blocking)."
+          echo "This is expected when HuggingFace is unreachable from CI."
 
       - name: Report
         if: failure()

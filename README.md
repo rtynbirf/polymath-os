@@ -3,9 +3,9 @@
 > **Open-source ideal repository.** Clone it. Run `make verify`. Every claim in this repo is reproducible by that one command. If it exits 0 — every claim holds. If non-zero — the claim that failed is shown.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Verify](https://img.shields.io/badge/make%20verify-23%2F23%20PASS-brightgreen)](./scripts/check.py)
+[![Verify](https://img.shields.io/badge/make%20verify-26%2F26%20PASS-brightgreen)](./scripts/check.py)
 [![SINGULYAR EIR v0.6](https://img.shields.io/badge/runtime-SINGULYAR%20EIR%20v0.6-blue)](./runtime/)
-[![Tests](https://img.shields.io/badge/tests-123%2F123%20PASS-brightgreen)](./runtime/tests/)
+[![Tests](https://img.shields.io/badge/tests-290%2F290%20PASS-brightgreen)](./runtime/tests/)
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
 [![CI](https://img.shields.io/badge/CI-5%2F5%20green-brightgreen)](https://github.com/rtynbirf/polymath-os/actions)
 
