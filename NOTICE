@@ -1,0 +1,10 @@
+NOTICE
+======
+
+Пояснения к лицензии (перенесены из LICENSE для SPDX-распознавания):
+
+-licensed by its
+  original authors. See `runtime/README.md` and `runtime/SHA256SUMS.txt`.
+- All dependencies listed in Sovereignty Registry (`docs/adr/0002-sovereignty-registry.md`)
+  retain their original licenses. This repo only ships source code; it does
+  not redistribute third-party binaries.
