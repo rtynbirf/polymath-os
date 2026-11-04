@@ -47,7 +47,7 @@ make verify
 # → Result: 23 passed, 0 failed (of 23 claims)
 
 # 3. Issue the 7 foundational decrees (creates ~/.polymath-os/decrees.db)
-python3 /home/z/my-project/scripts/issue_decrees.py
+python3 ~/scripts/issue_decrees.py
 # → 7 decrees recorded, chain integrity OK
 
 # 4. Run the production decree enforcement demo
@@ -111,7 +111,7 @@ The decree log is the **human's supreme law layer** — above every ADR, above t
 
 ### 7 foundational decrees + N supersession/amendment decrees (in `~/.polymath-os/decrees.db`)
 
-The 7 foundational decrees are issued once via `python3 /home/z/my-project/scripts/issue_decrees.py`. After that, additional decrees may be added via the Decree Portal:
+The 7 foundational decrees are issued once via `python3 ~/scripts/issue_decrees.py`. After that, additional decrees may be added via the Decree Portal:
 - `category=supersession` — revokes a previous decree (per ADR-0028, v3.14.0)
 - `category=amendment` — drives ADR operations: create/amend/supersede/deprecate (per ADR-0026, v3.12.0)
 - `category=law/prohibition/permission/observation/directive` — new rules (existing behavior)
@@ -244,4 +244,4 @@ This repo was built through an iterative dialogue:
 14. **v3.15.0 (ALL GAPS CLOSED)**: Production DB reset to 7 decrees (was 8 from manual test). MANIFEST.json synced (v3.14.0, adrs=28, tests=220, ci_checks=24, expanded features). ARCHITECTURE.md ADR table 28 rows. README "7 foundational + N" instead of stale "7". AgentMeshServer real Runtime integration (replace _demo_execute_fn). AdrAmender production use (create amendments.log). Audit of sovereignty_drill + cross-repo-governance workflows. Electron install test.
 15. **v3.20.0 (FULLY OPERATIONAL, current)**: ADR-0031 decree cryptographic signing — pure-python Ed25519 (RFC 8032, stdlib only), ssh-keygen-compatible keys, signatures over chain hash in append-only `decree_signatures` table. Honest verification (integrity_failed/not_signed/signature_mismatch). provenance_report(). 20 tests. make verify 25→26 claims (26/26 green). Production decrees signed by PID=1 key (7/7, chain OK, trust anchor VERIFIED). FIXED: CI red on main (biome lint in decree-bridge.js), Electron 31 portal sandbox (npm start showed no decrees — sandbox:false in main.js).
 
-Worklog: `/home/z/my-project/worklog.md` (10+ Task IDs across multiple release sessions — full audit trail of every change).
+Worklog: `~/worklog.md` (10+ Task IDs across multiple release sessions — full audit trail of every change).

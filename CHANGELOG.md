@@ -280,7 +280,7 @@ ADR, above the kernel, above the code.
 
 ### Verification
 
-- `python3 /home/z/my-project/scripts/issue_decrees.py` issues the 7
+- `python3 ~/scripts/issue_decrees.py` issues the 7
   decrees, runs compliance checks, verifies chain integrity.
 - `node apps/browser/decree-bridge.js list` shows all 7 (or more).
 - `node apps/browser/decree-bridge.js check "configure DNS with Google

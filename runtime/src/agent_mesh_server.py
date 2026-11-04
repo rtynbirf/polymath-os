@@ -495,7 +495,7 @@ def main(argv=None):
     decree_db = Path(args.decree_db).expanduser()
     if not decree_db.exists():
         print(f"⚠ Decree DB not found at {decree_db}", file=sys.stderr)
-        print("  Run `python3 /home/z/my-project/scripts/issue_decrees.py` first to issue 7 foundational decrees.", file=sys.stderr)
+        print("  Run `python3 ~/scripts/issue_decrees.py` first to issue 7 foundational decrees.", file=sys.stderr)
         dl = None
     else:
         dl = DecreeLog(str(decree_db), check_same_thread=False)

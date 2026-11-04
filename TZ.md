@@ -217,7 +217,7 @@ polymath-os/
 
 ## 8. Ссылки
 
-- Исходные исследования: `/home/z/my-project/research/` (4 отчёта по 2500-3500 слов каждый)
-- Worklog: `/home/z/my-project/worklog.md`
+- Исходные исследования: `~/research/` (4 отчёта по 2500-3500 слов каждый)
+- Worklog: `~/worklog.md`
 - ADR folder: `docs/adr/`
 - Runbook: `docs/runbook/RUNBOOK.md`

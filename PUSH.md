@@ -13,14 +13,14 @@ PID=1 is shared (we're all human init-processes), but **security context is per-
 
 ```bash
 # Option A: tarball (preserves git history)
-cd /home/z/my-project/download
+cd ~/download
 tar czf polymath-os.tar.gz polymath-os
 # download polymath-os.tar.gz to your machine, then:
 tar xzf polymath-os.tar.gz
 cd polymath-os
 
 # Option B: if you can scp/rsync directly
-rsync -avz /home/z/my-project/download/polymath-os/ user@your-machine:~/polymath-os/
+rsync -avz ~/download/polymath-os/ user@your-machine:~/polymath-os/
 ```
 
 ### 1. Create an empty repo on GitHub

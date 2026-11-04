@@ -179,7 +179,7 @@
 
 ## Мониторинг прогресса
 
-- **Worklog:** `/home/z/my-project/worklog.md` (append-only, multi-agent shared)
+- **Worklog:** `~/worklog.md` (append-only, multi-agent shared)
 - **Project board:** GitHub Projects v2 с колонками: To Do / In Progress / In Review / Done
 - **Daily:** commit в `vault/00-daily/YYYY-MM-DD.md` (15-min review)
 - **Weekly:** `vault/00-daily/week-YYYY-Www.md` (MOC update + retro)

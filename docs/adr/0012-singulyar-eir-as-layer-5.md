@@ -136,4 +136,4 @@ polymath-os/runtime/    # SINGULYAR EIR v0.3
 - ROADMAP интеграции: `runtime/docs/ROADMAP.md` (последняя секция)
 - EXPERIMENT_RESULTS: `runtime/docs/EXPERIMENT_RESULTS.md`
 - LIMITATIONS: `runtime/docs/LIMITATIONS.md`
-- Pasted Content (бриф коллег): `/home/z/my-project/upload/Pasted Content_1792135112722.txt`
+- Pasted Content (бриф коллег): `~/upload/Pasted Content_1792135112722.txt`
