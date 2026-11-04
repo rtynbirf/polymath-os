@@ -8,7 +8,7 @@ terraform {
   required_version = ">= 1.6.0"
 
   required_providers {
-        # Hetzner Cloud (servers + firewalls)
+    # Hetzner Cloud (servers + firewalls)
     hcloud = {
       source  = "hetznercloud/hcloud"
       version = "~> 1.0"
