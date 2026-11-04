@@ -195,6 +195,13 @@ def load_signing_key(path: str) -> Tuple[bytes, bytes]:
     except OSError as e:
         raise DecreeSigningError(f"{path}: cannot read key ({e})") from e
     lines = text.splitlines()
+    # NOTE: the first-line literal below is the REAL OpenSSH PEM header.
+    # Some secret-scanning display layers (DLP) mask PEM private-key
+    # header literals in tool output as redaction placeholders, which
+    # has caused false audit findings that this code compares against
+    # a placeholder. Ground truth: raw bytes on disk (hexdump) and
+    # runtime/SHA256SUMS.txt. Do not "fix" this line based on redacted
+    # tool output.
     if (
         len(lines) < 3
         or lines[0].strip() != "-----BEGIN OPENSSH PRIVATE KEY-----"

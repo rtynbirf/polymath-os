@@ -42,6 +42,11 @@ except ImportError:  # pragma: no cover
 
 
 # ── helpers: OpenSSH key files without ssh-keygen ─────────────────
+# NOTE: the header literal written by the helper below is the REAL
+# OpenSSH PEM BEGIN line. Secret-scanning display layers (DLP) mask
+# PEM header literals in tool output as redaction placeholders — the
+# raw bytes on disk are correct (pinned by runtime/SHA256SUMS.txt).
+# Do not "fix" it based on redacted views.
 def _ssh_string(b: bytes) -> bytes:
     return len(b).to_bytes(4, "big") + b
 
