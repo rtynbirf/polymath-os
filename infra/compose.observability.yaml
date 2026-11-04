@@ -31,17 +31,16 @@ networks:
     name: polymath-obs-net
 
 volumes:
-  grafana-data:          # dashboards, users, sessions
-  loki-data:             # log chunks + index
-  tempo-data:            # traces (blocks)
-  mimir-data:            # metrics blocks
-  prometheus-data:       # short-term metrics ( scrape → Mimir )
-  glitchtip-data:        # error events (postgres-backed)
-  postgres-glitchtip-data:  # glitchtip DB
-  otel-collector-data:  # spillover buffer
+  grafana-data: # dashboards, users, sessions
+  loki-data: # log chunks + index
+  tempo-data: # traces (blocks)
+  mimir-data: # metrics blocks
+  prometheus-data: # short-term metrics ( scrape → Mimir )
+  glitchtip-data: # error events (postgres-backed)
+  postgres-glitchtip-data: # glitchtip DB
+  otel-collector-data: # spillover buffer
 
 services:
-
   # ── Prometheus — short-term metrics scrape + remote_write to Mimir ────
   prometheus:
     image: prom/prometheus:v2.54.1
@@ -62,7 +61,7 @@ services:
       retries: 3
       start_period: 30s
     ports:
-      - "127.0.0.1:9090:9090"   # bound to loopback — expose via ingress
+      - "127.0.0.1:9090:9090" # bound to loopback — expose via ingress
 
   # ── Loki — log aggregation (Grafana LGTM: L) ──────────────────────────
   loki:
@@ -100,8 +99,8 @@ services:
       retries: 3
       start_period: 30s
     ports:
-      - "127.0.0.1:3200:3200"      # tempo HTTP
-      - "127.0.0.1:4317:4317"      # OTLP gRPC (receive traces)
+      - "127.0.0.1:3200:3200" # tempo HTTP
+      - "127.0.0.1:4317:4317" # OTLP gRPC (receive traces)
 
   # ── Mimir — long-term metrics (Grafana LGTM: M) ──────────────────────
   mimir:
@@ -120,8 +119,8 @@ services:
       retries: 3
       start_period: 30s
     ports:
-      - "127.0.0.1:8080:8080"      # Mimir HTTP
-      - "127.0.0.1:9095:9095"      # Prometheus remote_write compatible endpoint
+      - "127.0.0.1:8080:8080" # Mimir HTTP
+      - "127.0.0.1:9095:9095" # Prometheus remote_write compatible endpoint
 
   # ── OpenTelemetry Collector — pipeline (recv → process → export) ──────
   otel-collector:
@@ -140,12 +139,12 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      loki:    { condition: service_healthy }
-      tempo:   { condition: service_healthy }
-      mimir:   { condition: service_healthy }
+      loki: { condition: service_healthy }
+      tempo: { condition: service_healthy }
+      mimir: { condition: service_healthy }
     ports:
-      - "127.0.0.1:4318:4318"      # OTLP HTTP (apps send traces here)
-      - "127.0.0.1:8888:8888"      # internal metrics
+      - "127.0.0.1:4318:4318" # OTLP HTTP (apps send traces here)
+      - "127.0.0.1:8888:8888" # internal metrics
 
   # ── Grafana — dashboards + explore UI ─────────────────────────────────
   grafana:
@@ -162,9 +161,9 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_SERVER_HTTP_PORT: "3000"
     depends_on:
-      loki:    { condition: service_healthy }
-      tempo:   { condition: service_healthy }
-      mimir:   { condition: service_healthy }
+      loki: { condition: service_healthy }
+      tempo: { condition: service_healthy }
+      mimir: { condition: service_healthy }
       prometheus: { condition: service_healthy }
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
@@ -173,7 +172,7 @@ services:
       retries: 5
       start_period: 60s
     ports:
-      - "3000:3000"   # public — dashboard UI (in production: behind ingress + auth)
+      - "3000:3000" # public — dashboard UI (in production: behind ingress + auth)
 
   # ── Postgres for Glitchtip ────────────────────────────────────────────
   postgres-glitchtip:

@@ -10,6 +10,7 @@
 ## 1. Цели и задачи
 
 ### 1.1. Цель
+
 Создать **единый self-bootstrapping репозиторий**, который объединяет:
 - структуру монорепо (Layer 1)
 - AI-рабочие процессы (Layer 2)
@@ -22,6 +23,7 @@
 Репозиторий должен быть **самодостаточным**: `git clone` + одна команда `make bootstrap` → готовое рабочее окружение на новой машине за ≤30 минут. После bootstrap: `make verify` → 24/24 PASS — открытый контракт с пользователем.
 
 ### 1.2. Задачи
+
 1. Зафиксировать архитектурные принципы (**5+1 слоёв + Decree Log**) в ADR. На v3.8.0 — 28 ADRs (0001-0028).
 2. Внедрить trunk-based development с merge queue + CODEOWNERS + branch protection.
 3. Настроить CI: lint, typecheck, test, security scan, SBOM, cosign signing, SLSA provenance. На v3.8.0 — 5 CI check-runs (lint+typecheck+test+build+security, make verify, CodeQL JS, CodeQL Python, Build+SBOM+cosign+Release).
@@ -41,69 +43,69 @@
 
 ### 2.1. Repository structure
 
-| Требование | Реализация |
-|---|---|
-| Single source of truth | git, всё в репо (код, конфиг, docs, infra) |
-| Monorepo structure | `apps/`, `packages/`, `tooling/`, `docs/` (см. README.md) |
-| Package manager | pnpm + workspaces (`pnpm-workspace.yaml`) |
-| Build system | Turborepo (`turbo.json` с content-aware hashing + remote cache) |
-| Versioning | Changesets, independent versioning, conventional commits |
-| Branching | Trunk-based, `main` — единственная долгоживущая ветка |
-| Merging | Squash-merge + linear history + GitHub Merge Queue |
-| Code ownership | `.github/CODEOWNERS` — каждый path имеет explicit owner |
-| Branch protection | Require PR, ≥1 approval, CODEOWNERS, status checks, no bypasses |
-| Templates | GitHub Template Repo (для верхнеуровневого репо) + Copier для подшаблонов |
+| Требование             | Реализация                                                                |
+| ---------------------- | ------------------------------------------------------------------------- |
+| Single source of truth | git, всё в репо (код, конфиг, docs, infra)                                |
+| Monorepo structure     | `apps/`, `packages/`, `tooling/`, `docs/` (см. README.md)                 |
+| Package manager        | pnpm + workspaces (`pnpm-workspace.yaml`)                                 |
+| Build system           | Turborepo (`turbo.json` с content-aware hashing + remote cache)           |
+| Versioning             | Changesets, independent versioning, conventional commits                  |
+| Branching              | Trunk-based, `main` — единственная долгоживущая ветка                     |
+| Merging                | Squash-merge + linear history + GitHub Merge Queue                        |
+| Code ownership         | `.github/CODEOWNERS` — каждый path имеет explicit owner                   |
+| Branch protection      | Require PR, ≥1 approval, CODEOWNERS, status checks, no bypasses           |
+| Templates              | GitHub Template Repo (для верхнеуровневого репо) + Copier для подшаблонов |
 
 ### 2.2. AI workflows
 
-| Требование | Реализация |
-|---|---|
-| Tool interface | MCP (Model Context Protocol) — все инструменты как MCP-серверы |
-| Agent orchestration | Single-agent baseline (Anthropic pattern). Multi-agent — только при обоснованной необходимости |
-| Coding agent primary | Claude Code (terminal-native, repo-aware) |
-| Coding agent IDE | Cursor (Composer multi-file) |
-| Coding agent git-native | Aider (transparent diffs) |
-| Local LLM fallback | Ollama + Qwen 2.5 / Llama 3.3 / gpt-oss (privacy-tasks) |
-| Embeddings | `nomic-embed-text` через Ollama (локально, без облака) |
-| Eval in CI | promptfoo (golden dataset regression) + Langfuse (production traces) |
-| Prompt caching | Anthropic explicit `cache_control` + OpenAI automatic — проектировать под cache-hit |
-| Context engineering | Явные 4 подсистемы: working / reference (RAG over MCP) / episodic / compression |
-| Interop | A2A protocol (Google) — если несколько агентов разных вендоров |
-| Anti-patterns | Prompt spaghetti, unmanaged context, tool sprawl, multi-agent без причины |
+| Требование              | Реализация                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Tool interface          | MCP (Model Context Protocol) — все инструменты как MCP-серверы                                 |
+| Agent orchestration     | Single-agent baseline (Anthropic pattern). Multi-agent — только при обоснованной необходимости |
+| Coding agent primary    | Claude Code (terminal-native, repo-aware)                                                      |
+| Coding agent IDE        | Cursor (Composer multi-file)                                                                   |
+| Coding agent git-native | Aider (transparent diffs)                                                                      |
+| Local LLM fallback      | Ollama + Qwen 2.5 / Llama 3.3 / gpt-oss (privacy-tasks)                                        |
+| Embeddings              | `nomic-embed-text` через Ollama (локально, без облака)                                         |
+| Eval in CI              | promptfoo (golden dataset regression) + Langfuse (production traces)                           |
+| Prompt caching          | Anthropic explicit `cache_control` + OpenAI automatic — проектировать под cache-hit            |
+| Context engineering     | Явные 4 подсистемы: working / reference (RAG over MCP) / episodic / compression                |
+| Interop                 | A2A protocol (Google) — если несколько агентов разных вендоров                                 |
+| Anti-patterns           | Prompt spaghetti, unmanaged context, tool sprawl, multi-agent без причины                      |
 
 ### 2.3. Second brain / PKM
 
-| Требование | Реализация |
-|---|---|
-| Source format | Plain markdown (читается `cat`-ом через 10 лет) |
-| Sync | git (obsidian-git plugin, auto-backup 10 min) |
-| Editor | Obsidian (primary GUI) + Foam (VSCode alt) |
-| Note types | Fleeting (≤48ч) → Literature (своими словами) → Permanent (atomic) |
-| Org pattern | PARA (folders) + MOC (Maps of Content, Nick Milo) |
-| Capture | Apple Notes / Drafts / AudioPen → `00-daily/## Inbox` |
-| Retrieval | Dataview (SQL-like) + Smart Connections (semantic, local) |
-| RAG | Copilot for Obsidian + Ollama VaultQA mode (полностью офлайн) |
-| Publish | Quartz v4 → GitHub Pages (фильтр по `publish: true` в frontmatter) |
-| Rituals | Daily (10+10 min) + Weekly (30 min) + Monthly (2ч) + Quarterly (полдня) |
-| Anti-fragility | Раз в полгода: открыть vault без Obsidian → должно работать |
+| Требование     | Реализация                                                              |
+| -------------- | ----------------------------------------------------------------------- |
+| Source format  | Plain markdown (читается `cat`-ом через 10 лет)                         |
+| Sync           | git (obsidian-git plugin, auto-backup 10 min)                           |
+| Editor         | Obsidian (primary GUI) + Foam (VSCode alt)                              |
+| Note types     | Fleeting (≤48ч) → Literature (своими словами) → Permanent (atomic)      |
+| Org pattern    | PARA (folders) + MOC (Maps of Content, Nick Milo)                       |
+| Capture        | Apple Notes / Drafts / AudioPen → `00-daily/## Inbox`                   |
+| Retrieval      | Dataview (SQL-like) + Smart Connections (semantic, local)               |
+| RAG            | Copilot for Obsidian + Ollama VaultQA mode (полностью офлайн)           |
+| Publish        | Quartz v4 → GitHub Pages (фильтр по `publish: true` в frontmatter)      |
+| Rituals        | Daily (10+10 min) + Weekly (30 min) + Monthly (2ч) + Quarterly (полдня) |
+| Anti-fragility | Раз в полгода: открыть vault без Obsidian → должно работать             |
 
 ### 2.4. DevEx / CI / IaC
 
-| Требование | Реализация |
-|---|---|
-| CI platform | GitHub Actions (reusable workflows + composite actions в `.github-templates`) |
-| Local CI | `act -W .github/workflows/ci.yml` — то же, что в CI |
-| Secrets | SOPS + age (git-ops) + Doppler (CI injection); OIDC trust (no long-lived PATs) |
+| Требование      | Реализация                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| CI platform     | GitHub Actions (reusable workflows + composite actions в `.github-templates`)             |
+| Local CI        | `act -W .github/workflows/ci.yml` — то же, что в CI                                       |
+| Secrets         | SOPS + age (git-ops) + Doppler (CI injection); OIDC trust (no long-lived PATs)            |
 | Static analysis | Semgrep (code) + Trivy (images/fs) + gitleaks (secrets in git) + Ruff/Biome (lint/format) |
-| Supply chain | CycloneDX SBOM + cosign keyless signing + SLSA Level 2+ provenance |
-| IaC | OpenTofu (Terraform fork, drop-in) + Pulumi (если нужен real-language) |
-| Dev shell | Nix Flakes + direnv (одинаковая среда на macOS/Linux/WSL2) |
-| Dotfiles | chezmoi + age + 1Password CLI (`chezmoi init --apply` на новой машине) |
-| Dev env | devcontainer.json (Codespaces/DevPod/Cursor/VS Code — один spec) |
-| Local K8s | Tilt + kind/k3s/minikube + Testcontainers |
-| Observability | OpenTelemetry SDK в каждом сервисе → Grafana LGTM (self-host) + Sentry/Glitchtip |
-| Feature flags | Unleash (self-hosted) для trunk-based dev |
-| Deployment | GitOps (ArgoCD/FluxCD) или `helm upgrade --install` из CI на merge в main |
+| Supply chain    | CycloneDX SBOM + cosign keyless signing + SLSA Level 2+ provenance                        |
+| IaC             | OpenTofu (Terraform fork, drop-in) + Pulumi (если нужен real-language)                    |
+| Dev shell       | Nix Flakes + direnv (одинаковая среда на macOS/Linux/WSL2)                                |
+| Dotfiles        | chezmoi + age + 1Password CLI (`chezmoi init --apply` на новой машине)                    |
+| Dev env         | devcontainer.json (Codespaces/DevPod/Cursor/VS Code — один spec)                          |
+| Local K8s       | Tilt + kind/k3s/minikube + Testcontainers                                                 |
+| Observability   | OpenTelemetry SDK в каждом сервисе → Grafana LGTM (self-host) + Sentry/Glitchtip          |
+| Feature flags   | Unleash (self-hosted) для trunk-based dev                                                 |
+| Deployment      | GitOps (ArgoCD/FluxCD) или `helm upgrade --install` из CI на merge в main                 |
 
 ## 3. Структура репозитория (каркас)
 
@@ -176,20 +178,20 @@ polymath-os/
 
 ## 4. Критерии приёмки
 
-| Критерий | Метрика |
-|---|---|
-| Bootstrap time | ≤30 минут от `git clone` до готового dev-shell на новой машине |
-| CI runtime | ≤5 минут для PR (lint+typecheck+test на cached) |
-| Local CI parity | `act -W` воспроизводит 100% шагов CI |
-| Coverage | ≥80% line coverage на packages/* |
-| Supply chain | 100% releases имеют SBOM + cosign signature + SLSA Level 2+ |
-| Secret hygiene | 0 secrets in git (gitleaks в CI — blocking) |
-| Vault sync | Auto-commit каждые 10 min, push на GitHub private repo |
+| Критерий             | Метрика                                                                  |
+| -------------------- | ------------------------------------------------------------------------ |
+| Bootstrap time       | ≤30 минут от `git clone` до готового dev-shell на новой машине           |
+| CI runtime           | ≤5 минут для PR (lint+typecheck+test на cached)                          |
+| Local CI parity      | `act -W` воспроизводит 100% шагов CI                                     |
+| Coverage             | ≥80% line coverage на packages/*                                         |
+| Supply chain         | 100% releases имеют SBOM + cosign signature + SLSA Level 2+              |
+| Secret hygiene       | 0 secrets in git (gitleaks в CI — blocking)                              |
+| Vault sync           | Auto-commit каждые 10 min, push на GitHub private repo                   |
 | Vault anti-fragility | Vault открывается без Obsidian (в VSCode+Foam или `less`) — каждые 6 мес |
-| Eval coverage | ≥1 golden dataset на каждый production agent |
-| Observability | 100% сервисов инструментированы OTel SDK |
-| Reversibility | `make destroy` откатывает IaC ≤5 минут |
-| Documentation | ADR на каждое значимое решение (≥7 initial ADRs) |
+| Eval coverage        | ≥1 golden dataset на каждый production agent                             |
+| Observability        | 100% сервисов инструментированы OTel SDK                                 |
+| Reversibility        | `make destroy` откатывает IaC ≤5 минут                                   |
+| Documentation        | ADR на каждое значимое решение (≥7 initial ADRs)                         |
 
 ## 5. Non-goals (что не делаем)
 
@@ -202,14 +204,14 @@ polymath-os/
 
 ## 6. Риски и митигация
 
-| Риск | Митигация |
-|---|---|
-| Nix learning curve | Документация в `docs/05-devex-ci.md` + flake.nix с комментариями |
-| Obsidian plugin sprawl | Белый список 7 essential плагинов (Dataview, Templater, obsidian-git, Smart Connections, Copilot, Web Clipper, Excalidraw) |
-| MCP-сервер разрыв | При разрыве — fallback на ad-hoc function definitions (задокументировано в ADR) |
-| Cosign keyless outage | Backup: cosign с keypair (ключи в 1Password, не в git) |
-| GitHub Actions outage | Woodpecker CI self-hosted как backup (Forgejo-runner совместимый с GHA-синтаксисом) |
-| Quartz v4 breaking change | Pin Quartz v4.x, миграция на v5 — отдельным ADR |
+| Риск                      | Митигация                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Nix learning curve        | Документация в `docs/05-devex-ci.md` + flake.nix с комментариями                                                           |
+| Obsidian plugin sprawl    | Белый список 7 essential плагинов (Dataview, Templater, obsidian-git, Smart Connections, Copilot, Web Clipper, Excalidraw) |
+| MCP-сервер разрыв         | При разрыве — fallback на ad-hoc function definitions (задокументировано в ADR)                                            |
+| Cosign keyless outage     | Backup: cosign с keypair (ключи в 1Password, не в git)                                                                     |
+| GitHub Actions outage     | Woodpecker CI self-hosted как backup (Forgejo-runner совместимый с GHA-синтаксисом)                                        |
+| Quartz v4 breaking change | Pin Quartz v4.x, миграция на v5 — отдельным ADR                                                                            |
 
 ## 7. Сроки
 

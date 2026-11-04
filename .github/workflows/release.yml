@@ -23,9 +23,9 @@ on:
           - "false"
 
 permissions:
-  contents: write    # create GitHub Release + upload assets
-  id-token: write    # cosign keyless (OIDC) — no long-lived signing key in secrets
-  packages: write   # GHCR push (reserved; no images currently published)
+  contents: write # create GitHub Release + upload assets
+  id-token: write # cosign keyless (OIDC) — no long-lived signing key in secrets
+  packages: write # GHCR push (reserved; no images currently published)
 
 # Never cancel an in-flight release — partial published Release is worse than full retry.
 concurrency:
@@ -201,7 +201,7 @@ jobs:
           body_path: release_notes.md
           draft: ${{ github.event.inputs.skip-publish == 'true' && 'true' || 'false' }}
           prerelease: ${{ steps.meta.outputs.prerelease }}
-          generate_release_notes: false   # we use CHANGELOG.md, not auto-generated commits
+          generate_release_notes: false # we use CHANGELOG.md, not auto-generated commits
           files: |
             ${{ env.SBOM_FILE }}
             ${{ env.SBOM_FILE }}.sha256

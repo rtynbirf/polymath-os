@@ -14,13 +14,13 @@ name: Sovereignty Drill
 
 on:
   schedule:
-    - cron: '0 3 * * 1'  # every Monday 03:00 UTC
+    - cron: "0 3 * * 1" # every Monday 03:00 UTC
   workflow_dispatch:
     inputs:
       service:
-        description: 'Tier 2 service to disable (default: openrouter — least disruptive)'
+        description: "Tier 2 service to disable (default: openrouter — least disruptive)"
         required: false
-        default: 'openrouter'
+        default: "openrouter"
         type: choice
         options:
           - openrouter
@@ -37,13 +37,13 @@ on:
           - all_tier2
 
 permissions:
-  contents: read   # only need to read repo for drill
-  actions: read    # to query workflow status if needed
-  issues: write    # to open issue if drill fails (sovereignty regression)
+  contents: read # only need to read repo for drill
+  actions: read # to query workflow status if needed
+  issues: write # to open issue if drill fails (sovereignty regression)
 
 concurrency:
   group: sovereignty-drill
-  cancel-in-progress: false  # never cancel mid-drill
+  cancel-in-progress: false # never cancel mid-drill
 
 jobs:
   drill:
@@ -56,7 +56,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Run sovereignty drill
         id: drill

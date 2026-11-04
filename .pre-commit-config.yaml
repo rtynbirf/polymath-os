@@ -30,7 +30,6 @@ repos:
       - id: gitleaks
         name: gitleaks (no secrets in commit)
         # На pre-commit проверяем staged файлы; полный scan — в CI (`.github/workflows/ci.yml`).
-
   # ── Standard hygiene hooks (pre-commit-hooks) ────────────────────────────
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -41,7 +40,7 @@ repos:
         # Markdown fixer is off — markdown has soft wraps; final newline enforced separately.
         exclude: ^docs/adr/template\.md$
       - id: check-yaml
-        args: [--allow-multiple-documents, --unsafe]   # `--unsafe` для !!str anchors
+        args: [--allow-multiple-documents, --unsafe] # `--unsafe` для !!str anchors
       - id: check-json
       - id: check-toml
       - id: check-xml
@@ -67,7 +66,6 @@ repos:
       - id: commitizen
         stages: [commit-msg]
         # Bump на release — через `cz bump` (ручками; не автоматом в pre-commit).
-
   # ── Markdown lint — sync with .markdownlint.yaml ─────────────────────────
   # `igorshilin/markdownlint-cli2` — самый активный pre-commit wrapper
   # поверх `DavidAnson/markdownlint-cli2`. DavidAnson/markdownlint — основная либа.

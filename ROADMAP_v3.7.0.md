@@ -1,4 +1,5 @@
 # ROADMAP — Polymath OS
+
 ## Дорожная карта развития
 
 **Текущая версия:** v3.7.0 (commit `6e97a5a`, 2026-10-17)
@@ -81,7 +82,6 @@ Integration tests `test_decree_runtime_integration.py` written (3 tests). BUT �
 ### v3.6.0 (2026-10-17) — 🔥 OPERATIONAL: Decree Bridge wired
 
 **Главный релиз.** Система стала OPERATIONAL.
-
 - `apps/browser/decree-bridge.js` (new, 144 lines) — Node bridge to Python DecreeLog
 - 7 foundational decrees recorded in real SQLite (`~/.polymath-os/decrees.db`):
   1. ЧЕЛОВЕК = PID=1 (law)
@@ -138,34 +138,34 @@ Integration tests `test_decree_runtime_integration.py` written (3 tests). BUT �
 
 ### 2.1. Что работает
 
-| Компонент | Статус | Доказательство |
-|-----------|--------|----------------|
-| DecreeLog (SQLite, hash-chained) | ✓ OPERATIONAL | 7 decrees recorded, chain integrity verified |
-| Runtime.set_decree_log() + decree gate | ✓ OPERATIONAL | demo_with_decree.py shows WAITING_FOR_HUMAN |
-| check_compliance() v0.5 phrase matching | ✓ OPERATIONAL | false positive FIXED, 5 new tests pass |
-| Decree Portal HTML UI | ✓ OPERATIONAL | bridge-first / localStorage fallback |
-| Electron desktop wrapper | ✓ OPERATIONAL | contextBridge exposes window.decreeBridge |
-| Sovereignty Registry + Freedom Checker | ✓ OPERATIONAL | 0 Tier 3 benefactors found |
-| Evidence Ledger | ✓ OPERATIONAL | 11 event types, hash-chain verified |
-| MCP adapters (4 adapters, 16 capabilities) | ✓ OPERATIONAL | coverage check pass |
-| Garden (Quartz v4) with default-deny | ✓ OPERATIONAL | canary test pass |
-| make verify (22 claims) | ✓ OPERATIONAL | 22/22 PASS |
-| CI on commit 6e97a5a | ✓ GREEN | 4/4 checks |
-| CodeQL SAST (JS + Python) | ✓ GREEN | both analyzers success |
-| SLSA L2 build + cosign keyless | ✓ OPERATIONAL | release.yml |
+| Компонент                                  | Статус        | Доказательство                               |
+| ------------------------------------------ | ------------- | -------------------------------------------- |
+| DecreeLog (SQLite, hash-chained)           | ✓ OPERATIONAL | 7 decrees recorded, chain integrity verified |
+| Runtime.set_decree_log() + decree gate     | ✓ OPERATIONAL | demo_with_decree.py shows WAITING_FOR_HUMAN  |
+| check_compliance() v0.5 phrase matching    | ✓ OPERATIONAL | false positive FIXED, 5 new tests pass       |
+| Decree Portal HTML UI                      | ✓ OPERATIONAL | bridge-first / localStorage fallback         |
+| Electron desktop wrapper                   | ✓ OPERATIONAL | contextBridge exposes window.decreeBridge    |
+| Sovereignty Registry + Freedom Checker     | ✓ OPERATIONAL | 0 Tier 3 benefactors found                   |
+| Evidence Ledger                            | ✓ OPERATIONAL | 11 event types, hash-chain verified          |
+| MCP adapters (4 adapters, 16 capabilities) | ✓ OPERATIONAL | coverage check pass                          |
+| Garden (Quartz v4) with default-deny       | ✓ OPERATIONAL | canary test pass                             |
+| make verify (22 claims)                    | ✓ OPERATIONAL | 22/22 PASS                                   |
+| CI on commit 6e97a5a                       | ✓ GREEN       | 4/4 checks                                   |
+| CodeQL SAST (JS + Python)                  | ✓ GREEN       | both analyzers success                       |
+| SLSA L2 build + cosign keyless             | ✓ OPERATIONAL | release.yml                                  |
 
 ### 2.2. Что в target-состоянии (не реализовано)
 
-| Компонент | ADR | Статус |
-|-----------|-----|--------|
-| Real LLM inference in CI | ADR-0015 | stub used |
-| SLSA L3 build | ADR-0013 | L2 reached, L3 target |
-| Self-rewriting ADR mechanism | ADR-0016 | manual only |
-| Genomic architecture (per-component isolation) | ADR-0018 | partial (manifest-driven) |
-| Container runtime (productionized) | ADR-0011 | compose files only |
-| Multi-agent research (productionized) | ADR-0007 | research only |
-| v0.6 word-boundary regex | (future) | substring match in v0.5 |
-| Real Electron install test | (future) | package.json declared, install not tested |
+| Компонент                                      | ADR      | Статус                                    |
+| ---------------------------------------------- | -------- | ----------------------------------------- |
+| Real LLM inference in CI                       | ADR-0015 | stub used                                 |
+| SLSA L3 build                                  | ADR-0013 | L2 reached, L3 target                     |
+| Self-rewriting ADR mechanism                   | ADR-0016 | manual only                               |
+| Genomic architecture (per-component isolation) | ADR-0018 | partial (manifest-driven)                 |
+| Container runtime (productionized)             | ADR-0011 | compose files only                        |
+| Multi-agent research (productionized)          | ADR-0007 | research only                             |
+| v0.6 word-boundary regex                       | (future) | substring match in v0.5                   |
+| Real Electron install test                     | (future) | package.json declared, install not tested |
 
 ### 2.3. Метрики на v3.7.0
 
@@ -373,7 +373,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 
 **Риск:** PAT утечёт в plaintext (в bash history, в session logs, в commit'ах).
 
-**Митигация:** 
+**Митигация:**
 - env-var passing (не inline)
 - Reset remote URL after every push
 - GitHub secret scanner auto-revoke (backup)
@@ -433,48 +433,48 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 
 ### 8.1. Engineering metrics
 
-| Метрика | Текущее (v3.7.0) | Target (v1.0) |
-|---------|-----------------|---------------|
-| `make verify` claims | 22/22 | 30+/30+ |
-| Runtime tests | 111/111 (4 skipped) | 150+/150+ |
-| CI check-runs | 4/4 green | 6+/6+ green |
-| Test coverage (mutation score) | ~80% | ≥85% |
-| Recovery time from UNKNOWN | <1s (in-memory) | <100ms (production) |
-| Lint time | ~300ms | <500ms (more rules) |
-| Typecheck time | ~360ms | <1s (more files) |
-| SBOM generation | ~10s | <30s |
-| Build size (release) | ~3.3MB | <10MB |
+| Метрика                        | Текущее (v3.7.0)    | Target (v1.0)       |
+| ------------------------------ | ------------------- | ------------------- |
+| `make verify` claims           | 22/22               | 30+/30+             |
+| Runtime tests                  | 111/111 (4 skipped) | 150+/150+           |
+| CI check-runs                  | 4/4 green           | 6+/6+ green         |
+| Test coverage (mutation score) | ~80%                | ≥85%                |
+| Recovery time from UNKNOWN     | <1s (in-memory)     | <100ms (production) |
+| Lint time                      | ~300ms              | <500ms (more rules) |
+| Typecheck time                 | ~360ms              | <1s (more files)    |
+| SBOM generation                | ~10s                | <30s                |
+| Build size (release)           | ~3.3MB              | <10MB               |
 
 ### 8.2. Sovereignty metrics
 
-| Метрика | Текущее | Target |
-|---------|---------|--------|
-| Tier 3 benefactors in code | 0 | 0 (maintain) |
-| Tier 1 (sovereign) dependencies | ~10 | 15+ |
-| Tier 2 (rented, switchable) | ~5 | 5 (maintain) |
-| Data on local disk | 100% | 100% (maintain) |
-| Open formats (markdown/SQLite/JSON) | 100% | 100% (maintain) |
-| Self-hosted LLM inferences | 0 (stub) | 100% (cell65-llm) |
+| Метрика                             | Текущее  | Target            |
+| ----------------------------------- | -------- | ----------------- |
+| Tier 3 benefactors in code          | 0        | 0 (maintain)      |
+| Tier 1 (sovereign) dependencies     | ~10      | 15+               |
+| Tier 2 (rented, switchable)         | ~5       | 5 (maintain)      |
+| Data on local disk                  | 100%     | 100% (maintain)   |
+| Open formats (markdown/SQLite/JSON) | 100%     | 100% (maintain)   |
+| Self-hosted LLM inferences          | 0 (stub) | 100% (cell65-llm) |
 
 ### 8.3. Decree enforcement metrics
 
-| Метрика | Текущее | Target |
-|---------|---------|--------|
-| Foundational decrees | 7 | 7+ (user adds more via Portal) |
-| DECREE_BLOCK events per 1000 intents | ~50 (demo) | measured in production |
-| False positive rate | ~5% (v0.5) | <1% (v0.6) |
-| Decree log chain integrity | ✓ verified | ✓ verified |
-| Decree Portal usage | tested locally | production daily use |
+| Метрика                              | Текущее        | Target                         |
+| ------------------------------------ | -------------- | ------------------------------ |
+| Foundational decrees                 | 7              | 7+ (user adds more via Portal) |
+| DECREE_BLOCK events per 1000 intents | ~50 (demo)     | measured in production         |
+| False positive rate                  | ~5% (v0.5)     | <1% (v0.6)                     |
+| Decree log chain integrity           | ✓ verified     | ✓ verified                     |
+| Decree Portal usage                  | tested locally | production daily use           |
 
 ### 8.4. Reproducibility metrics
 
-| Метрика | Текущее | Target |
-|---------|---------|--------|
-| `make verify` exit 0 on clean machine | ✓ | ✓ (maintain) |
-| CI green on every main commit | ✓ (since v3.6.0) | ✓ (maintain) |
-| SLSA build level | L2 | L3 |
-| SBOM generated per release | ✓ | ✓ (maintain) |
-| cosign-signed artifacts | ✓ | ✓ (maintain) |
+| Метрика                               | Текущее          | Target       |
+| ------------------------------------- | ---------------- | ------------ |
+| `make verify` exit 0 on clean machine | ✓                | ✓ (maintain) |
+| CI green on every main commit         | ✓ (since v3.6.0) | ✓ (maintain) |
+| SLSA build level                      | L2               | L3           |
+| SBOM generated per release            | ✓                | ✓ (maintain) |
+| cosign-signed artifacts               | ✓                | ✓ (maintain) |
 
 ---
 
@@ -501,7 +501,6 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ## 10. Финальная подпись
 
 **Дорожная карта = история + настоящее + видение.**
-
 - **История:** 28 релизов за один день — не sprint, а concentrated burst. Каждый релиз добавлял функциональность или фиксил баг. От v1.0.0 (initial) до v3.7.0 (multiagent operational).
 - **Настоящее:** система OPERATIONAL. CI green. 22/22 verify. 7 decrees enforced. Production demo работает.
 - **Видение:** v1.0 production с SLSA L3, real LLM, sovereignty from corporate clouds. Polymath OS как OS layer.
@@ -512,6 +511,6 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 
 ---
 
-*Документ сгенерирован 2026-10-17 для релиза v3.7.0. История коммитов — `git log --oneline`. Контекст архитектурных решений — `docs/adr/`. Рабочий журнал агентов — `~/worklog.md`.*
+_Документ сгенерирован 2026-10-17 для релиза v3.7.0. История коммитов — `git log --oneline`. Контекст архитектурных решений — `docs/adr/`. Рабочий журнал агентов — `~/worklog.md`._
 
 **ВОЛЯ ЧЕЛОВЕКОИЗЪЯВЛЕНИЯ = НАКАЗ. DECREE > ADR > code.**

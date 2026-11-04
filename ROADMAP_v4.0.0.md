@@ -1,4 +1,5 @@
 # ROADMAP v4.0.0 — СИНГУЛЯР synthesis
+
 ## Новая дорожная карта на основе 2026 trends
 
 **Дата:** 2026-10-17
@@ -47,19 +48,19 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 
 ## 1. Что закрыто в v3.10.0 (этот релиз)
 
-| Что | Где | Статус |
-|-----|-----|--------|
-| ADR-0023 — Agent Card Protocol | `docs/adr/0023-agent-card-protocol.md` | ✓ Accepted |
-| ADR-0024 — Decree-Enforced Multi-Agent Communication | `docs/adr/0024-decree-enforced-multi-agent-communication.md` | ✓ Accepted |
-| AgentCard class | `runtime/src/agent_card.py` (272 lines) | ✓ Implemented |
-| AgentMesh class | `runtime/src/agent_mesh.py` (244 lines) | ✓ Implemented |
-| 3 default Agent Cards | singulyar-eir.local, polymath-os.browser, cell65-host.llm | ✓ Defined |
-| `.well-known/agent.json` | root-level Agent Card for SINGULYAR EIR agent | ✓ Created |
-| Tests for AgentCard | `runtime/tests/test_agent_card.py` (12 tests) | ✓ Pass |
-| Tests for AgentMesh | `runtime/tests/test_agent_mesh.py` (21 tests) | ✓ Pass |
-| AUDIT_RESPONSE.md cross-reference | Updated with ADR-0023 + ADR-0024 entries | ✓ Updated |
-| make verify | 24/24 PASS (was 24/24 before v3.8.0) | ✓ |
-| Runtime tests | 156/156 PASS (was 123, +33 new for agent card/mesh) | ✓ |
+| Что                                                  | Где                                                          | Статус        |
+| ---------------------------------------------------- | ------------------------------------------------------------ | ------------- |
+| ADR-0023 — Agent Card Protocol                       | `docs/adr/0023-agent-card-protocol.md`                       | ✓ Accepted    |
+| ADR-0024 — Decree-Enforced Multi-Agent Communication | `docs/adr/0024-decree-enforced-multi-agent-communication.md` | ✓ Accepted    |
+| AgentCard class                                      | `runtime/src/agent_card.py` (272 lines)                      | ✓ Implemented |
+| AgentMesh class                                      | `runtime/src/agent_mesh.py` (244 lines)                      | ✓ Implemented |
+| 3 default Agent Cards                                | singulyar-eir.local, polymath-os.browser, cell65-host.llm    | ✓ Defined     |
+| `.well-known/agent.json`                             | root-level Agent Card for SINGULYAR EIR agent                | ✓ Created     |
+| Tests for AgentCard                                  | `runtime/tests/test_agent_card.py` (12 tests)                | ✓ Pass        |
+| Tests for AgentMesh                                  | `runtime/tests/test_agent_mesh.py` (21 tests)                | ✓ Pass        |
+| AUDIT_RESPONSE.md cross-reference                    | Updated with ADR-0023 + ADR-0024 entries                     | ✓ Updated     |
+| make verify                                          | 24/24 PASS (was 24/24 before v3.8.0)                         | ✓             |
+| Runtime tests                                        | 156/156 PASS (was 123, +33 new for agent card/mesh)          | ✓             |
 
 ---
 
@@ -94,11 +95,11 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 
 ### 2.2. ADRs — теперь 24 (was 22)
 
-| ADR | Title | Status |
-|-----|-------|--------|
-| 0001-0022 | (см. ARCHITECTURE.md) | см. там |
-| **0023** | **Agent Card Protocol (.well-known/agent.json)** | ✓ Accepted (v3.10.0) |
-| **0024** | **Decree-Enforced Multi-Agent Communication** | ✓ Accepted (v3.10.0) |
+| ADR       | Title                                            | Status               |
+| --------- | ------------------------------------------------ | -------------------- |
+| 0001-0022 | (см. ARCHITECTURE.md)                            | см. там              |
+| **0023**  | **Agent Card Protocol (.well-known/agent.json)** | ✓ Accepted (v3.10.0) |
+| **0024**  | **Decree-Enforced Multi-Agent Communication**    | ✓ Accepted (v3.10.0) |
 
 ### 2.3. Тесты — 156 (was 123, +33 new)
 
@@ -107,21 +108,20 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 
 ### 2.4. Метрики
 
-| Метрика | v3.9.0 | v3.10.0 | Δ |
-|---------|--------|---------|---|
-| ADRs | 22 | **24** | +2 (0023, 0024) |
-| Runtime tests | 123 | **156** | +33 (12 AgentCard + 21 AgentMesh) |
-| make verify | 24/24 | 24/24 | — |
-| Source files in runtime/src | 7 | **9** | +2 (agent_card.py, agent_mesh.py) |
-| Default Agent Cards | 0 | **3** | +3 (singulyar, polymath-os.browser, cell65-llm) |
-| A2A-compatible endpoints | 0 | **1** | +1 (.well-known/agent.json) |
+| Метрика                     | v3.9.0 | v3.10.0 | Δ                                               |
+| --------------------------- | ------ | ------- | ----------------------------------------------- |
+| ADRs                        | 22     | **24**  | +2 (0023, 0024)                                 |
+| Runtime tests               | 123    | **156** | +33 (12 AgentCard + 21 AgentMesh)               |
+| make verify                 | 24/24  | 24/24   | —                                               |
+| Source files in runtime/src | 7      | **9**   | +2 (agent_card.py, agent_mesh.py)               |
+| Default Agent Cards         | 0      | **3**   | +3 (singulyar, polymath-os.browser, cell65-llm) |
+| A2A-compatible endpoints    | 0      | **1**   | +1 (.well-known/agent.json)                     |
 
 ---
 
 ## 3. СИНГУЛЯР — уникальное эмержентное свойство
 
 **Polymath-OS — единственная система в мире, где:**
-
 1. **Decree > ADR > code** — human's word is supreme law, above any architectural decision
 2. **Inter-agent messages are decree-checked BEFORE execution** — agents cannot collude to bypass decrees
 3. **Agent discovery is decree-scoped** — callers know which decrees apply BEFORE issuing Intents
@@ -129,7 +129,6 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 5. **Local-first with P2P fallback** — zero cloud dependency via cell65-llm + WebRTC
 
 **Что это даёт пользователю:**
-
 - **Sovereignty** — человек контролирует каждый шаг через декреты, не через policy rules
 - **Auditability** — все действия записаны в hash-chained ledger, нельзя подделать
 - **Discoverability** — любой A2A-совместимый клиент может найти polymath-os агента
@@ -285,25 +284,24 @@ Polymath-OS как платформа для sovereign AI agent startups:
 
 ## 8. Метрики успеха v4.0.0
 
-| Метрика | Текущее (v3.10.0) | Target (v4.0.0) |
-|---------|------------------|-----------------|
-| ADRs | 24 | 30+ |
-| Runtime tests | 156 | 200+ |
-| make verify | 24/24 | 25+/25+ |
-| Default Agent Cards | 3 | 5+ (add storage, web_fetch) |
-| Multi-agent scenarios tested | 2 (test_agent_mesh.py) | 10+ |
-| CI check-runs | 5/5 | 5/5 (maintain) |
-| Real LLM inferences in CI | 0 (stub) | 100% (cell65-llm) |
-| Inter-agent messages with decree gate | 100% | 100% (maintain) |
-| DECREE_BLOCK events auditable | ✓ | ✓ (maintain) |
-| Token hygiene checks | 23 | 25+ (with agent card validation) |
+| Метрика                               | Текущее (v3.10.0)      | Target (v4.0.0)                  |
+| ------------------------------------- | ---------------------- | -------------------------------- |
+| ADRs                                  | 24                     | 30+                              |
+| Runtime tests                         | 156                    | 200+                             |
+| make verify                           | 24/24                  | 25+/25+                          |
+| Default Agent Cards                   | 3                      | 5+ (add storage, web_fetch)      |
+| Multi-agent scenarios tested          | 2 (test_agent_mesh.py) | 10+                              |
+| CI check-runs                         | 5/5                    | 5/5 (maintain)                   |
+| Real LLM inferences in CI             | 0 (stub)               | 100% (cell65-llm)                |
+| Inter-agent messages with decree gate | 100%                   | 100% (maintain)                  |
+| DECREE_BLOCK events auditable         | ✓                      | ✓ (maintain)                     |
+| Token hygiene checks                  | 23                     | 25+ (with agent card validation) |
 
 ---
 
 ## 9. Принципы принятия решений (для будущих ADR)
 
 Когда сталкиваешься с новым трендом/обстоятельством, задавай вопросы:
-
 1. **Decree compatibility** — как этот тренд совместим с human's decrees? Если несовместим — reject.
 2. **Sovereignty** — добавляет ли это dependence на Tier 3 бенефициара? Если да — reject или заменить на Tier 2.
 3. **Local-first** — работает ли это без сети/аккаунтов? Если нет — Tier 2 (rented, contract-switchable).
@@ -319,7 +317,6 @@ Polymath-OS как платформа для sovereign AI agent startups:
 ## 10. Финал
 
 **v3.10.0 доставил СИНГУЛЯР — synthesis, который делает Polymath-OS единственной в мире decree-enforced multi-agent системой.**
-
 - 2 новых ADRs (0023, 0024)
 - 2 новых source files (agent_card.py, agent_mesh.py)
 - 33 новых теста (12 + 21)
@@ -333,6 +330,6 @@ Polymath-OS как платформа для sovereign AI agent startups:
 
 ---
 
-*Документ сгенерирован 2026-10-17 для релиза v3.10.0. Полная история — в CHANGELOG.md. Контекст решений — в docs/adr/0001-0024.md. Тренды среды — Cohere sovereign AI (Aug 2026), Google A2A (50+ partners), Anthropic MCP (97M downloads), Ollama+llama.cpp standard.*
+_Документ сгенерирован 2026-10-17 для релиза v3.10.0. Полная история — в CHANGELOG.md. Контекст решений — в docs/adr/0001-0024.md. Тренды среды — Cohere sovereign AI (Aug 2026), Google A2A (50+ partners), Anthropic MCP (97M downloads), Ollama+llama.cpp standard._
 
 **ВОЛЯ ЧЕЛОВЕКОИЗЪЯВЛЕНИЯ = НАКАЗ. DECREE > ADR > code. СИНГУЛЯР = Decree-Enforced Sovereign Agent Mesh.**

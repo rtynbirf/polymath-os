@@ -32,58 +32,58 @@ a migration ADR (ADR-0008 §3).
 
 ## Files
 
-| File                          | Class / symbol           | Purpose                                                |
-| ----------------------------- | ------------------------- | ------------------------------------------------------ |
-| `__init__.py`                 | *(package)*               | Re-exports public API                                  |
-| `base_adapter.py`             | `MCPAdapter`, `MCP_VERSION` | Abstract bridge + pinned MCP revision (ADR-0008)   |
-| `filesystem_adapter.py`       | `FilesystemAdapter`       | Local FS ops via MCP filesystem server                |
-| `git_adapter.py`              | `GitAdapter`              | Git ops via MCP git server                            |
-| `postgres_adapter.py`         | `PostgresAdapter`         | Postgres ops via MCP postgres server                  |
-| `web_search_adapter.py`       | `WebSearchAdapter`        | Web search + URL fetch via MCP web-search server      |
-| `registry.py`                 | `MCPCapabilityRegistry`, `default_registry` | Capability lookup used by SINGULYAR planner |
-| `__main__.py`                 | *(CLI)*                   | `python -m tooling.agents.mcp {list, verify}`         |
-| `tests/test_adapters.py`      | *(unittest)*              | Per-adapter interface + capability field checks       |
-| `tests/test_registry.py`      | *(unittest)*              | Registry `register` + `find_compatible` behaviour     |
+| File                     | Class / symbol                              | Purpose                                           |
+| ------------------------ | ------------------------------------------- | ------------------------------------------------- |
+| `__init__.py`            | _(package)_                                 | Re-exports public API                             |
+| `base_adapter.py`        | `MCPAdapter`, `MCP_VERSION`                 | Abstract bridge + pinned MCP revision (ADR-0008)  |
+| `filesystem_adapter.py`  | `FilesystemAdapter`                         | Local FS ops via MCP filesystem server            |
+| `git_adapter.py`         | `GitAdapter`                                | Git ops via MCP git server                        |
+| `postgres_adapter.py`    | `PostgresAdapter`                           | Postgres ops via MCP postgres server              |
+| `web_search_adapter.py`  | `WebSearchAdapter`                          | Web search + URL fetch via MCP web-search server  |
+| `registry.py`            | `MCPCapabilityRegistry`, `default_registry` | Capability lookup used by SINGULYAR planner       |
+| `__main__.py`            | _(CLI)_                                     | `python -m tooling.agents.mcp {list, verify}`     |
+| `tests/test_adapters.py` | _(unittest)_                                | Per-adapter interface + capability field checks   |
+| `tests/test_registry.py` | _(unittest)_                                | Registry `register` + `find_compatible` behaviour |
 
 ## Mapping table — MCP server → SINGULYAR Capability → Adapter class
 
-| MCP server        | SINGULYAR operation    | capability_id         | adapter_id       | idempotent? | risk   | Adapter class        |
-| ----------------- | ---------------------- | --------------------- | ---------------- | ----------: | ------ | -------------------- |
-| `filesystem`      | `create_file`          | `fs-create-file`     | `mcp-filesystem` | yes         | medium | `FilesystemAdapter`  |
-| `filesystem`      | `write_file`           | `fs-write-file`       | `mcp-filesystem` | yes         | medium | `FilesystemAdapter`  |
-| `filesystem`      | `read_file`            | `fs-read-file`        | `mcp-filesystem` | yes         | low    | `FilesystemAdapter`  |
-| `filesystem`      | `delete_file`          | `fs-delete-file`      | `mcp-filesystem` | yes         | high   | `FilesystemAdapter`  |
-| `filesystem`      | `list_dir`             | `fs-list-dir`         | `mcp-filesystem` | yes         | low    | `FilesystemAdapter`  |
-| `filesystem`      | `append_file`          | `fs-append-file`      | `mcp-filesystem` | **no**      | medium | `FilesystemAdapter`  |
-| `git`             | `commit`               | `git-commit`          | `mcp-git`        | **no**      | high   | `GitAdapter`         |
-| `git`             | `push`                 | `git-push`            | `mcp-git`        | yes         | high   | `GitAdapter`         |
-| `git`             | `create_branch`        | `git-create-branch`   | `mcp-git`        | yes         | medium | `GitAdapter`         |
-| `git`             | `checkout`             | `git-checkout`         | `mcp-git`        | yes         | medium | `GitAdapter`         |
-| `git`             | `merge`                | `git-merge`            | `mcp-git`        | **no**      | high   | `GitAdapter`         |
-| `postgres`        | `execute_query`        | `pg-execute-query`    | `mcp-postgres`   | yes         | low    | `PostgresAdapter`    |
-| `postgres`        | `execute_migration`    | `pg-execute-migration` | `mcp-postgres`   | yes         | high   | `PostgresAdapter`    |
-| `postgres`        | `upsert_row`           | `pg-upsert-row`       | `mcp-postgres`   | yes         | medium | `PostgresAdapter`    |
-| `websearch`       | `search`               | `ws-search`           | `mcp-websearch`  | yes (TTL)   | low    | `WebSearchAdapter`   |
-| `websearch`       | `fetch_url`            | `ws-fetch-url`        | `mcp-websearch`  | yes         | low    | `WebSearchAdapter`   |
+| MCP server   | SINGULYAR operation | capability_id          | adapter_id       | idempotent? | risk   | Adapter class       |
+| ------------ | ------------------- | ---------------------- | ---------------- | ----------: | ------ | ------------------- |
+| `filesystem` | `create_file`       | `fs-create-file`       | `mcp-filesystem` |         yes | medium | `FilesystemAdapter` |
+| `filesystem` | `write_file`        | `fs-write-file`        | `mcp-filesystem` |         yes | medium | `FilesystemAdapter` |
+| `filesystem` | `read_file`         | `fs-read-file`         | `mcp-filesystem` |         yes | low    | `FilesystemAdapter` |
+| `filesystem` | `delete_file`       | `fs-delete-file`       | `mcp-filesystem` |         yes | high   | `FilesystemAdapter` |
+| `filesystem` | `list_dir`          | `fs-list-dir`          | `mcp-filesystem` |         yes | low    | `FilesystemAdapter` |
+| `filesystem` | `append_file`       | `fs-append-file`       | `mcp-filesystem` |      **no** | medium | `FilesystemAdapter` |
+| `git`        | `commit`            | `git-commit`           | `mcp-git`        |      **no** | high   | `GitAdapter`        |
+| `git`        | `push`              | `git-push`             | `mcp-git`        |         yes | high   | `GitAdapter`        |
+| `git`        | `create_branch`     | `git-create-branch`    | `mcp-git`        |         yes | medium | `GitAdapter`        |
+| `git`        | `checkout`          | `git-checkout`         | `mcp-git`        |         yes | medium | `GitAdapter`        |
+| `git`        | `merge`             | `git-merge`            | `mcp-git`        |      **no** | high   | `GitAdapter`        |
+| `postgres`   | `execute_query`     | `pg-execute-query`     | `mcp-postgres`   |         yes | low    | `PostgresAdapter`   |
+| `postgres`   | `execute_migration` | `pg-execute-migration` | `mcp-postgres`   |         yes | high   | `PostgresAdapter`   |
+| `postgres`   | `upsert_row`        | `pg-upsert-row`        | `mcp-postgres`   |         yes | medium | `PostgresAdapter`   |
+| `websearch`  | `search`            | `ws-search`            | `mcp-websearch`  |   yes (TTL) | low    | `WebSearchAdapter`  |
+| `websearch`  | `fetch_url`         | `ws-fetch-url`         | `mcp-websearch`  |         yes | low    | `WebSearchAdapter`  |
 
 ## Idempotency contract
 
-| Operation           | Idempotent? | Why                                                                          |
-| ------------------- | ----------: | ---------------------------------------------------------------------------- |
-| `create_file`       | yes         | Creating a path that already exists with the same content = no-op            |
-| `write_file`        | yes         | Writing the same content twice leaves the file in the same end state         |
-| `append_file`       | **no**      | Each call appends bytes; repeated calls accumulate                            |
-| `delete_file`       | yes         | Deleting a non-existent path = no-op                                         |
-| `git commit`        | **no**      | Each call mints a new commit hash                                            |
-| `git push`          | yes         | Pushing a ref whose remote has the same hash = "Everything up-to-date"       |
-| `git create_branch`| yes         | Creating a branch that already exists = no-op (deterministic name)          |
-| `git checkout`      | yes         | Switching to the same ref = no-op                                            |
-| `git merge`         | **no**      | A repeated merge may create a new merge commit if upstream advanced         |
-| `execute_query`     | yes         | SELECT does not change state                                                  |
-| `execute_migration` | yes         | Version tracking in `schema_migrations` dedupes                              |
-| `upsert_row`        | yes         | PK-based upsert with same row = no-op                                         |
-| `search`            | yes (TTL)   | Same `(query, time_window)` returns cached results until TTL expires         |
-| `fetch_url`         | yes         | Same URL = same content (until source changes)                              |
+| Operation           | Idempotent? | Why                                                                    |
+| ------------------- | ----------: | ---------------------------------------------------------------------- |
+| `create_file`       |         yes | Creating a path that already exists with the same content = no-op      |
+| `write_file`        |         yes | Writing the same content twice leaves the file in the same end state   |
+| `append_file`       |      **no** | Each call appends bytes; repeated calls accumulate                     |
+| `delete_file`       |         yes | Deleting a non-existent path = no-op                                   |
+| `git commit`        |      **no** | Each call mints a new commit hash                                      |
+| `git push`          |         yes | Pushing a ref whose remote has the same hash = "Everything up-to-date" |
+| `git create_branch` |         yes | Creating a branch that already exists = no-op (deterministic name)     |
+| `git checkout`      |         yes | Switching to the same ref = no-op                                      |
+| `git merge`         |      **no** | A repeated merge may create a new merge commit if upstream advanced    |
+| `execute_query`     |         yes | SELECT does not change state                                           |
+| `execute_migration` |         yes | Version tracking in `schema_migrations` dedupes                        |
+| `upsert_row`        |         yes | PK-based upsert with same row = no-op                                  |
+| `search`            |   yes (TTL) | Same `(query, time_window)` returns cached results until TTL expires   |
+| `fetch_url`         |         yes | Same URL = same content (until source changes)                         |
 
 SINGULYAR EIR **never auto-retries** a non-idempotent capability whose state
 is ABSENT — `recover()` routes to `WAITING_FOR_HUMAN` instead of guessing.
@@ -92,11 +92,11 @@ is ABSENT — `recover()` routes to `WAITING_FOR_HUMAN` instead of guessing.
 
 Every adapter's `read_state(intent, idempotency_key) → Observation` returns:
 
-| `Observation.status` | Meaning                                          | Kernel action           |
-| -------------------- | ------------------------------------------------ | ----------------------- |
-| `PRESENT`            | Effect exists under this idempotency key           | Verify value/count       |
-| `ABSENT`             | Effect definitely did NOT happen                 | Retry if `cap.idempotent` |
-| `UNAVAILABLE`        | Cannot tell (server down, query failed)          | Stay UNKNOWN, no retry   |
+| `Observation.status` | Meaning                                  | Kernel action             |
+| -------------------- | ---------------------------------------- | ------------------------- |
+| `PRESENT`            | Effect exists under this idempotency key | Verify value/count        |
+| `ABSENT`             | Effect definitely did NOT happen         | Retry if `cap.idempotent` |
+| `UNAVAILABLE`        | Cannot tell (server down, query failed)  | Stay UNKNOWN, no retry    |
 
 Returning `None` is forbidden — it would erase the ABSENT/UNAVAILABLE
 distinction that `Runtime.recover()` relies on.

@@ -15,9 +15,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'vault/**'
-      - 'apps/garden/scripts/build_simple.sh'
-      - '.github/workflows/publish-garden.yml'
+      - "vault/**"
+      - "apps/garden/scripts/build_simple.sh"
+      - ".github/workflows/publish-garden.yml"
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Filter vault (default-deny per ADR-0009)
         run: |

@@ -31,7 +31,6 @@ volumes:
   postgres-unleash-data:
 
 services:
-
   postgres-unleash:
     image: postgres:16-alpine
     container_name: polymath-postgres-unleash
@@ -70,4 +69,4 @@ services:
       retries: 5
       start_period: 60s
     ports:
-      - "4242:4242"   # public — SDKs + dashboard (behind ingress + auth in prod)
+      - "4242:4242" # public — SDKs + dashboard (behind ingress + auth in prod)

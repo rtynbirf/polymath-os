@@ -10,6 +10,7 @@
 **Цель:** чистый git-каркас, ничего лишнего.
 
 ### Day 1-2: Repo init
+
 - [ ] `git init -b main` + структура каталогов (apps/packages/tooling/docs/vault/infra)
 - [ ] `README.md` (landing page, по Preston-Werner pattern)
 - [ ] `LICENSE` (MIT)
@@ -19,8 +20,9 @@
 - [ ] `.github/CODEOWNERS` (даже если solo — это self-governance)
 
 ### Day 3-4: Package manager + monorepo
+
 - [ ] `corepack enable`, `pnpm init`
-- [ ] `pnpm-workspace.yaml` (apps/*, packages/*, tooling/*)
+- [ ] `pnpm-workspace.yaml` (apps/_, packages/_, tooling/*)
 - [ ] `turbo.json` (build/lint/test/typecheck/dev pipelines с `dependsOn`)
 - [ ] `tsconfig.base.json` (strict TS)
 - [ ] `packages/config-tsconfig/` (base + nextjs)
@@ -28,6 +30,7 @@
 - [ ] `.changeset/config.json` (independent versioning)
 
 ### Day 5-7: CI baseline + Hooks
+
 - [ ] `.github/workflows/ci.yml`: checkout + pnpm install (frozen-lockfile) + lint + typecheck + test + build
 - [ ] `commitlint` + `commitizen` + `lefthook.yml` (pre-commit: lint-staged; commit-msg: commitlint)
 - [ ] `action-semantic-pull-request` для PR title
@@ -43,11 +46,13 @@
 **Цель:** dev environment, который ставится одной командой.
 
 ### Day 8-10: Dev shell (Nix)
+
 - [ ] `infra/flake.nix` (go, tilt, k3s, cosign, trivy, semgrep, sops, age, 1password-cli)
 - [ ] `direnv` + `nix-direnv` setup, `.envrc` с `use flake`
 - [ ] Документация в `docs/05-devex-ci.md` (как добавить пакет в flake)
 
 ### Day 11-13: Dotfiles (chezmoi)
+
 - [ ] Отдельный репо `github.com/USER/dotfiles` (chezmoi source)
 - [ ] `.chezmoi.toml.tmpl`, `.chezmoiscripts/run_once-install-packages.sh.tmpl`
 - [ ] `dot_zshrc.tmpl`, `dot_config/nvim/`, `dot_config/tmux/`, `dot_gitconfig.tmpl`
@@ -55,17 +60,20 @@
 - [ ] CI в dotfiles-repo: `act -W` проверяет что `chezmoi apply` проходит на чистом образе
 
 ### Day 14-16: devcontainer + DevPod
+
 - [ ] `.devcontainer/devcontainer.json` (image, features, postCreateCommand, forwardPorts)
 - [ ] Tested in: VS Code, Cursor, DevPod (`devpod up .`), GitHub Codespaces
 - [ ] Один `devcontainer.json` работает везде — это и есть идемпотентный dev env
 
 ### Day 17-19: Local dev loop (Tilt)
+
 - [ ] `Tiltfile` (docker_build + live_update + k8s_yaml + port_forwards)
 - [ ] `docker-compose.yaml` для non-K8s сервисов (Postgres, Redis)
 - [ ] `Makefile` (bootstrap, dev, test, ci-local, sign)
 - [ ] Tilt UI открывает hot-reload в kind/k3s
 
 ### Day 20-21: Secrets (SOPS + age)
+
 - [ ] `age-keygen` (private key НЕ коммитится, хранится в 1Password)
 - [ ] `.sops.yaml` (creation_rules: `secrets/.*\.yaml$`)
 - [ ] `infra/environments/personal/secrets.sops.yaml` (пример с dummy values)
@@ -80,6 +88,7 @@
 **Цель:** 4 слоя системы начинают работать вместе.
 
 ### Day 22-28: Layer 1 — Repository structure full
+
 - [ ] Apps scaffolded: `apps/web` (Next.js 15 via create-next-app), `apps/api` (Hono), `apps/garden` (Quartz v4)
 - [ ] Packages: `packages/ui` (shadcn/ui based), `packages/db` (Drizzle + schema), `packages/utils`
 - [ ] `tooling/generators` (plop templates: new-app, new-package)
@@ -88,6 +97,7 @@
 - [ ] Dependabot config + Renovate alt (review)
 
 ### Day 29-35: Layer 2 — AI workflows
+
 - [ ] MCP servers configured: filesystem, git, postgres, web-search (Ollama or local)
 - [ ] Claude Code installed + configured (`CLAUDE.md` в корне репо)
 - [ ] Aider config (`.aider.conf.yml`)
@@ -97,6 +107,7 @@
 - [ ] promptfoo в CI: golden dataset regression на каждый agent prompt
 
 ### Day 36-42: Layer 3 — Second brain
+
 - [ ] `vault/` structure (00-daily, 10-projects, ..., 60-permanent, 90-meta)
 - [ ] `vault/90-meta/templates/` (permanent.md, daily.md, literature.md)
 - [ ] Obsidian vault opens `vault/` as folder
@@ -107,6 +118,7 @@
 - [ ] `.github/workflows/publish-garden.yml` → GitHub Pages on push to main
 
 ### Day 43-50: Layer 4 — DevEx/CI/IaC
+
 - [ ] `.github-templates` repo (reusable workflows + composite actions)
 - [ ] OIDC trust: GitHub Actions → AWS/GCP (no long-lived keys)
 - [ ] `infra/tofu/` (modules: cloudflare-dns, hetzner-server, vault-cluster, unleash)
@@ -116,6 +128,7 @@
 - [ ] Testcontainers: integration tests поднимают Postgres/Redis в CI
 
 ### Day 51-60: Security hardening
+
 - [ ] `trivy fs .` + `trivy image` в CI (blocking on HIGH/CRITICAL)
 - [ ] `semgrep --config auto` (CI, non-blocking → blocking после grace period)
 - [ ] CodeQL analysis (GitHub Advanced Security free для OSS)
@@ -134,6 +147,7 @@
 **Цель:** real traffic, real feedback, real metrics.
 
 ### Day 61-70: Deploy + Observability
+
 - [ ] `infra/tofu/environments/personal/main.tf` — production-stack
 - [ ] ArgoCD или FluxCD (GitOps) деплой в k3s-кластер
 - [ ] OTel collector → Tempo/Loki/Mimir
@@ -142,6 +156,7 @@
 - [ ] Uptime monitoring: BetterStack (free tier)
 
 ### Day 71-80: AI workflows production
+
 - [ ] Langfuse → production traces (online evals)
 - [ ] promptfoo scheduled regression (daily, weekly)
 - [ ] Braintrust (или Langfuse evals) → CI gating на changes в prompts
@@ -150,6 +165,7 @@
 - [ ] Prompt caching metrics: cache-hit-ratio per agent, $/1M tokens, p95 latency
 
 ### Day 81-85: Second brain → publish
+
 - [ ] Quartz v4 site live на `garden.your-domain.com`
 - [ ] Public subset: only `publish: true` notes
 - [ ] Search: Quartz full-text + Smart Connections public version
@@ -157,6 +173,7 @@
 - [ ] Cross-link: ADR → vault/60-permanent note (bi-directional)
 
 ### Day 86-90: Documentation + Audit
+
 - [ ] `docs/runbook/RUNBOOK.md` — incident response, rollback, on-call
 - [ ] All ADRs (≥7) committed
 - [ ] `docs/adr/template.md` обновлён
@@ -170,12 +187,12 @@
 
 ## Критерии перехода между фазами
 
-| Фаза → Фаза | Gate |
-|---|---|
-| 0 → 1 | `git clone` + `pnpm install` + `pnpm turbo run build` проходят на чистой машине без ошибок |
-| 1 → 2 | `chezmoi init --apply && make bootstrap && make dev` открывает Tilt с hot-reload |
-| 2 → 3 | Все 4 слоя документированы, ADR ≥7, `make ci-local` проходит, observability collect-ает метрики |
-| 3 → Done | v1.0.0 tag + release с SBOM+cosign, audit checklist 100% зелёный |
+| Фаза → Фаза | Gate                                                                                            |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| 0 → 1       | `git clone` + `pnpm install` + `pnpm turbo run build` проходят на чистой машине без ошибок      |
+| 1 → 2       | `chezmoi init --apply && make bootstrap && make dev` открывает Tilt с hot-reload                |
+| 2 → 3       | Все 4 слоя документированы, ADR ≥7, `make ci-local` проходит, observability collect-ает метрики |
+| 3 → Done    | v1.0.0 tag + release с SBOM+cosign, audit checklist 100% зелёный                                |
 
 ## Мониторинг прогресса
 

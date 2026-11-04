@@ -6,20 +6,21 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": [
-      "node_modules",
-      "dist",
-      "build",
-      ".turbo",
-      ".next",
-      "target",
-      "apps/garden/public",
-      "apps/garden/.quartz-cache",
-      "apps/garden/quartz",
-      "pnpm-lock.yaml",
-      "runtime",
-      "docs",
-      "vault"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/.turbo",
+      "!**/.next",
+      "!**/target",
+      "!**/apps/garden/public",
+      "!**/apps/garden/.quartz-cache",
+      "!**/apps/garden/quartz",
+      "!**/pnpm-lock.yaml",
+      "!**/runtime",
+      "!**/docs",
+      "!**/vault"
     ]
   },
   "formatter": {
@@ -40,7 +41,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "style": {
         "noNonNullAssertion": "off",
         "noParameterAssign": "off",
@@ -58,7 +59,5 @@
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
-  }
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
 }

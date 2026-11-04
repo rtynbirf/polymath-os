@@ -91,28 +91,28 @@ shred -u /tmp/secrets.yaml
 
 ## CI rules (per `.github/workflows/tofu.yml`)
 
-| Event | Action |
-|---|---|
-| PR touching `infra/tofu/` | `tofu fmt -check` + `tofu validate` + `tofu plan` (OIDC trust, no static creds) |
-| Push to `main` | **Nothing** — apply is manual dispatch |
-| Manual dispatch with approval | `tofu apply` on chosen env |
-| Manual dispatch on `prod` env | Requires 2 approvals (CODEOWNERS + extra) |
+| Event                         | Action                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| PR touching `infra/tofu/`     | `tofu fmt -check` + `tofu validate` + `tofu plan` (OIDC trust, no static creds) |
+| Push to `main`                | **Nothing** — apply is manual dispatch                                          |
+| Manual dispatch with approval | `tofu apply` on chosen env                                                      |
+| Manual dispatch on `prod` env | Requires 2 approvals (CODEOWNERS + extra)                                       |
 
 Per ADR-0005 (separate rollback targets): `tofu destroy` on prod env
 requires same manual dispatch + approval chain. No emergency bypass.
 
 ## Sovereignty map (per ADR-0002)
 
-| Component | Tier | Replacement |
-|---|---|---|
-| OpenTofu | Tier 1 (OSS, MPL) | Terraform fork — drop-in |
-| SOPS + age | Tier 1 (sovereign core) | GPG fallback (no network) |
-| Cloudflare DNS | Tier 2 | bind9 self-host / Bunny CDN |
-| Hetzner Cloud | Tier 2 | OVH / Scaleway / mini-PC |
-| AWS S3 (tfstate) | Tier 2 | MinIO self-hosted |
-| AWS DynamoDB (lock) | Tier 2 | etcd / Consul KV |
-| HashiCorp Vault (Helm) | Tier 2 | Vaultwarden / SOPS+age offline |
-| Unleash | Tier 2 | Git-ops feature branches (no SaaS) |
+| Component              | Tier                    | Replacement                        |
+| ---------------------- | ----------------------- | ---------------------------------- |
+| OpenTofu               | Tier 1 (OSS, MPL)       | Terraform fork — drop-in           |
+| SOPS + age             | Tier 1 (sovereign core) | GPG fallback (no network)          |
+| Cloudflare DNS         | Tier 2                  | bind9 self-host / Bunny CDN        |
+| Hetzner Cloud          | Tier 2                  | OVH / Scaleway / mini-PC           |
+| AWS S3 (tfstate)       | Tier 2                  | MinIO self-hosted                  |
+| AWS DynamoDB (lock)    | Tier 2                  | etcd / Consul KV                   |
+| HashiCorp Vault (Helm) | Tier 2                  | Vaultwarden / SOPS+age offline     |
+| Unleash                | Tier 2                  | Git-ops feature branches (no SaaS) |
 
 ## Anti-patterns
 

@@ -33,7 +33,6 @@ gh repo create polymath-os --public --source=. --remote=origin
 ```
 
 **Option B — via web UI:**
-
 1. Go to https://github.com/new
 2. Repository name: `polymath-os`
 3. Description: `LFS-style rebuild of personal operating system — open-source ideal repo with verifiable claims`

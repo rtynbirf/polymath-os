@@ -63,7 +63,7 @@ body:
   - type: textarea
     id: verify-output
     attributes:
-      label: '`make verify` output'
+      label: "`make verify` output"
       description: |
         Вставь полный вывод `make verify` (или вывод конкретного check'а).
         Не сокращай — нужна последняя строка с `Result: N passed, M failed`.

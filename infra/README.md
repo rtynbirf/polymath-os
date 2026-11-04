@@ -69,11 +69,11 @@ rm -f tfplan
 
 ## How `apply` happens — CI only
 
-| Event | Action | By whom |
-|---|---|---|
-| PR touching `infra/tofu/` | `tofu fmt -check` + `tofu validate` + `tofu plan` | automated (no creds needed for fmt/validate; OIDC for plan) |
-| Push to `main` | **nothing** — apply is never automatic | — |
-| Manual dispatch with approval | `tofu apply` on chosen environment | human + CODEOWNERS |
+| Event                         | Action                                            | By whom                                                     |
+| ----------------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| PR touching `infra/tofu/`     | `tofu fmt -check` + `tofu validate` + `tofu plan` | automated (no creds needed for fmt/validate; OIDC for plan) |
+| Push to `main`                | **nothing** — apply is never automatic            | —                                                           |
+| Manual dispatch with approval | `tofu apply` on chosen environment                | human + CODEOWNERS                                          |
 
 Workflows: `.github/workflows/tofu.yml`. OIDC trust → AWS role assumed
 short-lived (no static `AWS_ACCESS_KEY_ID`). Per ADR-0005: `tofu apply`
@@ -86,27 +86,27 @@ on `prod` requires 2 approvals (CODEOWNERS + extra).
 
 ### Tier 1 — sovereign core (offline-able)
 
-| Component | Format | Replacement |
-|---|---|---|
-| OpenTofu | HCL | Terraform (drop-in) |
-| SOPS + age | X25519 + ChaCha20-Poly1305 | GPG (fallback) |
-| `git` history | git objects | itself |
-| Module source files | HCL text | — |
+| Component           | Format                     | Replacement         |
+| ------------------- | -------------------------- | ------------------- |
+| OpenTofu            | HCL                        | Terraform (drop-in) |
+| SOPS + age          | X25519 + ChaCha20-Poly1305 | GPG (fallback)      |
+| `git` history       | git objects                | itself              |
+| Module source files | HCL text                   | —                   |
 
 ### Tier 2 — rented services (replaceable by contract)
 
-| Service | Capability | Replacement | Offline fallback |
-|---|---|---|---|
-| Cloudflare | DNS / CDN | bind9 (self-host) / Bunny CDN | `/etc/hosts` |
-| Hetzner | VPS (k3s host) | OVH / Scaleway / mini-PC | local bare metal |
-| AWS S3 (tfstate) | state storage | MinIO (self-host) | local file backend |
-| AWS DynamoDB (lock) | distributed lock | etcd / Consul KV | local lock file |
-| HashiCorp Vault (Helm) | secrets + dynamic creds | Vaultwarden / SOPS+age | age-encrypted files in git |
-| Unleash (Helm) | feature flags | git-ops feature branches | long-lived branches (worse) |
-| Grafana LGTM | observability | Promtail+Jaeger+Mimir separate | structured logs to stdout |
-| Glitchtip | error tracking | Sentry (SaaS, Tier 2) | structured logs in Loki |
-| 1Password (CLI) | bootstrap-time secret fetch | Vaultwarden | manual key transfer |
-| GitHub Actions (OIDC) | CI for `tofu apply` | Woodpecker CI / Forgejo | `tofu apply` from laptop |
+| Service                | Capability                  | Replacement                    | Offline fallback            |
+| ---------------------- | --------------------------- | ------------------------------ | --------------------------- |
+| Cloudflare             | DNS / CDN                   | bind9 (self-host) / Bunny CDN  | `/etc/hosts`                |
+| Hetzner                | VPS (k3s host)              | OVH / Scaleway / mini-PC       | local bare metal            |
+| AWS S3 (tfstate)       | state storage               | MinIO (self-host)              | local file backend          |
+| AWS DynamoDB (lock)    | distributed lock            | etcd / Consul KV               | local lock file             |
+| HashiCorp Vault (Helm) | secrets + dynamic creds     | Vaultwarden / SOPS+age         | age-encrypted files in git  |
+| Unleash (Helm)         | feature flags               | git-ops feature branches       | long-lived branches (worse) |
+| Grafana LGTM           | observability               | Promtail+Jaeger+Mimir separate | structured logs to stdout   |
+| Glitchtip              | error tracking              | Sentry (SaaS, Tier 2)          | structured logs in Loki     |
+| 1Password (CLI)        | bootstrap-time secret fetch | Vaultwarden                    | manual key transfer         |
+| GitHub Actions (OIDC)  | CI for `tofu apply`         | Woodpecker CI / Forgejo        | `tofu apply` from laptop    |
 
 ### Tier 3 — lock-in (none in `infra/`)
 
@@ -116,12 +116,12 @@ identity (Tier 1 sovereign).
 
 ## Quarterly drill (per ADR-0002 §Sovereignty metric)
 
-| Drill | How | Expected |
-|---|---|---|
-| Cloudflare offline | change NS records to Hetzner DNS, wait for TTL | DNS resolves within 4× TTL |
-| AWS S3 offline | `tofu init -reconfigure -backend=local` | tfstate reads from local file |
-| Hetzner offline | k3s на local bare metal | cluster up in ≤30 min |
-| 1Password offline | age identity from encrypted backup | secrets decrypt |
+| Drill              | How                                            | Expected                      |
+| ------------------ | ---------------------------------------------- | ----------------------------- |
+| Cloudflare offline | change NS records to Hetzner DNS, wait for TTL | DNS resolves within 4× TTL    |
+| AWS S3 offline     | `tofu init -reconfigure -backend=local`        | tfstate reads from local file |
+| Hetzner offline    | k3s на local bare metal                        | cluster up in ≤30 min         |
+| 1Password offline  | age identity from encrypted backup             | secrets decrypt               |
 
 Records of each drill — in `docs/runbook/RUNBOOK.md` (per-env RPO/RTO).
 
@@ -140,7 +140,6 @@ Records of each drill — in `docs/runbook/RUNBOOK.md` (per-env RPO/RTO).
 ## LFS-рекомендации
 
 См. `ROADMAP.md` Фаза 1 + Фаза 2. Резюме для `infra/`:
-
 1. flake.nix + direnv → reproducible infra shell (Nixpkgs 24.05)
 2. SOPS+age → secrets in git, decryptable offline (Tier 1)
 3. OpenTofu (MPL, BSL-safe) → no Terraform BSL lock-in

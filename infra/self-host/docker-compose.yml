@@ -38,8 +38,8 @@ services:
   gitea:
     image: gitea/gitea:latest
     ports:
-      - "127.0.0.1:3000:3000"   # web UI — наружу только через reverse-proxy/SSH-туннель
-      - "2222:22"     # SSH git — наружу сознательно (git remote); ограничьте firewall'ом
+      - "127.0.0.1:3000:3000" # web UI — наружу только через reverse-proxy/SSH-туннель
+      - "2222:22" # SSH git — наружу сознательно (git remote); ограничьте firewall'ом
     volumes:
       - gitea-data:/data
       - /etc/timezone:/etc/timezone:ro
@@ -53,7 +53,7 @@ services:
   verdaccio:
     image: verdaccio/verdaccio:latest
     ports:
-      - "127.0.0.1:4873:4873"   # npm registry — клиенты через reverse-proxy/туннель
+      - "127.0.0.1:4873:4873" # npm registry — клиенты через reverse-proxy/туннель
     volumes:
       - verdaccio-data:/verdaccio/storage
     restart: always
@@ -62,7 +62,7 @@ services:
   devpi:
     image: docker.io/mpasternacki/devpi:latest
     ports:
-      - "127.0.0.1:3141:3141"   # PyPI mirror — клиенты через reverse-proxy/туннель
+      - "127.0.0.1:3141:3141" # PyPI mirror — клиенты через reverse-proxy/туннель
     volumes:
       - devpi-data:/data
     restart: always
@@ -71,7 +71,7 @@ services:
   nostromo:
     image: ghcr.io/mikedilger/nostromo:latest
     ports:
-      - "127.0.0.1:8080:8080"   # WebSocket relay — наружу через reverse-proxy (wss)
+      - "127.0.0.1:8080:8080" # WebSocket relay — наружу через reverse-proxy (wss)
     volumes:
       - nostromo-data:/nostromo/data
     restart: always
@@ -80,7 +80,7 @@ services:
   glitchtip:
     image: glitchtip/glitchtip:latest
     ports:
-      - "127.0.0.1:8001:8000"   # UI + приём событий — через reverse-proxy/туннель
+      - "127.0.0.1:8001:8000" # UI + приём событий — через reverse-proxy/туннель
     environment:
       # Образ Glitchtip (Django) читает SECRET_KEY; значение берём из
       # GLITCHTIP_SECRET_KEY. Пароль БД должен совпадать в обоих сервисах.
@@ -104,7 +104,7 @@ services:
   uptime-kuma:
     image: louislam/uptime-kuma:latest
     ports:
-      - "127.0.0.1:3001:3001"   # панель мониторинга — через reverse-proxy/туннель
+      - "127.0.0.1:3001:3001" # панель мониторинга — через reverse-proxy/туннель
     volumes:
       - kuma-data:/app/data
     restart: always
@@ -125,7 +125,7 @@ services:
   electrs:
     image: dppt/electrs:latest
     ports:
-      - "127.0.0.1:50001:50001"   # electrum server — кошелёк через SSH-туннель
+      - "127.0.0.1:50001:50001" # electrum server — кошелёк через SSH-туннель
     environment:
       - NETWORK=mainnet
     volumes:

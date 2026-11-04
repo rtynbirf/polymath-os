@@ -61,21 +61,21 @@
           `<button class="tab ${t.id === activeTab ? "active" : ""}" role="tab" aria-selected="${t.id === activeTab}" data-tab="${t.id}"><span class="tab-dot"></span>${esc(t.title)}${tabs.length > 1 ? `<span class="close-tab" data-close="${t.id}" aria-label="Закрыть вкладку">×</span>` : ""}</button>`,
       )
       .join("");
-    root.querySelectorAll("[data-tab]").forEach((b) =>
+    root.querySelectorAll("[data-tab]").forEach((b) => {
       b.addEventListener("click", (e) => {
         if (e.target.dataset.close) return;
         activeTab = Number(b.dataset.tab);
         renderTabs();
         renderView(currentTab().view);
         $("#address").value = currentTab().url.startsWith("singulyar://") ? "" : currentTab().url;
-      }),
-    );
-    root.querySelectorAll("[data-close]").forEach((b) =>
+      });
+    });
+    root.querySelectorAll("[data-close]").forEach((b) => {
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         closeTab(Number(b.dataset.close));
-      }),
-    );
+      });
+    });
   }
   function closeTab(id) {
     if (tabs.length === 1) {
@@ -118,7 +118,9 @@
     t.url = `singulyar://${view}`;
     renderTabs();
     renderView(view);
-    $$(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+    $$(".nav-item").forEach((b) => {
+      b.classList.toggle("active", b.dataset.view === view);
+    });
     $("#address").value = "";
   }
   function setTabPage(view, title, url) {
@@ -132,7 +134,9 @@
   function renderView(view) {
     const main = $("#main");
     if (!views[view]) view = "home";
-    $$(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+    $$(".nav-item").forEach((b) => {
+      b.classList.toggle("active", b.dataset.view === view);
+    });
     main.innerHTML = views[view]();
     wire(main);
     if (view === "external") {
@@ -224,38 +228,38 @@
     return `${(n / 1048576).toFixed(2)} МБ`;
   }
   function wire(root) {
-    root
-      .querySelectorAll("[data-go]")
-      .forEach((b) => b.addEventListener("click", () => goView(b.dataset.go)));
-    root
-      .querySelectorAll("[data-action]")
-      .forEach((b) => b.addEventListener("click", () => action(b.dataset.action)));
-    root
-      .querySelectorAll("[data-open-url]")
-      .forEach((b) => b.addEventListener("click", () => navigate(b.dataset.openUrl)));
-    root.querySelectorAll("[data-remove-bookmark]").forEach((b) =>
+    root.querySelectorAll("[data-go]").forEach((b) => {
+      b.addEventListener("click", () => goView(b.dataset.go));
+    });
+    root.querySelectorAll("[data-action]").forEach((b) => {
+      b.addEventListener("click", () => action(b.dataset.action));
+    });
+    root.querySelectorAll("[data-open-url]").forEach((b) => {
+      b.addEventListener("click", () => navigate(b.dataset.openUrl));
+    });
+    root.querySelectorAll("[data-remove-bookmark]").forEach((b) => {
       b.addEventListener("click", () => {
         state.bookmarks.splice(Number(b.dataset.removeBookmark), 1);
         saveState();
         renderView("saved");
         toast("Ссылка удалена");
-      }),
-    );
-    root.querySelectorAll("[data-remove-note]").forEach((b) =>
+      });
+    });
+    root.querySelectorAll("[data-remove-note]").forEach((b) => {
       b.addEventListener("click", () => {
         state.notes.splice(Number(b.dataset.removeNote), 1);
         saveState();
         renderView("notes");
         toast("Заметка удалена");
-      }),
-    );
-    root.querySelectorAll("[data-setting]").forEach((c) =>
+      });
+    });
+    root.querySelectorAll("[data-setting]").forEach((c) => {
       c.addEventListener("change", () => {
         state.settings[c.dataset.setting] = c.checked;
         saveState();
         toast("Настройка сохранена");
-      }),
-    );
+      });
+    });
     const bf = $("#bookmarkForm");
     if (bf)
       bf.addEventListener("submit", (e) => {
@@ -467,7 +471,9 @@
     setTheme(state.theme === "dark" ? "light" : "dark"),
   );
   $("#exportBtn").addEventListener("click", exportData);
-  $$(".nav-item").forEach((b) => b.addEventListener("click", () => goView(b.dataset.view)));
+  $$(".nav-item").forEach((b) => {
+    b.addEventListener("click", () => goView(b.dataset.view));
+  });
   $("#address").addEventListener("focus", (e) => e.currentTarget.select());
   setTheme(state.theme);
   renderTabs();

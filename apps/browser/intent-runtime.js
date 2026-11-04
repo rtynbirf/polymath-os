@@ -109,7 +109,7 @@
     );
   }
   function authorize(plan, approved) {
-    if (!plan || !plan.capability)
+    if (!plan?.capability)
       return { allowed: false, status: "DENIED", reason: "Нет зарегистрированной возможности." };
     if (plan.policy.decision === "deny")
       return { allowed: false, status: "DENIED", reason: plan.policy.reason };

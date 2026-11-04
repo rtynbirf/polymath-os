@@ -12,11 +12,11 @@ name: Cross-Repo Governance
 
 on:
   schedule:
-    - cron: '0 3 * * 2'  # every Tuesday 03:00 UTC
+    - cron: "0 3 * * 2" # every Tuesday 03:00 UTC
   workflow_dispatch:
 
 permissions:
-  issues: write   # open issue in singulyar if governance check fails
+  issues: write # open issue in singulyar if governance check fails
   contents: read
 
 concurrency:
@@ -34,7 +34,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Check singulyar AGENTS.md exists
         id: check_agents

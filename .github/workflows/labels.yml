@@ -17,8 +17,8 @@ on:
       - ".github/labels.yml"
 
 permissions:
-  pull-requests: write   # actions/labeler добавляет/убирает labels на PR
-  issues: write           # gh label create/update на catalog-sync
+  pull-requests: write # actions/labeler добавляет/убирает labels на PR
+  issues: write # gh label create/update на catalog-sync
   contents: read
 
 # Labeler идемпотентен — race-condition между push и PR безопасна.
@@ -37,7 +37,7 @@ jobs:
         with:
           configuration-path: .github/labeler.yml
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          sync-labels: true   # убирает label, когда паттерн перестал match
+          sync-labels: true # убирает label, когда паттерн перестал match
 
   sync-catalog:
     name: Sync .github/labels.yml catalog → GitHub
