@@ -1,0 +1,38 @@
+# Polymath OS
+
+> Open-source LFS-стиль персональная операционная система: 5 слоёв + cross-cutting.
+> Верховный слой — Decree Log: слово Человека (PID 1) как закон, append-only,
+> hash-chained, проверяется ДО политики (DECREE > ADR > code).
+> Все утверждения репо воспроизводимы одной командой: clone → `make verify` → exit 0.
+
+## Documents
+
+- [README.md](README.md): вход — что это, пять слоёв, быстрый старт, бейджи verify.
+- [AGENTS.md](AGENTS.md): правила для агентов — «не сломай make verify», 7 контрактов, порядок чтения ADR.
+- [MANIFEST.json](MANIFEST.json): машиночитаемая декларация — адаптеры, MCP, контракты, decree-система, версии.
+- [ARCHITECTURE.md](ARCHITECTURE.md): ментальная модель слоёв и связей.
+- [Makefile](Makefile): метаболизм — verify, test и прочие цели.
+- [scripts/check.py](scripts/check.py): движок verify — каждая заявка репо проверяема им.
+- [docs/adr/](docs/adr/): 36 ADR (0001–0036) + amendments.log; оригиналы ADR не правятся — только supersede/amend.
+- [CHANGELOG.md](CHANGELOG.md): история версий и релизов.
+- [CONTRIBUTING.md](CONTRIBUTING.md): как вносить изменения.
+- [SECURITY.md](SECURITY.md): токен-гигиена, порядок сообщения об уязвимостях.
+- [LICENSE](LICENSE): MIT; [NOTICE](NOTICE): уведомления о правах.
+
+## Key ADRs (порядок чтения из AGENTS.md; файлы — в docs/adr/)
+
+- ADR-0002 — Sovereignty Registry: что суверенное, что арендованное.
+- ADR-0012 — SINGULYAR EIR as Layer 5: ядро, сохраняющее намерение.
+- ADR-0006 — Falsifiable self-*: у каждого самодействия отрицательный тест.
+- ADR-0016 — Self-rewriting ADR: как менять правила.
+- ADR-0009 — Default-deny vault publish: что публикуется, что нет.
+
+## Optional
+
+- [runtime/](runtime/): SINGULYAR EIR — ядро исполнения (Intent → Decree Gate → Capability → Adapter → Evidence).
+- [apps/browser/decree-portal.html](apps/browser/decree-portal.html): Decree Portal — ввод и отзыв указов.
+- [apps/browser/decree-bridge.js](apps/browser/decree-bridge.js): мост портала к Python DecreeLog.
+- [docs/POLYMATH_PROTOCOL.md](docs/POLYMATH_PROTOCOL.md), [docs/SOVEREIGNTY_CONTRACT.md](docs/SOVEREIGNTY_CONTRACT.md), [docs/MANIFESTO.md](docs/MANIFESTO.md): программные документы.
+- [docs/ECOSYSTEM.md](docs/ECOSYSTEM.md): экосистема вокруг ОС.
+- [vault/](vault/): Second Brain (PKM) — приватный слой, default-deny публикация.
+- [TZ.md](TZ.md), [ROADMAP.md](ROADMAP.md): задание и дорога.
