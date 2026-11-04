@@ -7,6 +7,7 @@
 1. **Обсуждение:** для не-trivial изменений — открой issue или Discussion с предложением.
 2. **ADR:** если изменяется архитектура — создай/обнови ADR в `docs/adr/`.
 3. **Локальная проверка:**
+
    ```bash
    make bootstrap && make lint && make typecheck && make test && make ci-local
    ```
@@ -16,6 +17,7 @@
 - **Ветка:** `feat/<short-scope>-<kebab-topic>` (например, `feat/web-add-auth`)
 - **Время жизни:** ≤24 ч; если дольше — разбей на stacked PRs (Graphite)
 - **Commit message:** [Conventional Commits](https://www.conventionalcommits.org):
+
   ```
   feat(web): add OAuth login with Google
   fix(api): handle 404 on user-not-found

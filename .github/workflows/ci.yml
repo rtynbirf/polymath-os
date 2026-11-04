@@ -11,7 +11,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # required for OIDC + cosign keyless
+  id-token: write # required for OIDC + cosign keyless
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Run verify (12 verifiable claims)
         run: make verify
@@ -48,7 +48,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: "20"
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
@@ -93,7 +93,7 @@ jobs:
           scan-type: fs
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: '1'
+          exit-code: "1"
         continue-on-error: true
 
       - name: Run gitleaks

@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|----------|
-| latest `main` + tagged releases | ✅ |
-| anything older | ❌ |
+| Version                         | Supported |
+| ------------------------------- | --------- |
+| latest `main` + tagged releases | ✅        |
+| anything older                  | ❌        |
 
 ## Reporting a Vulnerability
 
@@ -109,14 +109,14 @@ For polymath-os specifically:
 
 ### Token formats reference
 
-| Prefix | Type | Total length |
-|--------|------|--------------|
-| `github_pat_` | Fine-grained PAT | ~93 chars |
-| `ghp_` | Classic PAT (user) | 40 chars |
-| `gho_` | OAuth token | 40 chars |
-| `ghu_` | User-to-server | 40 chars |
-| `ghs_` | Server-to-server | 40 chars |
-| `ghr_` | Refresh token | 80 chars |
+| Prefix        | Type               | Total length |
+| ------------- | ------------------ | ------------ |
+| `github_pat_` | Fine-grained PAT   | ~93 chars    |
+| `ghp_`        | Classic PAT (user) | 40 chars     |
+| `gho_`        | OAuth token        | 40 chars     |
+| `ghu_`        | User-to-server     | 40 chars     |
+| `ghs_`        | Server-to-server   | 40 chars     |
+| `ghr_`        | Refresh token      | 80 chars     |
 
 ## Audit checklist
 

@@ -91,7 +91,7 @@ body:
   - type: checkboxes
     id: verify-impact
     attributes:
-      label: '`make verify` impact'
+      label: "`make verify` impact"
       description: |
         Каждый новый claim в README требует нового check'а в `scripts/check.py`.
         Это open-source contract — без check'а claim не считается доказанным.

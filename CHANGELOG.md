@@ -109,7 +109,6 @@ The user invoked the "perfect OS" command — clean up loose ends, finish everyt
 The v3.6.0 release session had a `github_pat_...` token auto-revoked by
 GitHub's secret scanner because it appeared in plaintext in a bash command.
 v3.8.0 closes this gap with three layers:
-
 1. **`scripts/check_token_hygiene.py`** (new, 234 lines) — scans all
    `.py`, `.sh`, `.js`, `.yml`, `.json`, `.md`, `.ts`, `.tf`, `.nix` files
    for known token patterns: `github_pat_<50+ chars>`, `ghp_<36 chars>`,
@@ -206,15 +205,15 @@ ADR, above the kernel, above the code.
 
 ### The 7 foundational decrees
 
-| # | Category | Text |
-|---|----------|------|
-| 1 | law | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека. |
-| 2 | law | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. |
-| 3 | prohibition | never use Google DNS |
-| 4 | prohibition | never use Cloudflare |
-| 5 | prohibition | never use Chrome Firefox Edge Safari |
-| 6 | law | UNKNOWN first-class. Таймаут не равен failure не равен success. |
-| 7 | law | Default-deny. Публикуется только явное publish:true. |
+| #   | Category    | Text                                                               |
+| --- | ----------- | ------------------------------------------------------------------ |
+| 1   | law         | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека.        |
+| 2   | law         | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. |
+| 3   | prohibition | never use Google DNS                                               |
+| 4   | prohibition | never use Cloudflare                                               |
+| 5   | prohibition | never use Chrome Firefox Edge Safari                               |
+| 6   | law         | UNKNOWN first-class. Таймаут не равен failure не равен success.    |
+| 7   | law         | Default-deny. Публикуется только явное publish:true.               |
 
 ### Enforcement — `check_compliance()` now operates on real decrees
 
@@ -313,6 +312,7 @@ release closes all of them — `make verify` 12/12 PASS, CI green
 on commit e4ba013.
 
 ### Fixes
+
 - **pnpm-lock.yaml** — generated against `package.json` devDependencies
   (495 packages resolved, 5311-line lockfile). `pnpm install
   --frozen-lockfile` now succeeds.
@@ -365,8 +365,8 @@ on commit e4ba013.
 - **CI Test step** — replaced `pnpm turbo run test` (which fought with
   echo-based stub test scripts) with real Python tests:
   `cd runtime && python3 scripts/check.py` (40 SINGULYAR EIR tests)
-  + `PYTHONPATH=. python3 -m tooling.agents.mcp verify` (62 MCP
-  adapter tests).
+  - `PYTHONPATH=. python3 -m tooling.agents.mcp verify` (62 MCP
+    adapter tests).
 - **CI Build step** — `continue-on-error: true` + bootstraps Quartz v4
   in apps/garden/ before building. Garden build is a downstream
   concern fully covered by `publish-garden.yml` workflow.
@@ -379,6 +379,7 @@ on commit e4ba013.
   bumps are still needed).
 
 ### Verified
+
 - `make verify` — 12/12 PASS (open-source contract)
 - `cd runtime && python3 scripts/check.py` — ALL CHECKS PASSED (40 tests)
 - `PYTHONPATH=. python3 -m tooling.agents.mcp verify` — 16 capabilities,
@@ -393,6 +394,7 @@ on commit e4ba013.
 - **CodeQL on e4ba013 — GREEN** (JS + Python security queries)
 
 ### Repo metadata on GitHub
+
 - 20 topic tags: open-source, monorepo, ai-workflows, second-brain,
   devex, ci-cd, supply-chain-security, slsa, zettelkasten,
   intent-preservation, emergent, human-governed, sovereignty,
@@ -405,6 +407,7 @@ on commit e4ba013.
   follow-up)
 
 ### What's NOT here (per runtime/docs/LIMITATIONS.md)
+
 Network, WebRTC transport, encryption-at-rest, accounts, payments,
 AI models, multi-writer, external audit, proof-of-novelty.
 Single-writer kernel. Manual mutation testing (one gap found and

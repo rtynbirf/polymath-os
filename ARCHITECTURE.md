@@ -62,17 +62,20 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ## 3. Принципы проектирования
 
 ### 3.1. Single source of truth (Repo-as-Everything)
+
 Всё, что нужно для воспроизведения системы на чистой машине, лежит в git. Код, конфиг CI, инфраструктура, документация, политики, рунбуки, ADR. Это устраняет класс рисков: «works on my machine», исчезнувший коллега как single point of failure, Confluence-документация, умершая за 6 месяцев.
 
 ### 3.2. Local-first, cloud-optional
+
 Данные физически лежат на диске. Облако — только sync, не primary storage. Это устраняет класс рисков: вендор закрывается, меняет ToS, режет API, вводит paywall. Markdown, plain text, portable форматы как этический выбор.
 
 ### 3.3. Automation over discipline
+
 Люди ошибаются; CI — нет. Если правило можно выразить как код (lint, format, test, security scan, version bump, SBOM emit, sign) — оно должно быть в CI и блокирующим. Discipline-based processes («не забудь обновить changelog») деградируют в течение квартала.
 
 ### 3.4. Reversibility (три раздельные цели, не одна метрика)
-Каждое действие должно быть обратимым, но **rollback ≠ «60 сек и всё хорошо»**. Метрика разделена на три цели (ADR-0005):
 
+Каждое действие должно быть обратимым, но **rollback ≠ «60 сек и всё хорошо»**. Метрика разделена на три цели (ADR-0005):
 - **Откат кода** — ≤60 сек (`helm rollback` / `argocd app rollback`). Метрика: время выполнения команды.
 - **Безопасные миграции** — expand/contract, без отката данных. Метрика: CI тест «old code + new schema».
 - **Восстановление данных** — RPO/RTO с измеренным учением. Метрика: quarterly restore-test на чистой машине.
@@ -80,15 +83,16 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 Дополнительно: IaC-apply = `destroy`-able, Dotfiles-apply = `chezmoi forget`-able. Если нельзя откатить — это продакшен-риск, а не улучшение.
 
 ### 3.5. Fail fast, fail local
+
 Локальный цикл `act` / `dagger` / `tilt up` воспроизводит 90% CI. Те же контейнеры, те же скрипты, тот же lint. Если тесты проходят локально, они должны проходить и в CI. Обратное — баг инфраструктуры, не кода.
 
 ### 3.6. Output > collection
+
 Ценность системы измеряется **продуктом**, не объёмом собранного. Это применимо одинаково к: code repo ( commits, releases > stars ), second brain (опубликованные статьи > заметки в архиве), AI workflows (deployed agents > experiments). База без output-ритуала превращается в «кладбище любопытства».
 
 ### 3.7. PID=1 — метафора, не источник технических требований
 
 PID=1 как метафора допустима (человек — init-процесс, все инструменты — fork-exec от него). Но **выводить из неё технические требования нельзя** (права, изоляция сессий, переносимость — см. audit A11). Эти требования записаны отдельно:
-
 - **Rights & sessions:** каждый процесс имеет свой security context. `fork()` копирует образ, но не креды. Делегирование «карт-бланша» не делает второго тебя собой на уровне безопасности.
 - **Vendor lock-in = институциональный захват:** если инструмент начинает диктовать свои правила против твоей воли — заменить. Но решение о замене — через Sovereignty Registry (§8), не через метафору.
 - **Portability:** данные в открытом формате (markdown, SQLite, JSON) — этический выбор, не следствие из PID=1.
@@ -135,37 +139,37 @@ PID=1 как метафора допустима (человек — init-про
 
 Все архитектурные решения документируются в `docs/adr/`. **29 ADRs создано** (0001-0029, 0031) после аудита SINGULYAR EIR v0.6.1 + multiagent v3.7.0 + clean-up v3.8.0 + decree system v3.10.0-v3.14.0 + provenance v3.20.0:
 
-| ADR | Тема | Audit response | Реализовано |
-|---|---|---|---|
-| `0001` | Записываем архитектурные решения (bootstrap) | — | ✓ |
-| `0002` | Sovereignty Registry — двухъярусный реестр зависимостей | A1 | ✓ |
-| `0003` | Exit gates вместо календарной длины фаз | A2 | ✓ |
-| `0004` | SLSA Build L2 как цель v1.0, L3 только с builder isolation | A3 | ✓ L2 |
-| `0005` | Раздельные цели отката — код/миграции/данные | A4 | ✓ |
-| `0006` | Falsifiable self-* properties (каждое с отрицательным тестом) | A5 | ✓ |
-| `0007` | Multi-agent — research=parallel, execution=single+verifier | A7 | partial |
-| `0008` | MCP — тонкий внутренний адаптер, версия закреплена | A8 | ✓ |
-| `0009` | Default-deny публикация vault — из экспорта, не из репо | A9 | ✓ |
-| `0010` | Мутационный контроль для критичных путей | A10 | ✓ |
-| `0011` | Container runtime — colima/podman/containerd+nerdctl | A11 | partial |
-| `0012` | SINGULYAR EIR как Layer 5 — Execution Kernel | интеграция | ✓ |
-| `0013` | SLSA Build L3 target | (extension) | target v1.0 (Proposed) |
-| `0014` | WebRTC adapter as Tier 2 dependency | (extension) | ✓ |
-| `0015` | Real LLM inference in CI | (extension) | target v1.0 (Proposed) |
-| `0016` | Self-rewriting ADR mechanism | (extension) | **✓ CLOSED by ADR-0026** (v3.12.0) |
-| `0017` | Ecosystem governance protocol | (extension) | ✓ |
-| `0018` | Genomic architecture | (extension) | partial |
-| `0019` | Observability-first | (extension) | ✓ |
-| `0020` | Manifest-driven architecture | (extension) | ✓ |
-| `0021` | **Decree as supreme law** (v3.6.0 OPERATIONAL) | (extension) | ✓ |
-| `0022` | **Decree Portal as human interface** (v3.5.0+) | (extension) | ✓ |
-| `0023` | **Agent Card Protocol** (.well-known/agent.json, A2A) | (extension) | ✓ (v3.10.0) |
-| `0024` | **Decree-Enforced Multi-Agent Communication** (inbound in-process) | (extension) | ✓ (v3.10.0) |
-| `0025` | **Decree-Driven A2A Client** (outbound decree gate) | (extension) | ✓ (v3.11.0) |
-| `0026` | **Decree-Driven ADR Amendment Mechanism** (closes ADR-0016) | (extension) | ✓ (v3.12.0) |
-| `0027` | **Decree-Enforced HTTP JSON-RPC Server** (inbound HTTP) | (extension) | ✓ (v3.13.0) |
-| `0028` | **Decree Supersession Mechanism** (decrees can be revoked) | (extension) | ✓ (v3.14.0) |
-| `0031` | **Decree Cryptographic Signing** (Ed25519 authorship, pure stdlib) | (extension of ADR-0021) | ✓ (v3.20.0) |
+| ADR    | Тема                                                               | Audit response          | Реализовано                        |
+| ------ | ------------------------------------------------------------------ | ----------------------- | ---------------------------------- |
+| `0001` | Записываем архитектурные решения (bootstrap)                       | —                       | ✓                                  |
+| `0002` | Sovereignty Registry — двухъярусный реестр зависимостей            | A1                      | ✓                                  |
+| `0003` | Exit gates вместо календарной длины фаз                            | A2                      | ✓                                  |
+| `0004` | SLSA Build L2 как цель v1.0, L3 только с builder isolation         | A3                      | ✓ L2                               |
+| `0005` | Раздельные цели отката — код/миграции/данные                       | A4                      | ✓                                  |
+| `0006` | Falsifiable self-* properties (каждое с отрицательным тестом)      | A5                      | ✓                                  |
+| `0007` | Multi-agent — research=parallel, execution=single+verifier         | A7                      | partial                            |
+| `0008` | MCP — тонкий внутренний адаптер, версия закреплена                 | A8                      | ✓                                  |
+| `0009` | Default-deny публикация vault — из экспорта, не из репо            | A9                      | ✓                                  |
+| `0010` | Мутационный контроль для критичных путей                           | A10                     | ✓                                  |
+| `0011` | Container runtime — colima/podman/containerd+nerdctl               | A11                     | partial                            |
+| `0012` | SINGULYAR EIR как Layer 5 — Execution Kernel                       | интеграция              | ✓                                  |
+| `0013` | SLSA Build L3 target                                               | (extension)             | target v1.0 (Proposed)             |
+| `0014` | WebRTC adapter as Tier 2 dependency                                | (extension)             | ✓                                  |
+| `0015` | Real LLM inference in CI                                           | (extension)             | target v1.0 (Proposed)             |
+| `0016` | Self-rewriting ADR mechanism                                       | (extension)             | **✓ CLOSED by ADR-0026** (v3.12.0) |
+| `0017` | Ecosystem governance protocol                                      | (extension)             | ✓                                  |
+| `0018` | Genomic architecture                                               | (extension)             | partial                            |
+| `0019` | Observability-first                                                | (extension)             | ✓                                  |
+| `0020` | Manifest-driven architecture                                       | (extension)             | ✓                                  |
+| `0021` | **Decree as supreme law** (v3.6.0 OPERATIONAL)                     | (extension)             | ✓                                  |
+| `0022` | **Decree Portal as human interface** (v3.5.0+)                     | (extension)             | ✓                                  |
+| `0023` | **Agent Card Protocol** (.well-known/agent.json, A2A)              | (extension)             | ✓ (v3.10.0)                        |
+| `0024` | **Decree-Enforced Multi-Agent Communication** (inbound in-process) | (extension)             | ✓ (v3.10.0)                        |
+| `0025` | **Decree-Driven A2A Client** (outbound decree gate)                | (extension)             | ✓ (v3.11.0)                        |
+| `0026` | **Decree-Driven ADR Amendment Mechanism** (closes ADR-0016)        | (extension)             | ✓ (v3.12.0)                        |
+| `0027` | **Decree-Enforced HTTP JSON-RPC Server** (inbound HTTP)            | (extension)             | ✓ (v3.13.0)                        |
+| `0028` | **Decree Supersession Mechanism** (decrees can be revoked)         | (extension)             | ✓ (v3.14.0)                        |
+| `0031` | **Decree Cryptographic Signing** (Ed25519 authorship, pure stdlib) | (extension of ADR-0021) | ✓ (v3.20.0)                        |
 
 ADR — immutable после Accepted. Новые решения создаются superseding ADR'ом со ссылкой на старый. Соответствие замечаний аудита → действиям — в `docs/AUDIT_RESPONSE.md`.
 
@@ -190,19 +194,18 @@ Polymath OS — это не сумма 5 слоёв. Это **эмерджент
 
 Каждое свойство переформулировано **опровергаемо** — что реально гарантирует + свидетельство, которое требуется:
 
-| Заявление | Что реально гарантирует | Свидетельство (отрицательный тест) |
-|---|---|---|
-| **Self-audit** | CI проверяет то, что в него явно включили | Карта рисков → проверки; внесённый дефект должен краснить CI; мутационный контроль для критичных путей |
-| **Self-publish** | Деплой по правилам (allowlist + проверка итогового состава) | Заметка без `publish: true` с «ловушкой-строкой» не должна появиться в собранном сайте |
-| **Self-bootstrap** | Скрипт запускается на чистой машине | Quarterly: запуск на чистой VM, запись времени и версий |
-| **Self-evidence** | Документы лежат в git (тривиально) + трассировка «утверждение → тест/запуск» | Документы не подтверждают друг друга по кругу; каждое утверждение в ADR → тест или runbook-процедура |
-| **Self-verify** | Подпись артефакта проверена в deploy | `cosign verify` + `cosign verify-attestation`; артефакт без подписи не деплоится (CI fail) |
-| **Self-rollback** | Откат выполнен (три раздельные цели, ADR-0005) | Quarterly учение + проверка состояния после отката (метрика ошибок возвращается к фону) |
+| Заявление          | Что реально гарантирует                                                      | Свидетельство (отрицательный тест)                                                                     |
+| ------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Self-audit**     | CI проверяет то, что в него явно включили                                    | Карта рисков → проверки; внесённый дефект должен краснить CI; мутационный контроль для критичных путей |
+| **Self-publish**   | Деплой по правилам (allowlist + проверка итогового состава)                  | Заметка без `publish: true` с «ловушкой-строкой» не должна появиться в собранном сайте                 |
+| **Self-bootstrap** | Скрипт запускается на чистой машине                                          | Quarterly: запуск на чистой VM, запись времени и версий                                                |
+| **Self-evidence**  | Документы лежат в git (тривиально) + трассировка «утверждение → тест/запуск» | Документы не подтверждают друг друга по кругу; каждое утверждение в ADR → тест или runbook-процедура   |
+| **Self-verify**    | Подпись артефакта проверена в deploy                                         | `cosign verify` + `cosign verify-attestation`; артефакт без подписи не деплоится (CI fail)             |
+| **Self-rollback**  | Откат выполнен (три раздельные цели, ADR-0005)                               | Quarterly учение + проверка состояния после отката (метрика ошибок возвращается к фону)                |
 
 ### 7.2. Новое свойство от интеграции SINGULYAR EIR (Layer 5)
 
 Добавление Layer 5 даёт свойство, которого нет в сумме слоёв 1-4:
-
 - **Управляемая эмерджентная непрерывность** — система сохраняет намерение человека при смене исполнителя, восстанавливает выполнение по readback состояния (не по догадке), и превращает подтверждённые результаты в воспроизводимые способности.
 
 Это **гипотеза**, не утверждение. Лестница абляции B0→B3→EIR (`runtime/docs/EXPERIMENT_RESULTS.md`) показывает, что каждое звено убирает конкретный класс отказа; тест `test_each_ablation_link_is_load_bearing` проверяет, что каждое звено несущее. Цена: в двух сценариях ядро честно отвечает UNKNOWN вместо «наверное получилось».
@@ -218,7 +221,6 @@ LFS-этика буквально невыполнима для production-grade
 ### Tier 1: Суверенное ядро (sovereign core)
 
 Зависимости, которые работают **без сети и без аккаунтов**, данные в открытом формате:
-
 - **Git, Markdown, SQLite, age, Nix, Conventional Commits, cosign (keyless), CycloneDX SBOM**
 
 Суверенное ядро работает на чистой машине без аккаунта в GitHub/Sentry/Cloudflare.
@@ -227,19 +229,19 @@ LFS-этика буквально невыполнима для production-grade
 
 Зависимости, которые можно заменить по контракту. Для каждой: capability / формат данных / стоимость выхода / replacement / offline fallback.
 
-| Сервис | Capability | Replacement | Offline fallback |
-|---|---|---|---|
-| GitHub Actions | CI | Woodpecker CI / Forgejo Actions | `act` локально |
-| GitHub (repo) | git hosting | Gitea / Forgejo / Codeberg | локальный bare repo |
-| GitHub Pages | static hosting | Cloudflare Pages / Netlify | `python -m http.server` |
-| Sentry | error tracking | Glitchtip (self-host) | structured logs in Loki |
-| 1Password | secrets vault | Bitwarden (Vaultwarden) | age-encrypted files in git |
-| OpenRouter | LLM gateway | Ollama / vLLM (self-host) | local model only |
-| BetterStack | uptime | Uptime Kuma (self-host) | cron + curl + Telegram bot |
-| Hetzner | VPS | OVH / Scaleway / mini-PC | local bare metal |
-| Cloudflare | DNS / CDN | bind9 / Bunny CDN | `/etc/hosts` |
-| Obsidian | markdown editor | Foam / Logseq / `less` | `cat` / `less` |
-| Quartz | static site gen | MkDocs Material / Astro Starlight | plain HTML |
+| Сервис         | Capability      | Replacement                       | Offline fallback           |
+| -------------- | --------------- | --------------------------------- | -------------------------- |
+| GitHub Actions | CI              | Woodpecker CI / Forgejo Actions   | `act` локально             |
+| GitHub (repo)  | git hosting     | Gitea / Forgejo / Codeberg        | локальный bare repo        |
+| GitHub Pages   | static hosting  | Cloudflare Pages / Netlify        | `python -m http.server`    |
+| Sentry         | error tracking  | Glitchtip (self-host)             | structured logs in Loki    |
+| 1Password      | secrets vault   | Bitwarden (Vaultwarden)           | age-encrypted files in git |
+| OpenRouter     | LLM gateway     | Ollama / vLLM (self-host)         | local model only           |
+| BetterStack    | uptime          | Uptime Kuma (self-host)           | cron + curl + Telegram bot |
+| Hetzner        | VPS             | OVH / Scaleway / mini-PC          | local bare metal           |
+| Cloudflare     | DNS / CDN       | bind9 / Bunny CDN                 | `/etc/hosts`               |
+| Obsidian       | markdown editor | Foam / Logseq / `less`            | `cat` / `less`             |
+| Quartz         | static site gen | MkDocs Material / Astro Starlight | plain HTML                 |
 
 ### Tier 3: Закрытые форматы (lock-in, миграция обязательна)
 

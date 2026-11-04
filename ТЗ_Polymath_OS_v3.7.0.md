@@ -1,4 +1,5 @@
 # ТЗ — Polymath OS v3.7.0
+
 ## Техническое Задание
 
 **Версия документа:** 1.0 (2026-10-17)
@@ -14,7 +15,6 @@
 **Polymath OS** — персональная операционная система для человека-полимата. Это не дистрибутив Linux и не SaaS-продукт. Это **набор слоёв от репозитория до исполнительного ядра**, которые вместе образуют воспроизводимую среду для разработки, мышления, автоматизации и публикации — при сохранении полного суверенитета человека над системой.
 
 **Система решает следующие задачи:**
-
 1. **Сохранение намерения** — когда человек формулирует Intent («отправить данные в X», «опубликовать заметку», «выполнить команду»), система обязуется сохранить это намерение при смене исполнителя (adapter), восстановить выполнение после сбоя и не объявлять успех без подтверждённого состояния (честный UNKNOWN вместо «наверное получилось»).
 2. **Верховенство воли человека** — текст, который человек печатает в Decree Portal, становится **законом** (decree), который ядро SINGULYAR EIR проверяет перед каждым действием. Декрет append-only, hash-chained, невозможен к изменению или удалению.
 3. **Суверенитет над зависимостями** — каждый компонент системы классифицирован по трёхуровневому реестру: ядро (git, markdown, SQLite, age, Nix), арендуемые сервисы (заменяемые по контракту), запрещённые (Google, Cloudflare, Chrome/Firefox/Edge/Safari и т.п.).
@@ -24,7 +24,6 @@
 ### 1.2. Область применения
 
 Polymath OS применим в следующих сценариях:
-
 - **Личная разработка** — единое дерево git/monorepo для всех своих проектов, пакетов, конфигураций, документации.
 - **Second Brain (PKM)** — Obsidian vault с локальным AI (Copilot+Ollama), git-sync, smart connections.
 - **AI-ассистированные workflow** — MCP-native agents с version-pinning, eval-in-CI, multi-agent research.
@@ -34,30 +33,30 @@ Polymath OS применим в следующих сценариях:
 
 ### 1.3. Глоссарий
 
-| Термин | Определение |
-|--------|-------------|
-| **Intent** | Замороженный dataclass: `{intent_id, description, operation, payload, expected, risk, requires_consent, constraints}`. Атомарная единица работы в SINGULYAR EIR. |
-| **Capability** | Замороженный dataclass: `{capability_id, operation, adapter_id, risk_ceiling, offline, idempotent, local_only, priority}`. Возможность, заявленная в системе. |
-| **Adapter** | Реализация `execute()` + `read_state()` для конкретного side-effect (HTTP, SQLite, memory, WebRTC). |
-| **Observation** | Результат read-back: `{status: PRESENT/ABSENT/UNAVAILABLE, value, count}`. |
-| **Evidence** | Запись в evidence ledger: verdict (PASS/FAIL/INCONCLUSIVE) + observed state. |
-| **Decree** | Append-only запись в DecreeLog: `{seq, prev_hash, timestamp, decree_text, category, scope, decree_hash}`. Категории: law, prohibition, permission, observation, directive. |
-| **DecreeLog** | SQLite WAL база данных `~/.polymath-os/decrees.db`, hash-chained, append-only. |
-| **EvidenceLedger** | SQLite база с hash-chained событиями (STATE_TRANSITION, EXECUTION_STARTED, ADAPTER_RETURN, DECREE_BLOCK и др.). |
-| **Runtime** | Экземпляр `singulyar_runtime.Runtime` — координатор Intent → Capability → Adapter → Observation → Evidence. |
-| **Sovereignty Registry** | Двухъярусный реестр зависимостей: ядро (sovereign) + арендуемые (rented, заменяемые). |
-| **Decree Portal** | HTML/JS интерфейс для издания декретов (`apps/browser/decree-portal.html`). |
-| **Decree Bridge** | Node-мост между HTML UI и Python DecreeLog (`apps/browser/decree-bridge.js`). |
-| **PAROLE > LANGUE** | Тезис Соссюра: индивидуальное слово выше коллективного договора. В системе — декрет выше ADR. |
-| **PID=1** | Метафора: человек — init-процесс, все инструменты — fork-exec от него. |
-| **Default-deny** | Принцип: всё, что явно не разрешено (`publish:true`), запрещено. ADR-0009. |
-| **UNKNOWN state** | Первоклассное состояние — система не знает, выполнился ли side-effect. Не CONFIRMED, не FAILED. |
-| **Recovery** | Протокол: UNKNOWN → RECOVERING → read_state → VERIFYING → CONFIRMED/FAILED. |
-| **MCP** | Model Context Protocol — version-pinned адаптеры для LLM agents (filesystem, git, postgres, web_search). |
-| **Quartz v4** | Static site generator для digital garden. Используется в `apps/garden/`. |
-| **ADR** | Architecture Decision Record. 22 записи в `docs/adr/0001-0022.md`. |
-| **MANIFEST.json** | Корневой манифест с метриками системы (count of layers, ADRs, patterns, contracts, tests). |
-| **make verify** | Open-source контракт: 22 проверяемых утверждения, exit 0 = все держатся. |
+| Термин                   | Определение                                                                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Intent**               | Замороженный dataclass: `{intent_id, description, operation, payload, expected, risk, requires_consent, constraints}`. Атомарная единица работы в SINGULYAR EIR.           |
+| **Capability**           | Замороженный dataclass: `{capability_id, operation, adapter_id, risk_ceiling, offline, idempotent, local_only, priority}`. Возможность, заявленная в системе.              |
+| **Adapter**              | Реализация `execute()` + `read_state()` для конкретного side-effect (HTTP, SQLite, memory, WebRTC).                                                                        |
+| **Observation**          | Результат read-back: `{status: PRESENT/ABSENT/UNAVAILABLE, value, count}`.                                                                                                 |
+| **Evidence**             | Запись в evidence ledger: verdict (PASS/FAIL/INCONCLUSIVE) + observed state.                                                                                               |
+| **Decree**               | Append-only запись в DecreeLog: `{seq, prev_hash, timestamp, decree_text, category, scope, decree_hash}`. Категории: law, prohibition, permission, observation, directive. |
+| **DecreeLog**            | SQLite WAL база данных `~/.polymath-os/decrees.db`, hash-chained, append-only.                                                                                             |
+| **EvidenceLedger**       | SQLite база с hash-chained событиями (STATE_TRANSITION, EXECUTION_STARTED, ADAPTER_RETURN, DECREE_BLOCK и др.).                                                            |
+| **Runtime**              | Экземпляр `singulyar_runtime.Runtime` — координатор Intent → Capability → Adapter → Observation → Evidence.                                                                |
+| **Sovereignty Registry** | Двухъярусный реестр зависимостей: ядро (sovereign) + арендуемые (rented, заменяемые).                                                                                      |
+| **Decree Portal**        | HTML/JS интерфейс для издания декретов (`apps/browser/decree-portal.html`).                                                                                                |
+| **Decree Bridge**        | Node-мост между HTML UI и Python DecreeLog (`apps/browser/decree-bridge.js`).                                                                                              |
+| **PAROLE > LANGUE**      | Тезис Соссюра: индивидуальное слово выше коллективного договора. В системе — декрет выше ADR.                                                                              |
+| **PID=1**                | Метафора: человек — init-процесс, все инструменты — fork-exec от него.                                                                                                     |
+| **Default-deny**         | Принцип: всё, что явно не разрешено (`publish:true`), запрещено. ADR-0009.                                                                                                 |
+| **UNKNOWN state**        | Первоклассное состояние — система не знает, выполнился ли side-effect. Не CONFIRMED, не FAILED.                                                                            |
+| **Recovery**             | Протокол: UNKNOWN → RECOVERING → read_state → VERIFYING → CONFIRMED/FAILED.                                                                                                |
+| **MCP**                  | Model Context Protocol — version-pinned адаптеры для LLM agents (filesystem, git, postgres, web_search).                                                                   |
+| **Quartz v4**            | Static site generator для digital garden. Используется в `apps/garden/`.                                                                                                   |
+| **ADR**                  | Architecture Decision Record. 22 записи в `docs/adr/0001-0022.md`.                                                                                                         |
+| **MANIFEST.json**        | Корневой манифест с метриками системы (count of layers, ADRs, patterns, contracts, tests).                                                                                 |
+| **make verify**          | Open-source контракт: 22 проверяемых утверждения, exit 0 = все держатся.                                                                                                   |
 
 ### 1.4. Связанные документы
 
@@ -142,7 +141,6 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.1. Layer 1 — Repository Structure
 
 **Цель:** self-contained монорепозиторий с явным владением.
-
 - `pnpm` workspaces (`pnpm-workspace.yaml` → `apps/*`, `packages/*`, `tooling/*`)
 - `turbo.json` — build/lint/test/typecheck/dev pipelines с `dependsOn`
 - `@changesets/cli` — независимое версионирование пакетов
@@ -153,7 +151,6 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.2. Layer 2 — AI Workflows
 
 **Цель:** agent-as-process с eval-in-CI.
-
 - MCP (Model Context Protocol) — version-pinned (`tooling/agents/mcp/`)
 - 4 адаптера: filesystem, git, postgres, web_search
 - CLI: `python3 -m tooling.agents.mcp verify --coverage` — проверка покрытия
@@ -163,7 +160,6 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.3. Layer 3 — Second Brain (PKM)
 
 **Цель:** markdown-first база знаний с локальным AI.
-
 - Obsidian vault в `vault/` (`60-permanent/`, `90-meta/templates/`)
 - git-sync для versioning
 - Smart Connections + Copilot+Ollama для локального AI
@@ -172,7 +168,6 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.4. Layer 4 — DevEx / CI / IaC
 
 **Цель:** одна команда `make bootstrap` → готовая среда.
-
 - `flake.nix` — Nix Flakes для воспроизводимой среды
 - `infra/tofu/` — OpenTofu (Hetzner, Unleash, Cloudflare DNS, Vault cluster)
 - `infra/self-host/docker-compose.yml` — self-hosted services
@@ -205,7 +200,6 @@ CREATED ─► PLANNED ─► EXECUTING ─► VERIFYING ─► CONFIRMED  ✓
 ```
 
 **Ключевые инварианты:**
-
 - **UNKNOWN ≠ CONFIRMED** — никогда не объявлять успех без подтверждённого состояния (ADR-0006 falsifiable)
 - **DECREE_BLOCK → WAITING_FOR_HUMAN** — никогда не downgrade к более мягкому состоянию
 - **Hash-chain integrity** — fail-closed если цепочка нарушена (ADR-0006)
@@ -227,20 +221,20 @@ CREATED ─► PLANNED ─► EXECUTING ─► VERIFYING ─► CONFIRMED  ✓
 
 **Основные классы:**
 
-| Класс | Назначение |
-|-------|------------|
-| `Intent` | Frozen dataclass с 8 полями — атомарная единица работы |
-| `Capability` | Frozen dataclass с 8 полями — заявленная возможность |
-| `Adapter` (abstract) | Интерфейс `execute()` + `read_state()` |
-| `MemoryAdapter` | In-memory тестовый adapter (adapter_id="memory") |
-| `SimulatedRemoteAdapter` | Симуляция удалённого adapter (adapter_id="simulated-remote") |
-| `SqliteRemoteAdapter` | SQLite-backed adapter (adapter_id="sqlite-remote") |
-| `Observation` | Frozen dataclass с status PRESENT/ABSENT/UNAVAILABLE |
-| `Execution` | Запись о выполненной попытке (intent_id, adapter_id, capability_id, attempt #) |
-| `Policy` | Проверка разрешённых operations + capability constraints |
-| `PostconditionVerifier` | Сравнивает observed vs expected → PASS/FAIL/INCONCLUSIVE |
-| `EvidenceLedger` | Hash-chained event log (SQLite) |
-| `Runtime` | Координатор всего цикла + decree gate |
+| Класс                    | Назначение                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `Intent`                 | Frozen dataclass с 8 полями — атомарная единица работы                         |
+| `Capability`             | Frozen dataclass с 8 полями — заявленная возможность                           |
+| `Adapter` (abstract)     | Интерфейс `execute()` + `read_state()`                                         |
+| `MemoryAdapter`          | In-memory тестовый adapter (adapter_id="memory")                               |
+| `SimulatedRemoteAdapter` | Симуляция удалённого adapter (adapter_id="simulated-remote")                   |
+| `SqliteRemoteAdapter`    | SQLite-backed adapter (adapter_id="sqlite-remote")                             |
+| `Observation`            | Frozen dataclass с status PRESENT/ABSENT/UNAVAILABLE                           |
+| `Execution`              | Запись о выполненной попытке (intent_id, adapter_id, capability_id, attempt #) |
+| `Policy`                 | Проверка разрешённых operations + capability constraints                       |
+| `PostconditionVerifier`  | Сравнивает observed vs expected → PASS/FAIL/INCONCLUSIVE                       |
+| `EvidenceLedger`         | Hash-chained event log (SQLite)                                                |
+| `Runtime`                | Координатор всего цикла + decree gate                                          |
 
 **Runtime API (public):**
 
@@ -336,25 +330,24 @@ dl.close()
 
 Классификация каждого "never use X" prohibition в одну из 4 категорий:
 
-| Классификация | Триггер | Пример | Запрещённые термы |
-|---------------|---------|--------|-------------------|
-| **LIST** | 3+ proper-noun слова | "Chrome Firefox Edge Safari" | `chrome`, `firefox`, `edge`, `safari` |
-| **PHRASE** | 2 слова, 2-е — акроним (DNS/CDN/API/...) | "Google DNS" | `google dns`, `google` |
-| **SINGLE** | 1 слово | "Cloudflare" | `cloudflare` |
-| **DEFAULT** | 2 слова без акронима | (как phrase) | full phrase + head noun |
+| Классификация | Триггер                                  | Пример                       | Запрещённые термы                     |
+| ------------- | ---------------------------------------- | ---------------------------- | ------------------------------------- |
+| **LIST**      | 3+ proper-noun слова                     | "Chrome Firefox Edge Safari" | `chrome`, `firefox`, `edge`, `safari` |
+| **PHRASE**    | 2 слова, 2-е — акроним (DNS/CDN/API/...) | "Google DNS"                 | `google dns`, `google`                |
+| **SINGLE**    | 1 слово                                  | "Cloudflare"                 | `cloudflare`                          |
+| **DEFAULT**   | 2 слова без акронима                     | (как phrase)                 | full phrase + head noun               |
 
 Реализовано через `_extract_prohibited_terms(decree_text) -> List[str]`. Каждое нарушение включает `matched_term` поле для трассируемости.
 
 **Ложные срабатывания устранены (v0.4 → v0.5):**
 
-| Intent | v0.4 | v0.5 |
-|--------|------|------|
-| "configure DNS with local unbound" | DENIED (ложноположительное) | compliant |
-| "configure DNS with Google 8.8.8.8" | DENIED | DENIED (matched_term=google) |
-| "use Google DNS server explicitly" | DENIED | DENIED (matched_term=google dns) |
+| Intent                              | v0.4                        | v0.5                             |
+| ----------------------------------- | --------------------------- | -------------------------------- |
+| "configure DNS with local unbound"  | DENIED (ложноположительное) | compliant                        |
+| "configure DNS with Google 8.8.8.8" | DENIED                      | DENIED (matched_term=google)     |
+| "use Google DNS server explicitly"  | DENIED                      | DENIED (matched_term=google dns) |
 
 **Известные ограничения v0.5 (запланированы для v0.6):**
-
 - Substring matching без word boundaries: `chrome` совпадает с `chromebook` (v0.6 fix: `\bchrome\b` regex)
 - Naive `text.split("use", 1)` парсит "never abuse any services" как prohibited="any services" (v0.6 fix: regex pattern)
 
@@ -364,11 +357,11 @@ dl.close()
 
 **Три яруса зависимостей:**
 
-| Tier | Тип | Примеры | Политика |
-|------|-----|---------|----------|
-| **Tier 1 (Sovereign Core)** | Открытые форматы + sovereign tools | git, markdown, SQLite, age, Nix, OpenTofu, cosign | Базовый слой, не заменяемый |
-| **Tier 2 (Rented Services)** | Заменяемые по контракту | Hetzner (заменяется на любой VPS), Unleash (заменяется на Flagsmith), GitHub Actions (заменяется на act/gitea) | Контрактный слой, switch-out через ADR |
-| **Tier 3 (Forbidden Benefactors)** | Корпоративные игроки, противоречащие суверенитету | Google, Cloudflare, Chrome/Firefox/Edge/Safari, AWS, Azure | Не допускаются в кодовую базу |
+| Tier                               | Тип                                               | Примеры                                                                                                        | Политика                               |
+| ---------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Tier 1 (Sovereign Core)**        | Открытые форматы + sovereign tools                | git, markdown, SQLite, age, Nix, OpenTofu, cosign                                                              | Базовый слой, не заменяемый            |
+| **Tier 2 (Rented Services)**       | Заменяемые по контракту                           | Hetzner (заменяется на любой VPS), Unleash (заменяется на Flagsmith), GitHub Actions (заменяется на act/gitea) | Контрактный слой, switch-out через ADR |
+| **Tier 3 (Forbidden Benefactors)** | Корпоративные игроки, противоречащие суверенитету | Google, Cloudflare, Chrome/Firefox/Edge/Safari, AWS, Azure                                                     | Не допускаются в кодовую базу          |
 
 **Скрипт проверки:** `scripts/check_freedom.py` — проверяет package.json, pnpm-lock.yaml, go.sum на наличие Tier 3 бенефициаров.
 
@@ -379,7 +372,6 @@ dl.close()
 **Файл:** `runtime/src/singulyar_runtime.py` (класс `EvidenceLedger`)
 
 **SQLite WAL база** с hash-chained событиями:
-
 - `INTENT_ACCEPTED` — Intent прошёл валидацию, recorded fingerprint
 - `STATE_TRANSITION` — каждое изменение состояния (CREATED → PLANNED → ...)
 - `EXECUTION_STARTED` — write-ahead запись BEFORE side-effect
@@ -397,13 +389,11 @@ dl.close()
 ### 4.5. Decree Portal (UI)
 
 **Файлы:**
-
 - `apps/browser/decree-portal.html` — HTML/JS интерфейс
 - `apps/browser/decree-bridge.js` — Node bridge к Python DecreeLog
 - `apps/browser/electron/` — Electron desktop wrapper
 
 **UI компоненты:**
-
 - Textarea для ввода текста декрета (до 5000 символов)
 - 5 категорий-кнопок: Директива, Закон, Запрет, Разрешение, Наблюдение
 - Кнопка "⚡ ИЗДАТЬ ДЕКРЕТ"
@@ -414,21 +404,24 @@ dl.close()
 
 ```javascript
 function getBridge() {
-    try {
-        if (typeof require === 'function') {                    // Node/Electron main
-            const m = require('./decree-bridge.js');
-            return new m.DecreeBridge();
-        }
-    } catch (e) { /* fall through */ }
-    if (typeof window !== 'undefined' && window.decreeBridge) { // Electron preload
-        return window.decreeBridge;
+  try {
+    if (typeof require === "function") {
+      // Node/Electron main
+      const m = require("./decree-bridge.js");
+      return new m.DecreeBridge();
     }
-    return null;                                                // Pure browser → localStorage
+  } catch (e) {
+    /* fall through */
+  }
+  if (typeof window !== "undefined" && window.decreeBridge) {
+    // Electron preload
+    return window.decreeBridge;
+  }
+  return null; // Pure browser → localStorage
 }
 ```
 
 **Electron desktop wrapper (новое в v3.7.0):**
-
 - `apps/browser/electron/main.js` — BrowserWindow 1200×800, dark background
 - `apps/browser/electron/preload.js` — `contextBridge.exposeInMainWorld('decreeBridge', ...)`
 - Security: `contextIsolation: true`, `nodeIntegration: false`
@@ -440,12 +433,12 @@ function getBridge() {
 
 4 адаптера, каждый реализует `BaseAdapter`:
 
-| Adapter | Operations |
-|---------|-----------|
+| Adapter                 | Operations                              |
+| ----------------------- | --------------------------------------- |
 | `filesystem_adapter.py` | read_file, write_file, list_dir, search |
-| `git_adapter.py` | clone, commit, push, log, diff |
-| `postgres_adapter.py` | query, execute, migrate |
-| `web_search_adapter.py` | search, fetch_page |
+| `git_adapter.py`        | clone, commit, push, log, diff          |
+| `postgres_adapter.py`   | query, execute, migrate                 |
+| `web_search_adapter.py` | search, fetch_page                      |
 
 **Registry:** `tooling/agents/mcp/registry.py` — центральный реестр адаптеров
 **Version pinning:** ADR-0008 — каждый адаптер имеет semver version, изменения tracked
@@ -454,7 +447,6 @@ function getBridge() {
 ### 4.7. Garden (Quartz v4)
 
 **Директория:** `apps/garden/`
-
 - Quartz v4 — static site generator
 - Source: `apps/garden/content/` ← default-deny copy of `vault/60-permanent/`
 - Filter: `apps/garden/scripts/filter_vault.py` — копирует только заметки с `publish: true` frontmatter
@@ -466,47 +458,47 @@ function getBridge() {
 
 ## 5. Функциональные требования
 
-| ID | Требование | Реализация |
-|----|-----------|------------|
-| F-01 | Издание декрета через UI с записью в реальный SQLite | Decree Portal + decree-bridge.js + DecreeLog.issue() |
-| F-02 | Получение всех декретов через UI | Decree Portal + bridge.getDecrees() → DecreeLog.get_all() |
-| F-03 | Проверка compliance intent'а против активных декретов | DecreeLog.check_compliance() (v0.5 phrase matching) |
-| F-04 | Блокировка Intent при decree violation | Runtime._advance() → DECREE_BLOCK → WAITING_FOR_HUMAN |
-| F-05 | Восстановление Intent из UNKNOWN состояния | Runtime.recover() → read_state → VERIFYING |
-| F-06 | Запись всех state transitions в evidence ledger | Runtime._transition() → ledger.append("STATE_TRANSITION") |
-| F-07 | Hash-chain integrity для decree log | DecreeLog._verify_chain() at open, DecreeIntegrityError |
-| F-08 | Hash-chain integrity для evidence ledger | EvidenceLedger.verify() |
-| F-09 | Публикация заметок с `publish: true` только | filter_vault.py + canary test |
-| F-10 | Проверка суверенитета зависимостей | scripts/check_freedom.py (Tier 1/2/3) |
-| F-11 | JSON schema валидация Intent | schemas/intent.schema.json + jsonschema.validate() |
-| F-12 | Recovery от crash после side-effect | fault_hook + inject "after_adapter_return" |
-| F-13 | Idempotent retry по тому же idempotency_key | MemoryAdapter/SqliteRemoteAdapter dedup |
-| F-14 | Консент на high-risk Intent | Intent.requires_consent + grant_consent() |
-| F-15 | Mutation testing на critical paths | runtime/scripts/run_mutmut.sh (ADR-0010) |
-| F-16 | Sovereignty drill recovery | scripts/sovereignty_drill.py |
-| F-17 | SBOM generation на release | release.yml + CycloneDX |
-| F-18 | cosign keyless signing | release.yml + OIDC |
-| F-19 | CodeQL SAST | codeql.yml (javascript-typescript + python) |
-| F-20 | MCP adapter coverage check | `python3 -m tooling.agents.mcp verify --coverage` |
+| ID   | Требование                                            | Реализация                                                |
+| ---- | ----------------------------------------------------- | --------------------------------------------------------- |
+| F-01 | Издание декрета через UI с записью в реальный SQLite  | Decree Portal + decree-bridge.js + DecreeLog.issue()      |
+| F-02 | Получение всех декретов через UI                      | Decree Portal + bridge.getDecrees() → DecreeLog.get_all() |
+| F-03 | Проверка compliance intent'а против активных декретов | DecreeLog.check_compliance() (v0.5 phrase matching)       |
+| F-04 | Блокировка Intent при decree violation                | Runtime._advance() → DECREE_BLOCK → WAITING_FOR_HUMAN     |
+| F-05 | Восстановление Intent из UNKNOWN состояния            | Runtime.recover() → read_state → VERIFYING                |
+| F-06 | Запись всех state transitions в evidence ledger       | Runtime._transition() → ledger.append("STATE_TRANSITION") |
+| F-07 | Hash-chain integrity для decree log                   | DecreeLog._verify_chain() at open, DecreeIntegrityError   |
+| F-08 | Hash-chain integrity для evidence ledger              | EvidenceLedger.verify()                                   |
+| F-09 | Публикация заметок с `publish: true` только           | filter_vault.py + canary test                             |
+| F-10 | Проверка суверенитета зависимостей                    | scripts/check_freedom.py (Tier 1/2/3)                     |
+| F-11 | JSON schema валидация Intent                          | schemas/intent.schema.json + jsonschema.validate()        |
+| F-12 | Recovery от crash после side-effect                   | fault_hook + inject "after_adapter_return"                |
+| F-13 | Idempotent retry по тому же idempotency_key           | MemoryAdapter/SqliteRemoteAdapter dedup                   |
+| F-14 | Консент на high-risk Intent                           | Intent.requires_consent + grant_consent()                 |
+| F-15 | Mutation testing на critical paths                    | runtime/scripts/run_mutmut.sh (ADR-0010)                  |
+| F-16 | Sovereignty drill recovery                            | scripts/sovereignty_drill.py                              |
+| F-17 | SBOM generation на release                            | release.yml + CycloneDX                                   |
+| F-18 | cosign keyless signing                                | release.yml + OIDC                                        |
+| F-19 | CodeQL SAST                                           | codeql.yml (javascript-typescript + python)               |
+| F-20 | MCP adapter coverage check                            | `python3 -m tooling.agents.mcp verify --coverage`         |
 
 ---
 
 ## 6. Нефункциональные требования
 
-| ID | Требование | Метрика | Достигнуто |
-|----|-----------|---------|-----------|
-| NF-01 | Время выполнения Intent (медиана) | <100ms | ✓ (MemoryAdapter) |
-| NF-02 | UNKNOWN никогда не CONFIRMED | 0 случаев | ✓ (test_mutant_unknown_not_confirmed) |
-| NF-03 | Hash-chain integrity | fail-closed | ✓ (DecreeIntegrityError) |
-| NF-04 | Portability Python | 3.10+ | ✓ (tests on 3.12) |
-| NF-05 | Portability Node | 20+ | ✓ (Electron ^31, pnpm 9.15.9) |
-| NF-06 | Tier 3 бенефициаров в коде | 0 | ✓ (Freedom Checker PASS) |
-| NF-07 | make verify reproducibility | 22/22 exit 0 | ✓ |
-| NF-08 | Test coverage (mutation score) | ≥80% | ✓ (ADR-0010 mutmut) |
-| NF-09 | Recovery time from UNKNOWN | <1s | ✓ (in-memory) |
-| NF-10 | No corporate cloud lock-in | all data local | ✓ (markdown, SQLite) |
-| NF-11 | Reproducible CI | act -W ci.yml | ✓ (continue-on-error items skipped) |
-| NF-12 | SLSA build level | L2 (target L3) | ✓ L2 (ADR-0004), L3 target (ADR-0013) |
+| ID    | Требование                        | Метрика        | Достигнуто                            |
+| ----- | --------------------------------- | -------------- | ------------------------------------- |
+| NF-01 | Время выполнения Intent (медиана) | <100ms         | ✓ (MemoryAdapter)                     |
+| NF-02 | UNKNOWN никогда не CONFIRMED      | 0 случаев      | ✓ (test_mutant_unknown_not_confirmed) |
+| NF-03 | Hash-chain integrity              | fail-closed    | ✓ (DecreeIntegrityError)              |
+| NF-04 | Portability Python                | 3.10+          | ✓ (tests on 3.12)                     |
+| NF-05 | Portability Node                  | 20+            | ✓ (Electron ^31, pnpm 9.15.9)         |
+| NF-06 | Tier 3 бенефициаров в коде        | 0              | ✓ (Freedom Checker PASS)              |
+| NF-07 | make verify reproducibility       | 22/22 exit 0   | ✓                                     |
+| NF-08 | Test coverage (mutation score)    | ≥80%           | ✓ (ADR-0010 mutmut)                   |
+| NF-09 | Recovery time from UNKNOWN        | <1s            | ✓ (in-memory)                         |
+| NF-10 | No corporate cloud lock-in        | all data local | ✓ (markdown, SQLite)                  |
+| NF-11 | Reproducible CI                   | act -W ci.yml  | ✓ (continue-on-error items skipped)   |
+| NF-12 | SLSA build level                  | L2 (target L3) | ✓ L2 (ADR-0004), L3 target (ADR-0013) |
 
 ---
 
@@ -593,18 +585,18 @@ CREATE TABLE decrees (
 
 ## 8. Хранение данных
 
-| Что | Где | Формат |
-|-----|-----|--------|
-| Decrees | `~/.polymath-os/decrees.db` | SQLite WAL |
-| Evidence ledger | `runtime/ledger.db` (runtime-attached) | SQLite WAL |
-| Vault | `vault/60-permanent/` | markdown |
-| Garden public | `apps/garden/content/` | markdown (filtered from vault) |
-| ADRs | `docs/adr/0001-0022.md` | markdown |
-| Schemas | `runtime/schemas/{intent,capability,evidence}.schema.json` | JSON Schema |
-| Manifest | `MANIFEST.json` | JSON |
-| Lockfile | `pnpm-lock.yaml` | YAML |
-| CI config | `.github/workflows/*.yml` | YAML |
-| IaC | `infra/tofu/` | HCL (OpenTofu) |
+| Что             | Где                                                        | Формат                         |
+| --------------- | ---------------------------------------------------------- | ------------------------------ |
+| Decrees         | `~/.polymath-os/decrees.db`                                | SQLite WAL                     |
+| Evidence ledger | `runtime/ledger.db` (runtime-attached)                     | SQLite WAL                     |
+| Vault           | `vault/60-permanent/`                                      | markdown                       |
+| Garden public   | `apps/garden/content/`                                     | markdown (filtered from vault) |
+| ADRs            | `docs/adr/0001-0022.md`                                    | markdown                       |
+| Schemas         | `runtime/schemas/{intent,capability,evidence}.schema.json` | JSON Schema                    |
+| Manifest        | `MANIFEST.json`                                            | JSON                           |
+| Lockfile        | `pnpm-lock.yaml`                                           | YAML                           |
+| CI config       | `.github/workflows/*.yml`                                  | YAML                           |
+| IaC             | `infra/tofu/`                                              | HCL (OpenTofu)                 |
 
 ---
 
@@ -642,18 +634,18 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 
 ## 10. Тестирование
 
-| Уровень | Где | Количество | Покрытие |
-|---------|-----|-----------|----------|
-| Unit tests | `runtime/tests/test_*.py` | 111 | 100% state machine, recovery, durability |
-| Mutation tests | `runtime/scripts/run_mutmut.sh` | по ADR-0010 | ≥80% score (target) |
-| Experiment/ablation | `runtime/experiments/ablation.py` | B0→B3→EIR | каждое звено несущее |
-| Schema validation | `runtime/tests/test_runtime.py` | в составе | Intent/Capability/Observation/Evidence JSON Schemas |
-| Durability | `runtime/tests/test_durability.py` | crash injection | unknown/confirmed transitions |
-| Decree-runtime integration | `test_decree_runtime_integration.py` | 3 tests | prohibition blocks, no-decree allows, permission allows |
-| Decree log v0.5 | `test_decree_log.py` | 5 new tests | phrase matching LIST/PHRASE/SINGLE/DEFAULT |
-| `make verify` | `scripts/check.py` | 22 claims | open-source contract |
-| MCP adapter coverage | `tooling/agents/mcp/tests/` | 4 adapters | 16 capabilities |
-| Garden canary | `apps/garden/scripts/build_simple.sh` | 1 canary | negative test (secret leakage) |
+| Уровень                    | Где                                   | Количество      | Покрытие                                                |
+| -------------------------- | ------------------------------------- | --------------- | ------------------------------------------------------- |
+| Unit tests                 | `runtime/tests/test_*.py`             | 111             | 100% state machine, recovery, durability                |
+| Mutation tests             | `runtime/scripts/run_mutmut.sh`       | по ADR-0010     | ≥80% score (target)                                     |
+| Experiment/ablation        | `runtime/experiments/ablation.py`     | B0→B3→EIR       | каждое звено несущее                                    |
+| Schema validation          | `runtime/tests/test_runtime.py`       | в составе       | Intent/Capability/Observation/Evidence JSON Schemas     |
+| Durability                 | `runtime/tests/test_durability.py`    | crash injection | unknown/confirmed transitions                           |
+| Decree-runtime integration | `test_decree_runtime_integration.py`  | 3 tests         | prohibition blocks, no-decree allows, permission allows |
+| Decree log v0.5            | `test_decree_log.py`                  | 5 new tests     | phrase matching LIST/PHRASE/SINGLE/DEFAULT              |
+| `make verify`              | `scripts/check.py`                    | 22 claims       | open-source contract                                    |
+| MCP adapter coverage       | `tooling/agents/mcp/tests/`           | 4 adapters      | 16 capabilities                                         |
+| Garden canary              | `apps/garden/scripts/build_simple.sh` | 1 canary        | negative test (secret leakage)                          |
 
 ---
 
@@ -661,16 +653,16 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 
 ### 11.1. Workflows (`.github/workflows/`)
 
-| Workflow | File | Trigger | Purpose |
-|----------|------|---------|---------|
-| CI | `ci.yml` | push/PR to main | lint + typecheck + test + build + security + SBOM |
-| CodeQL | `codeql.yml` | push/PR | SAST (javascript-typescript + python) |
-| Release | `release.yml` | tag push | Build + SBOM + cosign-sign + GitHub Release |
-| publish-garden | `publish-garden.yml` | schedule/manual | Quartz build + GitHub Pages deploy |
-| Sovereignty Drill | `sovereignty_drill.yml` | schedule | recovery drill |
-| Cross-repo governance | `cross-repo-governance.yml` | push | inter-repo checks |
-| Triage labels | `labels.yml` | issues/PRs | auto-labeling |
-| tofu | `tofu.yml` | push to infra/ | IaC plan/apply |
+| Workflow              | File                        | Trigger         | Purpose                                           |
+| --------------------- | --------------------------- | --------------- | ------------------------------------------------- |
+| CI                    | `ci.yml`                    | push/PR to main | lint + typecheck + test + build + security + SBOM |
+| CodeQL                | `codeql.yml`                | push/PR         | SAST (javascript-typescript + python)             |
+| Release               | `release.yml`               | tag push        | Build + SBOM + cosign-sign + GitHub Release       |
+| publish-garden        | `publish-garden.yml`        | schedule/manual | Quartz build + GitHub Pages deploy                |
+| Sovereignty Drill     | `sovereignty_drill.yml`     | schedule        | recovery drill                                    |
+| Cross-repo governance | `cross-repo-governance.yml` | push            | inter-repo checks                                 |
+| Triage labels         | `labels.yml`                | issues/PRs      | auto-labeling                                     |
+| tofu                  | `tofu.yml`                  | push to infra/  | IaC plan/apply                                    |
 
 ### 11.2. Open-source contract
 
@@ -685,7 +677,6 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 ### 11.4. CI status (на v3.7.0)
 
 Все 4 check-runs на commit `6e97a5a` — GREEN:
-
 - ✓ `lint + typecheck + test + build + security`
 - ✓ `make verify (open-source contract)`
 - ✓ `Analyze (javascript-typescript)` (CodeQL)
@@ -710,13 +701,13 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 
 ### 12.3. Falsifiable claims (per ADR-0006)
 
-| Claim | Как опровергнуть | Статус |
-|-------|-----------------|--------|
-| UNKNOWN ≠ CONFIRMED | Тест `test_mutant_unknown_not_confirmed` | ✓ Не опровергнут |
-| Hash-chain integrity | Подменить `decree_hash` → `_verify_chain` raises | ✓ Fail-closed |
-| Default-deny publishing | Canary test (секрет должен быть удалён) | ✓ Удалён |
-| Recovery protocol | Inject fault after side-effect → recover() → CONFIRMED | ✓ Works |
-| Sovereignty (0 Tier 3) | `python3 scripts/check_freedom.py` | ✓ 0 found |
+| Claim                   | Как опровергнуть                                       | Статус           |
+| ----------------------- | ------------------------------------------------------ | ---------------- |
+| UNKNOWN ≠ CONFIRMED     | Тест `test_mutant_unknown_not_confirmed`               | ✓ Не опровергнут |
+| Hash-chain integrity    | Подменить `decree_hash` → `_verify_chain` raises       | ✓ Fail-closed    |
+| Default-deny publishing | Canary test (секрет должен быть удалён)                | ✓ Удалён         |
+| Recovery protocol       | Inject fault after side-effect → recover() → CONFIRMED | ✓ Works          |
+| Sovereignty (0 Tier 3)  | `python3 scripts/check_freedom.py`                     | ✓ 0 found        |
 
 ---
 
@@ -724,30 +715,30 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 
 22 архитектурных решения записаны в `docs/adr/0001-0022.md`. Каждое по шаблону Context / Decision / Consequences.
 
-| ADR | Title | Реализовано |
-|-----|-------|------------|
-| 0001 | Record architecture decisions | ✓ docs/adr/ |
-| 0002 | Sovereignty Registry | ✓ scripts/check_freedom.py |
-| 0003 | Exit gates not calendar | ✓ verify exit 0 = gate passed |
-| 0004 | SLSA L2 target | ✓ release.yml + cosign |
-| 0005 | Separate rollback targets | ✓ code/migration/data разделены |
-| 0006 | Falsifiable self-properties | ✓ UNKNOWN test, chain integrity test |
-| 0007 | Multi-agent research vs execution | partial (research only) |
-| 0008 | MCP version pin | ✓ registry.py |
-| 0009 | Default-deny vault publish | ✓ filter_vault.py + canary |
-| 0010 | Mutation testing critical paths | ✓ mutmut script |
-| 0011 | Container runtime | partial (compose files only) |
-| 0012 | SINGULYAR EIR as Layer 5 | ✓ runtime/ |
-| 0013 | SLSA L3 target | target (not yet) |
-| 0014 | WebRTC adapter as Tier 2 dep | ✓ adapters/webrtc_adapter.py |
-| 0015 | Real LLM inference in CI | target (stub used) |
-| 0016 | Self-rewriting ADR mechanism | target (not yet) |
-| 0017 | Ecosystem governance protocol | ✓ cross-repo-governance.yml |
-| 0018 | Genomic architecture | partial (manifest-driven) |
-| 0019 | Observability-first | ✓ _emit_trace() |
-| 0020 | Manifest-driven architecture | ✓ MANIFEST.json |
-| 0021 | Decree as supreme law | ✓ Runtime.set_decree_log() + DECREE_BLOCK |
-| 0022 | Decree Portal as human interface | ✓ apps/browser/decree-portal.html |
+| ADR  | Title                             | Реализовано                               |
+| ---- | --------------------------------- | ----------------------------------------- |
+| 0001 | Record architecture decisions     | ✓ docs/adr/                               |
+| 0002 | Sovereignty Registry              | ✓ scripts/check_freedom.py                |
+| 0003 | Exit gates not calendar           | ✓ verify exit 0 = gate passed             |
+| 0004 | SLSA L2 target                    | ✓ release.yml + cosign                    |
+| 0005 | Separate rollback targets         | ✓ code/migration/data разделены           |
+| 0006 | Falsifiable self-properties       | ✓ UNKNOWN test, chain integrity test      |
+| 0007 | Multi-agent research vs execution | partial (research only)                   |
+| 0008 | MCP version pin                   | ✓ registry.py                             |
+| 0009 | Default-deny vault publish        | ✓ filter_vault.py + canary                |
+| 0010 | Mutation testing critical paths   | ✓ mutmut script                           |
+| 0011 | Container runtime                 | partial (compose files only)              |
+| 0012 | SINGULYAR EIR as Layer 5          | ✓ runtime/                                |
+| 0013 | SLSA L3 target                    | target (not yet)                          |
+| 0014 | WebRTC adapter as Tier 2 dep      | ✓ adapters/webrtc_adapter.py              |
+| 0015 | Real LLM inference in CI          | target (stub used)                        |
+| 0016 | Self-rewriting ADR mechanism      | target (not yet)                          |
+| 0017 | Ecosystem governance protocol     | ✓ cross-repo-governance.yml               |
+| 0018 | Genomic architecture              | partial (manifest-driven)                 |
+| 0019 | Observability-first               | ✓_emit_trace()                            |
+| 0020 | Manifest-driven architecture      | ✓ MANIFEST.json                           |
+| 0021 | Decree as supreme law             | ✓ Runtime.set_decree_log() + DECREE_BLOCK |
+| 0022 | Decree Portal as human interface  | ✓ apps/browser/decree-portal.html         |
 
 ---
 
@@ -755,15 +746,15 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 
 7 фундаментальных декретов записаны в `~/.polymath-os/decrees.db`:
 
-| # | Category | Text | Enforced |
-|---|----------|------|----------|
-| 1 | law | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека. | ✓ philosophical |
-| 2 | law | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. | ✓ philosophical |
-| 3 | prohibition | never use Google DNS | ✓ matched_term="google" или "google dns" |
-| 4 | prohibition | never use Cloudflare | ✓ matched_term="cloudflare" |
-| 5 | prohibition | never use Chrome Firefox Edge Safari | ✓ matched_term in {chrome, firefox, edge, safari} |
-| 6 | law | UNKNOWN first-class. Таймаут ≠ failure ≠ success. | ✓ State.UNKNOWN + recovery protocol |
-| 7 | law | Default-deny. Публикуется только явное publish:true. | ✓ filter_vault.py + canary |
+| #   | Category    | Text                                                               | Enforced                                          |
+| --- | ----------- | ------------------------------------------------------------------ | ------------------------------------------------- |
+| 1   | law         | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека.        | ✓ philosophical                                   |
+| 2   | law         | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. | ✓ philosophical                                   |
+| 3   | prohibition | never use Google DNS                                               | ✓ matched_term="google" или "google dns"          |
+| 4   | prohibition | never use Cloudflare                                               | ✓ matched_term="cloudflare"                       |
+| 5   | prohibition | never use Chrome Firefox Edge Safari                               | ✓ matched_term in {chrome, firefox, edge, safari} |
+| 6   | law         | UNKNOWN first-class. Таймаут ≠ failure ≠ success.                  | ✓ State.UNKNOWN + recovery protocol               |
+| 7   | law         | Default-deny. Публикуется только явное publish:true.               | ✓ filter_vault.py + canary                        |
 
 ---
 
@@ -778,7 +769,6 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 ### 15.2. Ledger events
 
 Полный список event types:
-
 - `INTENT_ACCEPTED`, `INTENT_REJECTED`
 - `STATE_TRANSITION`
 - `EXECUTION_STARTED`, `ADAPTER_RETURN`, `ADAPTER_NOT_EXECUTED`, `ADAPTER_EXCEPTION`
@@ -808,7 +798,6 @@ DECREE_BLOCK events  : 1 (Intent 2 blocked by decree#3)
 ## 16. Финальная подпись
 
 **Система OPERATIONAL.**
-
 - 22 ADRs зафиксированы
 - 5 слоёв архитектуры реализованы
 - 7 фундаментальных декретов записаны в реальный SQLite

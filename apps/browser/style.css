@@ -69,13 +69,13 @@ button {
 .brand b {
   display: block;
   font-size: 15px;
-  letter-spacing: .16em;
+  letter-spacing: 0.16em;
 }
 .brand small {
   display: block;
   color: var(--muted);
   font-size: 9px;
-  letter-spacing: .2em;
+  letter-spacing: 0.2em;
   margin-top: 4px;
 }
 .address-wrap {
@@ -167,9 +167,6 @@ button {
   margin-left: 10px;
   color: #748278;
 }
-.tab.active .tab-dot {
-  background: var(--accent);
-}
 .tab-dot {
   display: inline-block;
   width: 6px;
@@ -179,6 +176,10 @@ button {
   margin-right: 8px;
   vertical-align: middle;
 }
+.tab.active .tab-dot {
+  background: var(--accent);
+}
+
 .new-tab {
   width: 32px;
   height: 32px;
@@ -220,7 +221,7 @@ button {
 }
 .side-label {
   font-size: 9px;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   color: #77877b;
   font-weight: 800;
   margin: 7px 10px 13px;
@@ -253,6 +254,13 @@ button {
   color: var(--accent);
   font-weight: 700;
 }
+.action-card span {
+  font-size: 21px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 11px;
+}
+
 .nav-item.active span {
   color: var(--accent);
 }
@@ -308,14 +316,14 @@ button {
 }
 .eyebrow {
   font-size: 10px;
-  letter-spacing: .17em;
+  letter-spacing: 0.17em;
   color: var(--accent);
   font-weight: 800;
   text-transform: uppercase;
 }
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(250px, .8fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 0.8fr);
   gap: 22px;
   align-items: stretch;
 }
@@ -325,7 +333,7 @@ button {
 .hero h1 {
   font-size: clamp(32px, 4vw, 57px);
   line-height: 1.03;
-  letter-spacing: -.055em;
+  letter-spacing: -0.055em;
   margin: 15px 0 19px;
   max-width: 700px;
 }
@@ -359,18 +367,20 @@ button {
   border: 1px solid #c7f36b32;
   right: -65px;
   top: -58px;
-  box-shadow: 0 0 0 22px #c7f36b08, 0 0 0 48px #c7f36b06;
+  box-shadow:
+    0 0 0 22px #c7f36b08,
+    0 0 0 48px #c7f36b06;
 }
 .hero-card .mini-label {
   font-size: 10px;
   color: var(--muted);
-  letter-spacing: .14em;
+  letter-spacing: 0.14em;
 }
 .hero-card h2 {
   font-size: 26px;
   line-height: 1.15;
   max-width: 270px;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
   z-index: 1;
 }
 .hero-card p {
@@ -408,7 +418,7 @@ button {
 .section-head h2 {
   font-size: 19px;
   margin: 0;
-  letter-spacing: -.03em;
+  letter-spacing: -0.03em;
 }
 .section-head p {
   font-size: 11px;
@@ -469,12 +479,7 @@ button {
   border-color: #647c51;
   transform: translateY(-1px);
 }
-.action-card span {
-  font-size: 21px;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 11px;
-}
+
 .principle {
   display: flex;
   gap: 14px;
@@ -498,7 +503,7 @@ button {
 }
 .page-title {
   font-size: 34px;
-  letter-spacing: -.045em;
+  letter-spacing: -0.045em;
   margin: 9px 0 10px;
 }
 .page-lead {
@@ -678,7 +683,7 @@ button {
   left: 3px;
   border-radius: 50%;
   background: #d5ded7;
-  transition: .15s;
+  transition: 0.15s;
 }
 .switch:checked {
   background: var(--accent2);
@@ -735,7 +740,7 @@ button {
   gap: 12px;
   color: #738176;
   font-size: 9px;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
 }
 .toast {
   position: fixed;
@@ -751,7 +756,7 @@ button {
   font-size: 12px;
   font-weight: 700;
   box-shadow: 0 12px 35px #0005;
-  transition: .2s;
+  transition: 0.2s;
   z-index: 20;
   max-width: 90vw;
 }

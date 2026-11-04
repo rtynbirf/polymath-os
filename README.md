@@ -23,15 +23,15 @@
 
 ## Layers
 
-| Layer | What | Code |
-|---|---|---|
-| **Decree Log** (supreme) | Human's word = law. SQLite, hash-chained, append-only. Enforced BEFORE policy. | `runtime/src/decree_log.py` + `apps/browser/decree-portal.html` |
-| **Layer 5** | Execution Kernel — preserves intent across executor changes, never claims success without verified state, decree gate above policy | `runtime/` (SINGULYAR EIR v0.6) |
-| **Layer 4** | DevEx / CI / IaC / Dotfiles / Observability | `infra/`, `Makefile`, `.github/workflows/`, `.devcontainer/` |
-| **Layer 3** | Second Brain (PKM) — markdown-first, git-synced, AI-augmented | `vault/` (private, canary-tested for default-deny publish) |
-| **Layer 2** | AI Workflows — MCP-native (version-pinned, 4 adapters) | `tooling/agents/mcp/` |
-| **Layer 1** | Repository Structure — pnpm + Turborepo + Changesets + CODEOWNERS | repo root |
-| **Cross-cutting** | Security (cosign/SLSA/SBOM) + OTel + git + token hygiene | everywhere |
+| Layer                    | What                                                                                                                               | Code                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Decree Log** (supreme) | Human's word = law. SQLite, hash-chained, append-only. Enforced BEFORE policy.                                                     | `runtime/src/decree_log.py` + `apps/browser/decree-portal.html` |
+| **Layer 5**              | Execution Kernel — preserves intent across executor changes, never claims success without verified state, decree gate above policy | `runtime/` (SINGULYAR EIR v0.6)                                 |
+| **Layer 4**              | DevEx / CI / IaC / Dotfiles / Observability                                                                                        | `infra/`, `Makefile`, `.github/workflows/`, `.devcontainer/`    |
+| **Layer 3**              | Second Brain (PKM) — markdown-first, git-synced, AI-augmented                                                                      | `vault/` (private, canary-tested for default-deny publish)      |
+| **Layer 2**              | AI Workflows — MCP-native (version-pinned, 4 adapters)                                                                             | `tooling/agents/mcp/`                                           |
+| **Layer 1**              | Repository Structure — pnpm + Turborepo + Changesets + CODEOWNERS                                                                  | repo root                                                       |
+| **Cross-cutting**        | Security (cosign/SLSA/SBOM) + OTel + git + token hygiene                                                                           | everywhere                                                      |
 
 For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**28 ADRs**: 0001-0022).
 
@@ -77,31 +77,31 @@ If `make verify` exits 0 — every claim below holds on your machine. That's the
 
 Every claim in this repo is backed by a test or command. `make verify` runs all **23 checks** (was 12 in v1.0, was 22 in v3.6.0, +1 token hygiene in v3.8.0).
 
-| # | Claim | How to verify | Status |
-|---|---|---|---|
-| 01 | SINGULYAR EIR passes all 220 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓ |
-| 02 | JSON Schemas (Intent / Capability / Evidence) parse and validate | `python scripts/check.py` (check 02) | ✓ |
-| 03 | 28 ADRs (0001-0028) all present | `ls docs/adr/` | ✓ |
-| 04 | Every ADR follows template (Date/Status/Context/Decision/Consequences) | `python scripts/check.py` (check 04) | ✓ |
-| 05 | `AUDIT_RESPONSE.md` cross-references every ADR | `python scripts/check.py` (check 05) | ✓ |
-| 06 | Sovereignty Registry covers every `package.json` dependency | `python scripts/check.py` (check 06) | ✓ |
-| 07 | RUNBOOK is hardened (preconditions + result check + ⛔ irreversible markers) | `python scripts/check.py` (check 07) | ✓ |
-| 08 | LICENSE = MIT | `cat LICENSE` | ✓ |
-| 09 | `ARCHITECTURE.md` documents 5+1 layers + Sovereignty Registry + falsifiable self-* | `python scripts/check.py` (check 09) | ✓ |
-| 10 | `runtime/src/*.py` compile (Python syntax check) | `python scripts/check.py` (check 10) | ✓ |
-| 11 | No `__pycache__` or `*.pyc` in tree | `python scripts/check.py` (check 11) | ✓ |
-| 12 | CI workflow runs pnpm + turbo + gitleaks | `python scripts/check.py` (check 12) | ✓ |
-| 13 | Pattern: manifest exclusivity (S17) | `python scripts/check.py` (check 13) | ✓ |
-| 14 | Pattern: counter-from-source (S2) | `python scripts/check.py` (check 14) | ✓ |
-| 15 | Pattern: CSP no scheme-only connect-src (S26/S41) | `python scripts/check.py` (check 15) | ✓ |
-| 16 | Pattern: sovereignty drill runner exists (ADR-0002) | `python scripts/check.py` (check 16) | ✓ |
-| 17 | Pattern: sequential triage rule-layer-first (S75) | `python scripts/check.py` (check 17) | ✓ |
-| 18 | Pattern: no silent SW registration failure (S48) | `python scripts/check.py` (check 18) | ✓ |
-| 19 | Pattern: storage eviction with protected-key Set (S30/S31) | `python scripts/check.py` (check 19) | ✓ |
-| 20 | Pattern: identity backup documented (S37) | `python scripts/check.py` (check 20) | ✓ |
-| 21 | Freedom: zero Tier 3 benefactors in code | `python scripts/check.py` (check 21) | ✓ |
-| 22 | MANIFEST.json exists + valid (ADR-0020) | `python scripts/check.py` (check 22) | ✓ |
-| 23 | **Token hygiene: no plaintext PATs in code (v0.6, ADR-0021 enforcement)** | `python scripts/check.py` (check 23) | ✓ |
+| #   | Claim                                                                                                                         | How to verify                           | Status |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
+| 01  | SINGULYAR EIR passes all 220 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓      |
+| 02  | JSON Schemas (Intent / Capability / Evidence) parse and validate                                                              | `python scripts/check.py` (check 02)    | ✓      |
+| 03  | 28 ADRs (0001-0028) all present                                                                                               | `ls docs/adr/`                          | ✓      |
+| 04  | Every ADR follows template (Date/Status/Context/Decision/Consequences)                                                        | `python scripts/check.py` (check 04)    | ✓      |
+| 05  | `AUDIT_RESPONSE.md` cross-references every ADR                                                                                | `python scripts/check.py` (check 05)    | ✓      |
+| 06  | Sovereignty Registry covers every `package.json` dependency                                                                   | `python scripts/check.py` (check 06)    | ✓      |
+| 07  | RUNBOOK is hardened (preconditions + result check + ⛔ irreversible markers)                                                  | `python scripts/check.py` (check 07)    | ✓      |
+| 08  | LICENSE = MIT                                                                                                                 | `cat LICENSE`                           | ✓      |
+| 09  | `ARCHITECTURE.md` documents 5+1 layers + Sovereignty Registry + falsifiable self-*                                            | `python scripts/check.py` (check 09)    | ✓      |
+| 10  | `runtime/src/*.py` compile (Python syntax check)                                                                              | `python scripts/check.py` (check 10)    | ✓      |
+| 11  | No `__pycache__` or `*.pyc` in tree                                                                                           | `python scripts/check.py` (check 11)    | ✓      |
+| 12  | CI workflow runs pnpm + turbo + gitleaks                                                                                      | `python scripts/check.py` (check 12)    | ✓      |
+| 13  | Pattern: manifest exclusivity (S17)                                                                                           | `python scripts/check.py` (check 13)    | ✓      |
+| 14  | Pattern: counter-from-source (S2)                                                                                             | `python scripts/check.py` (check 14)    | ✓      |
+| 15  | Pattern: CSP no scheme-only connect-src (S26/S41)                                                                             | `python scripts/check.py` (check 15)    | ✓      |
+| 16  | Pattern: sovereignty drill runner exists (ADR-0002)                                                                           | `python scripts/check.py` (check 16)    | ✓      |
+| 17  | Pattern: sequential triage rule-layer-first (S75)                                                                             | `python scripts/check.py` (check 17)    | ✓      |
+| 18  | Pattern: no silent SW registration failure (S48)                                                                              | `python scripts/check.py` (check 18)    | ✓      |
+| 19  | Pattern: storage eviction with protected-key Set (S30/S31)                                                                    | `python scripts/check.py` (check 19)    | ✓      |
+| 20  | Pattern: identity backup documented (S37)                                                                                     | `python scripts/check.py` (check 20)    | ✓      |
+| 21  | Freedom: zero Tier 3 benefactors in code                                                                                      | `python scripts/check.py` (check 21)    | ✓      |
+| 22  | MANIFEST.json exists + valid (ADR-0020)                                                                                       | `python scripts/check.py` (check 22)    | ✓      |
+| 23  | **Token hygiene: no plaintext PATs in code (v0.6, ADR-0021 enforcement)**                                                     | `python scripts/check.py` (check 23)    | ✓      |
 
 **To reproduce**: clone this repo, run `make verify`. You will see the same 24/24 PASS result.
 
@@ -118,23 +118,23 @@ The 7 foundational decrees are issued once via `python3 ~/scripts/issue_decrees.
 
 All decrees are **append-only, immutable, hash-chained**. Superseded decrees remain in the log for audit but `get_active_laws()` skips them.
 
-| # | Category | Text |
-|---|----------|------|
-| 1 | law | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека. |
-| 2 | law | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. |
-| 3 | prohibition | never use Google DNS |
-| 4 | prohibition | never use Cloudflare |
-| 5 | prohibition | never use Chrome Firefox Edge Safari |
-| 6 | law | UNKNOWN first-class. Таймаут ≠ failure ≠ success. |
-| 7 | law | Default-deny. Публикуется только явное publish:true. |
+| #   | Category    | Text                                                               |
+| --- | ----------- | ------------------------------------------------------------------ |
+| 1   | law         | ЧЕЛОВЕК = PID=1. Каждый инструмент — fork-exec от человека.        |
+| 2   | law         | PAROLE > LANGUE. Индивидуальное слово выше коллективного договора. |
+| 3   | prohibition | never use Google DNS                                               |
+| 4   | prohibition | never use Cloudflare                                               |
+| 5   | prohibition | never use Chrome Firefox Edge Safari                               |
+| 6   | law         | UNKNOWN first-class. Таймаут ≠ failure ≠ success.                  |
+| 7   | law         | Default-deny. Публикуется только явное publish:true.               |
 
 ### v0.6 Decree matching — three generations, all backward compatible
 
-| Generation | Algorithm | Example |
-|------------|-----------|---------|
-| v0.4 (initial) | Naive substring match | `chrome` matched `chromebook` (FALSE POSITIVE) |
-| v0.5 (v3.7.0) | Phrase classification (LIST/PHRASE/SINGLE/DEFAULT) | `Google DNS` → block on `google dns` OR `google` head noun |
-| v0.6 (v3.8.0) | Word-boundary regex `\b{term}\b` + scope filter + regex parser | `chrome` no longer matches `chromebook`; `never install/deploy/run/rely on` recognized |
+| Generation     | Algorithm                                                      | Example                                                                                |
+| -------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| v0.4 (initial) | Naive substring match                                          | `chrome` matched `chromebook` (FALSE POSITIVE)                                         |
+| v0.5 (v3.7.0)  | Phrase classification (LIST/PHRASE/SINGLE/DEFAULT)             | `Google DNS` → block on `google dns` OR `google` head noun                             |
+| v0.6 (v3.8.0)  | Word-boundary regex `\b{term}\b` + scope filter + regex parser | `chrome` no longer matches `chromebook`; `never install/deploy/run/rely on` recognized |
 
 ### Decree enforcement on real intents
 
@@ -171,7 +171,7 @@ $ node apps/browser/decree-bridge.js check "buy a chromebook"
 
 ## Why this exists
 
-This repo is the answer to: *"Какое новое свойство возникает, когда git, AI-agents, base знаний, CI/CD и recovery соединены именно так — и как доказать, что это не просто красивое название?"*
+This repo is the answer to: _"Какое новое свойство возникает, когда git, AI-agents, base знаний, CI/CD и recovery соединены именно так — и как доказать, что это не просто красивое название?"_
 
 The answer is **Layer 5 (SINGULYAR EIR)** — an execution kernel that:
 - preserves a person's declared intent across interchangeable execution methods
@@ -183,36 +183,36 @@ Emergence here is a **falsifiable hypothesis**, not a slogan. The ablation ladde
 
 ## Documentation map
 
-| Document | Purpose |
-|---|---|
-| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Mental model: 5+1 layers + Sovereignty Registry + falsifiable self-* + Decree as supreme law |
-| [`ТЗ_Polymath_OS_v3.7.0.md`](./ТЗ_Polymath_OS_v3.7.0.md) | **Consolidated ТЗ (technical spec, 16 sections, 47.9 KB)** — comprehensive |
-| [`ROADMAP_v3.7.0.md`](./ROADMAP_v3.7.0.md) | **Consolidated roadmap (history of 28 releases + 30/90/180/365-day vision)** |
-| [`TZ.md`](./TZ.md) | Original technical spec (Layer 1-4 view, pre-decree) |
-| [`ROADMAP.md`](./ROADMAP.md) | Phased plan (Phase 0-4, exit-gate based) |
-| [`CHANGELOG.md`](./CHANGELOG.md) | Release history (v1.0.0 → v3.8.0, all changes logged) |
-| [`MANIFEST.json`](./MANIFEST.json) | Root manifest (ADR-0020 — manifest-driven architecture) |
-| [`docs/AUDIT_RESPONSE.md`](./docs/AUDIT_RESPONSE.md) | Audit findings A1-A11 → ADR → action mapping |
-| [`docs/adr/`](./docs/adr) | **28 ADRs (0001-0028)** — every architectural decision |
-| [`docs/MANIFESTO.md`](./docs/MANIFESTO.md) | System manifesto (4 theses: PID=1, PAROLE>LANGUE, LFS, security context) |
-| [`docs/SOVEREIGNTY_CONTRACT.md`](./docs/SOVEREIGNTY_CONTRACT.md) | Sovereignty contract (Tier 1/2/3 dependency classification) |
-| [`docs/01-principles.md`](./docs/01-principles.md) | 18 principles (constitution) |
-| [`docs/02-repo-structure.md`](./docs/02-repo-structure.md) | Layer 1 details |
-| [`docs/03-ai-workflows.md`](./docs/03-ai-workflows.md) | Layer 2 details |
-| [`docs/04-second-brain.md`](./docs/04-second-brain.md) | Layer 3 details |
-| [`docs/05-devex-ci.md`](./docs/05-devex-ci.md) | Layer 4 details |
-| [`docs/runbook/RUNBOOK.md`](./docs/runbook/RUNBOOK.md) | Hardened operations runbook |
-| [`runtime/README.md`](./runtime/README.md) | Layer 5: SINGULYAR EIR v0.6 |
-| [`runtime/docs/TECHNICAL_SPEC.md`](./runtime/docs/TECHNICAL_SPEC.md) | EIR technical spec |
-| [`runtime/docs/DECREE_PRODUCTION_DEMO.md`](./runtime/docs/DECREE_PRODUCTION_DEMO.md) | Production decree demo (v3.7.0+) |
-| [`runtime/docs/EXPERIMENT_RESULTS.md`](./runtime/docs/EXPERIMENT_RESULTS.md) | Ablation B0→B3→EIR |
-| [`runtime/docs/LIMITATIONS.md`](./runtime/docs/LIMITATIONS.md) | What's NOT proven (honesty) |
-| [`runtime/docs/THREAT_MODEL.md`](./runtime/docs/THREAT_MODEL.md) | Threat model |
-| [`runtime/docs/AUDIT_POLYMATH.md`](./runtime/docs/AUDIT_POLYMATH.md) | The audit that drove the fixes |
-| [`apps/browser/decree-portal.html`](./apps/browser/decree-portal.html) | Decree Portal UI (HTML/JS, browser + Electron) |
-| [`apps/browser/decree-bridge.js`](./apps/browser/decree-bridge.js) | Node bridge: HTML UI ↔ Python DecreeLog ↔ SQLite |
-| [`apps/browser/electron/`](./apps/browser/electron/) | Electron desktop wrapper (v3.7.0+) |
-| [`SECURITY.md`](./SECURITY.md) | Security policy + **Token hygiene best practices (v3.8.0)** |
+| Document                                                                             | Purpose                                                                                      |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [`ARCHITECTURE.md`](./ARCHITECTURE.md)                                               | Mental model: 5+1 layers + Sovereignty Registry + falsifiable self-* + Decree as supreme law |
+| [`ТЗ_Polymath_OS_v3.7.0.md`](./ТЗ_Polymath_OS_v3.7.0.md)                             | **Consolidated ТЗ (technical spec, 16 sections, 47.9 KB)** — comprehensive                   |
+| [`ROADMAP_v3.7.0.md`](./ROADMAP_v3.7.0.md)                                           | **Consolidated roadmap (history of 28 releases + 30/90/180/365-day vision)**                 |
+| [`TZ.md`](./TZ.md)                                                                   | Original technical spec (Layer 1-4 view, pre-decree)                                         |
+| [`ROADMAP.md`](./ROADMAP.md)                                                         | Phased plan (Phase 0-4, exit-gate based)                                                     |
+| [`CHANGELOG.md`](./CHANGELOG.md)                                                     | Release history (v1.0.0 → v3.8.0, all changes logged)                                        |
+| [`MANIFEST.json`](./MANIFEST.json)                                                   | Root manifest (ADR-0020 — manifest-driven architecture)                                      |
+| [`docs/AUDIT_RESPONSE.md`](./docs/AUDIT_RESPONSE.md)                                 | Audit findings A1-A11 → ADR → action mapping                                                 |
+| [`docs/adr/`](./docs/adr)                                                            | **28 ADRs (0001-0028)** — every architectural decision                                       |
+| [`docs/MANIFESTO.md`](./docs/MANIFESTO.md)                                           | System manifesto (4 theses: PID=1, PAROLE>LANGUE, LFS, security context)                     |
+| [`docs/SOVEREIGNTY_CONTRACT.md`](./docs/SOVEREIGNTY_CONTRACT.md)                     | Sovereignty contract (Tier 1/2/3 dependency classification)                                  |
+| [`docs/01-principles.md`](./docs/01-principles.md)                                   | 18 principles (constitution)                                                                 |
+| [`docs/02-repo-structure.md`](./docs/02-repo-structure.md)                           | Layer 1 details                                                                              |
+| [`docs/03-ai-workflows.md`](./docs/03-ai-workflows.md)                               | Layer 2 details                                                                              |
+| [`docs/04-second-brain.md`](./docs/04-second-brain.md)                               | Layer 3 details                                                                              |
+| [`docs/05-devex-ci.md`](./docs/05-devex-ci.md)                                       | Layer 4 details                                                                              |
+| [`docs/runbook/RUNBOOK.md`](./docs/runbook/RUNBOOK.md)                               | Hardened operations runbook                                                                  |
+| [`runtime/README.md`](./runtime/README.md)                                           | Layer 5: SINGULYAR EIR v0.6                                                                  |
+| [`runtime/docs/TECHNICAL_SPEC.md`](./runtime/docs/TECHNICAL_SPEC.md)                 | EIR technical spec                                                                           |
+| [`runtime/docs/DECREE_PRODUCTION_DEMO.md`](./runtime/docs/DECREE_PRODUCTION_DEMO.md) | Production decree demo (v3.7.0+)                                                             |
+| [`runtime/docs/EXPERIMENT_RESULTS.md`](./runtime/docs/EXPERIMENT_RESULTS.md)         | Ablation B0→B3→EIR                                                                           |
+| [`runtime/docs/LIMITATIONS.md`](./runtime/docs/LIMITATIONS.md)                       | What's NOT proven (honesty)                                                                  |
+| [`runtime/docs/THREAT_MODEL.md`](./runtime/docs/THREAT_MODEL.md)                     | Threat model                                                                                 |
+| [`runtime/docs/AUDIT_POLYMATH.md`](./runtime/docs/AUDIT_POLYMATH.md)                 | The audit that drove the fixes                                                               |
+| [`apps/browser/decree-portal.html`](./apps/browser/decree-portal.html)               | Decree Portal UI (HTML/JS, browser + Electron)                                               |
+| [`apps/browser/decree-bridge.js`](./apps/browser/decree-bridge.js)                   | Node bridge: HTML UI ↔ Python DecreeLog ↔ SQLite                                             |
+| [`apps/browser/electron/`](./apps/browser/electron/)                                 | Electron desktop wrapper (v3.7.0+)                                                           |
+| [`SECURITY.md`](./SECURITY.md)                                                       | Security policy + **Token hygiene best practices (v3.8.0)**                                  |
 
 ## Contributing
 
@@ -227,7 +227,6 @@ MIT — see [`LICENSE`](./LICENSE). Take it. Use it. Fork it. The sovereign core
 ## Origin
 
 This repo was built through an iterative dialogue:
-
 1. **v0.1**: User asked for 100 file formats → 100 messengers → 100 portable apps (philosophical exploration of "human = system")
 2. **v0.2**: User delegated polymath audit → 4 parallel research agents → synthesis into Polymath OS (4 layers + cross-cutting)
 3. **v0.3-v1.1.0**: SINGULYAR EIR v0.3 audit applied → 11 audit findings fixed via 12 ADRs → SINGULYAR integrated as Layer 5 → repo promoted from "report" to "open-source ideal repo" with `make verify` contract

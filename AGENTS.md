@@ -63,6 +63,7 @@ make clean       # rm node_modules/dist/.next/.turbo/target/__pycache__
 ## Конвенции
 
 ### Файлы
+
 - **Не коммитить**: `.env`, `.env.local` (используй SOPS+age per ADR-0002 Tier 1);
   `*.age` private keys, `age-identity.txt`; `vault/.obsidian/workspace*`;
   `__pycache__/`, `*.pyc`; `node_modules/`, `dist/`, `.turbo/`, `.next/`
@@ -70,11 +71,13 @@ make clean       # rm node_modules/dist/.next/.turbo/target/__pycache__
 - **Conventional Commits**: trunk-based, ≤24h feature branch, squash-merge
 
 ### Добавление новой зависимости
+
 1. Добавить в `package.json` (для JS/TS) или `pyproject.toml` (для Python)
 2. Проверить ADR-0002 Tier (sovereign core? rented? closed format?)
 3. `make verify` check 06 (Sovereignty Registry covers package.json deps) должен пройти
 
 ### Добавление нового ADR
+
 1. Копировать `docs/adr/template.md` → `docs/adr/NNNN-<kebab-slug>.md`
 2. Заполнить Date, Status (Proposed), Context, Decision, Consequences
 3. Добавить строку в `docs/AUDIT_RESPONSE.md` (cross-reference)
@@ -82,6 +85,7 @@ make clean       # rm node_modules/dist/.next/.turbo/target/__pycache__
 5. Per ADR-0016: если это мета-ADR (изменяет процесс ADR), явно указать
 
 ### Добавление нового адаптера (SINGULYAR EIR consumer)
+
 1. Создать `runtime/src/adapters/<name>_adapter.py`
 2. Subclass `singulyar_runtime.Adapter`
 3. Реализовать `execute(intent, key)` + `read_state(intent, key) → Observation`
@@ -94,12 +98,14 @@ make clean       # rm node_modules/dist/.next/.turbo/target/__pycache__
 10. `cd runtime && python3 scripts/check.py` должен пройти
 
 ### Запуск sovereignty drill
+
 ```bash
 python3 scripts/sovereignty_drill.py --service sentry
 # JSON: {verify_pass, runtime_tests_pass, recovery_time_ms}
 ```
 
 ### Запуск multi-agent demo
+
 ```bash
 PYTHONPATH=runtime/src:runtime/src/adapters python3 scripts/multi_agent_demo.py -n 5
 # JSON: {agent_count, final_ledger_event_count, duplicate_writes, lead_violations}
@@ -107,27 +113,27 @@ PYTHONPATH=runtime/src:runtime/src/adapters python3 scripts/multi_agent_demo.py 
 
 ## Реальные consumers SINGULYAR EIR ядра
 
-| Adapter | Транспорт | Risk | Offline | Source |
-|---|---|---|---|---|
-| LLMLocalAdapter | Offline LLM (rule-layer deterministic) | low-medium | True | singulyar ·21 ОБЩЕНИЕ |
-| HTTPAdapter | REST request/response | low-medium | False | standard REST |
-| WebRTCAdapter | Air-gapped P2P (no STUN/TURN) | low-medium | True | singulyar ·17 ЗАЛ |
+| Adapter         | Транспорт                              | Risk       | Offline | Source                |
+| --------------- | -------------------------------------- | ---------- | ------- | --------------------- |
+| LLMLocalAdapter | Offline LLM (rule-layer deterministic) | low-medium | True    | singulyar ·21 ОБЩЕНИЕ |
+| HTTPAdapter     | REST request/response                  | low-medium | False   | standard REST         |
+| WebRTCAdapter   | Air-gapped P2P (no STUN/TURN)          | low-medium | True    | singulyar ·17 ЗАЛ     |
 
 Все 3 реализуют один контракт: `execute(intent, key)` + `read_state(intent, key) → Observation tri-state`.
 
 ## 9 паттернов из AUDIT_SINGULYAR (machine-checked)
 
-| # | Паттерн | CI check | Status |
-|---|---|---|---|
-| 1 | Manifest exclusivity | check.py #13 | dormant |
-| 2 | Counter-from-source | check.py #14 | dormant |
-| 3 | CSP no scheme-only connect-src | check.py #15 | dormant |
-| 4 | Sovereignty drill runner exists | check.py #16 | ACTIVE |
-| 5 | Sequential triage rule-layer-first | check.py #17 | ACTIVE |
-| 6 | No silent SW registration failure | check.py #18 | dormant |
-| 7 | Storage eviction with protected-key Set | check.py #19 | dormant |
-| 8 | Identity backup documented | check.py #20 | dormant |
-| 9 | Sovereignty drill in CI weekly | sovereignty_drill.yml cron | ACTIVE |
+| #   | Паттерн                                 | CI check                   | Status  |
+| --- | --------------------------------------- | -------------------------- | ------- |
+| 1   | Manifest exclusivity                    | check.py #13               | dormant |
+| 2   | Counter-from-source                     | check.py #14               | dormant |
+| 3   | CSP no scheme-only connect-src          | check.py #15               | dormant |
+| 4   | Sovereignty drill runner exists         | check.py #16               | ACTIVE  |
+| 5   | Sequential triage rule-layer-first      | check.py #17               | ACTIVE  |
+| 6   | No silent SW registration failure       | check.py #18               | dormant |
+| 7   | Storage eviction with protected-key Set | check.py #19               | dormant |
+| 8   | Identity backup documented              | check.py #20               | dormant |
+| 9   | Sovereignty drill in CI weekly          | sovereignty_drill.yml cron | ACTIVE  |
 
 ## Честные границы
 

@@ -1,4 +1,5 @@
 ---
+
 title: "Polymath OS Garden"
 description: "Public digital garden — atomic permanent notes exported from the Polymath OS second brain. Markdown-first, default-deny publish (ADR-0009)."
 publish: true

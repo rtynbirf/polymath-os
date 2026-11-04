@@ -11,14 +11,14 @@
 
 Слои:
 
-| Layer | Что | Где |
-|---|---|---|
-| **5** | Execution Kernel — SINGULYAR EIR v0.6.1 | `runtime/` |
-| **4** | DevEx / CI / IaC / Dotfiles / Observability | `Makefile`, `flake.nix`, `.github/workflows/` |
-| **3** | Second Brain (PKM) — markdown-first, git-synced | `vault/` (private, gitignored) |
-| **2** | AI Workflows — MCP-native, version-pinned | `tooling/agents/` (to be created) |
-| **1** | Repository Structure — pnpm + Turborepo + Changesets | repo root, `package.json` |
-| **cross-cutting** | Security (cosign/SLSA/SBOM) + OTel + git | everywhere |
+| Layer             | Что                                                  | Где                                           |
+| ----------------- | ---------------------------------------------------- | --------------------------------------------- |
+| **5**             | Execution Kernel — SINGULYAR EIR v0.6.1              | `runtime/`                                    |
+| **4**             | DevEx / CI / IaC / Dotfiles / Observability          | `Makefile`, `flake.nix`, `.github/workflows/` |
+| **3**             | Second Brain (PKM) — markdown-first, git-synced      | `vault/` (private, gitignored)                |
+| **2**             | AI Workflows — MCP-native, version-pinned            | `tooling/agents/` (to be created)             |
+| **1**             | Repository Structure — pnpm + Turborepo + Changesets | repo root, `package.json`                     |
+| **cross-cutting** | Security (cosign/SLSA/SBOM) + OTel + git             | everywhere                                    |
 
 Философия: **человек = PID=1 = processor + сумма частей**. Любой инструмент —
 fork-exec от человека, заменяемый через ADR + migration plan (Принцип 18).
@@ -39,7 +39,6 @@ make verify   # запускает 12 проверок через scripts/check.
 остаётся зелёным. Скрипт `scripts/check.py` сам по себе валидируется в check 12.
 
 `make verify` делает 12 проверок (см. `scripts/check.py`):
-
 1. SINGULYAR EIR — все 40 тестов в `runtime/` проходят
 2. JSON Schemas (Intent / Capability / Evidence) валидны
 3. ADRs 0001-0012 присутствуют
@@ -60,7 +59,6 @@ make verify   # запускает 12 проверок через scripts/check.
 ## ADRs — читать в этом порядке
 
 `docs/adr/` — 28 ADRs (0001-0028). Если времени мало, читай эти 4 первыми:
-
 1. **ADR-0002** Sovereignty Registry — Tier 1+2+3 реестр зависимостей. Основа
    для всех решений «что добавить в flake.nix», «что взять в SaaS».
 2. **ADR-0011** Container runtime — colima (macOS) / podman (Linux) /
@@ -79,20 +77,20 @@ ADR — immutable после Accepted. Новые решения → superseding
 
 ## Файловые конвенции
 
-| Путь | Назначение |
-|---|---|
-| `runtime/` | Layer 5: SINGULYAR EIR v0.6.1. Python stdlib only, без deps. |
-| `scripts/check.py` | 12 проверок `make verify`. |
-| `Makefile` | Single entry point (`make verify`, `make bootstrap`, `make dev`). |
-| `flake.nix` | Reproducible dev-shell (Tier 1+2 tools, см. `docs/05-devex-ci.md`). |
-| `.envrc` | direnv hook (`use flake` + `.env.local`). |
-| `docs/adr/` | 28 ADRs + `template.md`. |
-| `docs/0N-*.md` | Документация по слоям (01-principles, 02-repo-structure, etc). |
-| `.github/workflows/ci.yml` | CI: verify → lint → typecheck → test → build → security. |
-| `.github/workflows/` | Reusable workflows. |
-| `apps/`, `packages/`, `tooling/` | pnpm workspace packages (to be created). |
-| `vault/` | Second Brain (gitignored, private). |
-| `infra/` | OpenTofu IaC (to be created). |
+| Путь                             | Назначение                                                          |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `runtime/`                       | Layer 5: SINGULYAR EIR v0.6.1. Python stdlib only, без deps.        |
+| `scripts/check.py`               | 12 проверок `make verify`.                                          |
+| `Makefile`                       | Single entry point (`make verify`, `make bootstrap`, `make dev`).   |
+| `flake.nix`                      | Reproducible dev-shell (Tier 1+2 tools, см. `docs/05-devex-ci.md`). |
+| `.envrc`                         | direnv hook (`use flake` + `.env.local`).                           |
+| `docs/adr/`                      | 28 ADRs + `template.md`.                                            |
+| `docs/0N-*.md`                   | Документация по слоям (01-principles, 02-repo-structure, etc).      |
+| `.github/workflows/ci.yml`       | CI: verify → lint → typecheck → test → build → security.            |
+| `.github/workflows/`             | Reusable workflows.                                                 |
+| `apps/`, `packages/`, `tooling/` | pnpm workspace packages (to be created).                            |
+| `vault/`                         | Second Brain (gitignored, private).                                 |
+| `infra/`                         | OpenTofu IaC (to be created).                                       |
 
 **Не коммитить:**
 - `.env`, `.env.local` (secrets) → SOPS+age (ADR-0002 Tier 1) для git-ops.

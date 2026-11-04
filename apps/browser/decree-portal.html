@@ -50,22 +50,22 @@ background:var(--panel);max-height:400px;overflow:auto}
 Декрет append-only: невозможно изменить, невозможно удалить. Как только записан — навсегда.</p>
 
 <div class="decree-cat">
-<button class="active" data-cat="directive">📋 Директива</button>
-<button data-cat="law">⚖️ Закон</button>
-<button data-cat="prohibition">⛔ Запрет</button>
-<button data-cat="permission">✅ Разрешение</button>
-<button data-cat="observation">👁 Наблюдение</button>
+<button type="button" class="active" data-cat="directive">📋 Директива</button>
+<button type="button" data-cat="law">⚖️ Закон</button>
+<button type="button" data-cat="prohibition">⛔ Запрет</button>
+<button type="button" data-cat="permission">✅ Разрешение</button>
+<button type="button" data-cat="observation">👁 Наблюдение</button>
 </div>
 
 <div class="decree-class" title="Классификация: кто из агентов увидит этот декрет. Public — все. Internal — только внутренние агенты. Secret — только агенты с clearance=secret (per ADR-0029 §7).">
-<button class="active" data-class="public">🌐 Public</button>
-<button data-class="internal">🔒 Internal</button>
-<button data-class="secret">🔐 Secret</button>
+<button type="button" class="active" data-class="public">🌐 Public</button>
+<button type="button" data-class="internal">🔒 Internal</button>
+<button type="button" data-class="secret">🔐 Secret</button>
 </div>
 
 <textarea id="decreeInput" class="decree-textarea" placeholder="Например: никогда не использовать Google DNS" maxlength="5000"></textarea>
 <div style="margin-top:12px">
-<button class="button primary" id="issueBtn" style="font-size:18px;padding:12px 32px">⚡ ИЗДАТЬ ДЕКРЕТ</button>
+<button type="button" class="button primary" id="issueBtn" style="font-size:18px;padding:12px 32px">⚡ ИЗДАТЬ ДЕКРЕТ</button>
 </div>
 
 <div id="decreeLog" class="decree-log">
@@ -77,7 +77,7 @@ background:var(--panel);max-height:400px;overflow:auto}
 <div id="agentsSection" style="margin-top:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
 <h2 style="font-size:17px;margin:0">🤖 Зарегистрированные агенты <span id="agentsCount" style="color:var(--muted);font-size:14px;font-weight:normal"></span></h2>
-<button class="button" id="refreshAgentsBtn" style="font-size:13px;padding:6px 12px">Обновить</button>
+<button type="button" class="button" id="refreshAgentsBtn" style="font-size:13px;padding:6px 12px">Обновить</button>
 </div>
 <div id="agentsList" style="display:grid;grid-template-columns:1fr;gap:8px">
 <div style="color:var(--muted);text-align:center;padding:16px">Загрузка агентов...</div>
@@ -114,13 +114,13 @@ const STORAGE_KEY='singulyar.decree.portal.v1';
 
 document.querySelectorAll('.decree-cat button').forEach(b=>{
 b.onclick=()=>{
-document.querySelectorAll('.decree-cat button').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.decree-cat button').forEach(x=>{x.classList.remove('active')});
 b.classList.add('active');category=b.dataset.cat;
 };});
 
 document.querySelectorAll('.decree-class button').forEach(b=>{
 b.onclick=()=>{
-document.querySelectorAll('.decree-class button').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.decree-class button').forEach(x=>{x.classList.remove('active')});
 b.classList.add('active');classification=b.dataset.class;
 };});
 
@@ -151,7 +151,7 @@ const bridge=getBridge();
 if(bridge){
 try{
 const decrees=await bridge.getDecrees();
-if(decrees && decrees.length){
+if(decrees?.length){
 // Normalize: bridge returns decree_text + classification, renderLog expects text + classification
 return decrees.map(d=>({seq:d.seq,timestamp:d.timestamp,text:d.decree_text,category:d.category,scope:d.scope,classification:d.classification||'public',source:'sqlite'}));
 }
@@ -162,15 +162,15 @@ return loadLog().map(d=>({...d,classification:d.classification||'public',source:
 
 function renderLog(log){
 const view=$('#decreeLog');
-if(!log || !log.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
+if(!log?.length){view.innerHTML='<div class="decree-entry" style="color:var(--muted);text-align:center;padding:24px">Декретов пока нет. Первый декрет — твой.</div>';return}
 view.innerHTML=log.map(d=>{
-const catClass='cat-'+d.category;
-const clsClass='cls-'+(d.classification||'public');
+const catClass=`cat-${d.category}`;
+const clsClass=`cls-${d.classification||'public'}`;
 const clsLabel=(d.classification||'public').toUpperCase();
 const src=d.source==='sqlite'?' <span style="color:var(--accent);font-size:10px">SQLite</span>':' <span style="color:var(--muted);font-size:10px">local</span>';
 // v3.14.0 NEW (per ADR-0028) — show Supersede button on law/prohibition decrees
 const canSupersede=(d.category==='law'||d.category==='prohibition')&&d.source==='sqlite';
-const supBtn=canSupersede?` <button class="sup-btn" data-seq="${d.seq}" style="font-size:10px;padding:2px 6px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:3px;cursor:pointer">Отозвать</button>`:'';
+const supBtn=canSupersede?` <button type="button" class="sup-btn" data-seq="${d.seq}" style="font-size:10px;padding:2px 6px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:3px;cursor:pointer">Отозвать</button>`:'';
 return `<div class="decree-entry"><span class="seq">#${d.seq}</span><span class="cat ${catClass}">${d.category}</span><span class="cls ${clsClass}" title="Классификация (ADR-0029 §7)">${clsLabel}</span>${src}<span class="ts"> ${d.timestamp}</span>${supBtn}<div class="text">${esc(d.text)}</div></div>`;
 }).join('');
 // Attach supersede button handlers
@@ -180,10 +180,10 @@ const seq=parseInt(b.dataset.seq,10);
 const reason=prompt(`Отозвать декрет #${seq}?\n\nПричина отзыва (будет записана в DecreeLog):`);
 if(!reason)return;
 const bridge=getBridge();
-if(bridge&&bridge.supersedeDecree){
+if(bridge?.supersedeDecree){
 try{
 const result=await bridge.supersedeDecree(seq,reason);
-if(result&&result.error){toast(`⚠ Ошибка: ${result.error}`);return;}
+if(result?.error){toast(`⚠ Ошибка: ${result.error}`);return;}
 toast(`⚡ Декрет #${seq} отозван. Supersession decree #${result.seq} записан.`);
 const all=await fetchAllDecrees();
 renderLog(all);
@@ -238,10 +238,10 @@ fetchAllDecrees().then(renderLog);
 // v3.11.0 NEW — Agents section
 async function fetchAgents() {
   const bridge = getBridge();
-  if (bridge && bridge.getAgents) {
+  if (bridge?.getAgents) {
     try {
       const agents = await bridge.getAgents();
-      if (agents && agents.length) return agents;
+      if (agents?.length) return agents;
     } catch (e) { console.warn('[agents] bridge.getAgents failed:', e); }
   }
   // Fallback: empty (no agents loaded without bridge)
@@ -251,7 +251,7 @@ async function fetchAgents() {
 function renderAgents(agents) {
   const view = $('#agentsList');
   const count = $('#agentsCount');
-  if (!agents || !agents.length) {
+  if (!agents?.length) {
     count.textContent = '';
     view.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">Агенты не зарегистрированы. Bridge недоступен (нужен Node/Electron).</div>';
     return;
@@ -271,7 +271,7 @@ function renderAgents(agents) {
       <div style="margin-top:6px;font-size:11px;color:var(--muted)">
         <b>Capabilities:</b> ${(a.capabilities || []).map(esc).join(', ')}
       </div>
-      ${a.endpoints && a.endpoints.length ? `<div style="margin-top:4px;font-size:11px;color:var(--muted)"><b>Endpoints:</b> ${a.endpoints.map((e) => esc(e.type)).join(', ')}</div>` : ''}
+      ${a.endpoints?.length ? `<div style="margin-top:4px;font-size:11px;color:var(--muted)"><b>Endpoints:</b> ${a.endpoints.map((e) => esc(e.type)).join(', ')}</div>` : ''}
     </div>`;
   }).join('');
 }

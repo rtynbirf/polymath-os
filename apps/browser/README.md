@@ -29,14 +29,14 @@ system.status.read. Unknown commands → DENIED (not guessed).
 
 ## Files
 
-| File | Lines | What |
-|---|---|---|
-| `index.html` | 36 | Browser shell (sidebar, tabs, address bar) |
-| `style.css` | ~200 | Dark theme, responsive, WCAG 2.2 AA |
-| `app.js` | ~300 | Tab management, bookmarks, notes, settings |
-| `intent-lab.html` | ~150 | Intent lifecycle UI (Plan→Policy→Evidence→Journal) |
-| `intent-runtime.js` | 59 | Deterministic intent runtime (3 capabilities) |
-| `engines.txt` | 15 | Sovereign engine slot (first-existing-path wins) |
+| File                | Lines | What                                               |
+| ------------------- | ----- | -------------------------------------------------- |
+| `index.html`        | 36    | Browser shell (sidebar, tabs, address bar)         |
+| `style.css`         | ~200  | Dark theme, responsive, WCAG 2.2 AA                |
+| `app.js`            | ~300  | Tab management, bookmarks, notes, settings         |
+| `intent-lab.html`   | ~150  | Intent lifecycle UI (Plan→Policy→Evidence→Journal) |
+| `intent-runtime.js` | 59    | Deterministic intent runtime (3 capabilities)      |
+| `engines.txt`       | 15    | Sovereign engine slot (first-existing-path wins)   |
 
 ## Sovereignty principles
 
