@@ -763,6 +763,25 @@ def check_holos_selftest():
     return True, "60/60 green (геном, манифест-Меркла, тело, эскиз HRR, дыхание CRDT, суд, память E/S/P/W/I)"
 
 
+def check_pipeline_selftest():
+    """v3.24.0 NEW (claim #30): the fill-in mechanism (owner's .bat pack)
+    is a canon tool with machine-checked offline semantics: verify-gate,
+    token only in process memory, DCO commits, content-based patch
+    idempotency (git apply --reverse --check, defect D1 closed)."""
+    d = REPO_ROOT / "tooling" / "pipeline"
+    if not d.exists():
+        return False, "tooling/pipeline/ missing"
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120
+    )
+    if r.returncode != 0:
+        return False, f"pipeline selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "12/12" not in r.stdout:
+        return False, f"expected '12/12', got:\n{r.stdout[-500:]}"
+    return True, "12/12 green (verify-gate, token in memory, DCO, patch idempotency)"
+
+
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
     ("14. Pattern: counter-from-source (S2)", check_pattern_02_counter_from_source),
@@ -781,6 +800,7 @@ extra_checks = [
     ("27. ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)", check_archivarius_selftest),
     ("28. Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)", check_agent_selftest),
     ("29. HOLOS agent v2.0 selftest 60/60 (stdlib-only)", check_holos_selftest),
+    ("30. POLIMAT_PIPELINE v1.1 selftest 12/12 (v3.24.0)", check_pipeline_selftest),
 ]
 
 checks = [
