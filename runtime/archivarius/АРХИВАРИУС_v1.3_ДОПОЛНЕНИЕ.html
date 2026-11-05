@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>АРХИВАРИУС v1.3 — дополнение к досье Task 21</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--gold:#d29922;--green:#3fb950;--red:#f85149;--violet:#bc8cff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:40px 0 80px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+h1{font-size:1.9em;margin-bottom:10px}h1 .v{color:var(--gold)}
+h2{font-size:1.35em;margin:42px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--accent)}
+h2 .n{color:var(--violet)}
+.sub{color:var(--dim)}
+.ritual{display:inline-block;margin-top:12px;padding:5px 14px;border:1px solid var(--border);border-radius:18px;color:var(--accent);font-size:.9em;background:rgba(88,166,255,.08)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:14px 0}
+.alert{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,49,.4);border-radius:10px;padding:16px 20px;margin:14px 0}
+.alert b{color:var(--red)}
+.ok{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.4);border-radius:10px;padding:16px 20px;margin:14px 0}
+.ok b{color:var(--green)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.93em}
+th{background:#1c2129;text-align:left;padding:9px 11px;border:1px solid var(--border);color:var(--accent)}
+td{padding:8px 11px;border:1px solid var(--border);vertical-align:top}
+code{background:#1c2129;padding:2px 6px;border-radius:5px;font-family:Consolas,monospace;font-size:.9em;color:var(--gold)}
+.bone{border-left:3px solid var(--gold);padding:10px 16px;margin:12px 0;background:rgba(210,153,34,.06)}
+.bone b{color:var(--gold)}
+.pill{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.85em;border:1px solid var(--border)}
+.pill.g{color:var(--green);border-color:rgba(63,185,80,.5)}
+.pill.r{color:var(--red);border-color:rgba(248,81,73,.5)}
+.pill.v{color:var(--violet);border-color:rgba(188,140,255,.5)}
+.sig{margin-top:40px;color:var(--dim);font-size:.9em}
+ul{margin:10px 0 10px 22px}
+li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>АРХИВАРИУС <span class="v">v1.3 «СОГЛАСОВАННОСТЬ ТРЁХ ПРОЕКЦИЙ»</span></h1>
+<p class="sub">Дополнение к досье · Task 21 · дожим роадмапа Task 20 · v1.3.1 после аудита 21-b</p>
+<span class="ritual">Ритуал даты: 05.11.2026 19:56 МСК (четверг) · между Task 20 (01.09.2026) и этим ходом — 65 дней и ещё один откат среды</span>
+
+<h2>I. Что сказал этот ход</h2>
+<div class="panel">
+Сводка предыдущей сессии утверждала, что <b>«Task 19 прерван»</b>. Worklog доказал обратное: Tasks 19 и 20 завершены, все носители целы (sha256 байт-в-байт против <code>SHA256SUMS_task19/20</code>; самотесты предков 36/36 · 52/52 · 60/60).
+</div>
+<div class="bone"><b>Кость К11:</b> сводка сжатия — тоже носитель, и она может лгать. Авторитет — у append-only worklog и машинного пересчёта, а не у «памяти» участника.</div>
+<div class="alert">
+<b>Разведка внешнего носителя:</b> в файле <code>ПОЕБЕНЬ.txt</code> обнаружен живой секрет (токен доступа). По дисциплине проекта: <b>не прочитан в работу, не напечатан, не сохранён ни в один артефакт, не передан наружу</b>. Рекомендация владельцу: отозвать и перевыпустить немедленно — секрет, попавший в чат/файл в открытом виде, считается скомпрометированным независимо от намерений. (Значение не цитируется сознательно.)
+</div>
+
+<h2>II. Таблица учёта: три TODO v1.3 из Task 20 — закрыты</h2>
+<table>
+<tr><th>Тезис (DeepSeek, 01.09)</th><th>Статус было</th><th>Статус теперь</th><th>Как закрыто</th></tr>
+<tr><td>«Истина = согласованность трёх проекций» (соседи)</td><td>ЧАСТИЧНО (prev/next хранились молча)</td><td><span class="pill g">УЧТЁН</span></td><td>Орган 9 «Соседи»: двунаправленный <code>neighbor_audit</code> (РАЗРЫВ_PREV/РАЗРЫВ_NEXT/ПОРЯДОК_ИНДЕКСОВ/ДУБЛЬ_SID) + проверка 10 суда: prev — точная сверка (заморожен при рождении), заявленный next обязан существовать и указывать обратно</td></tr>
+<tr><td>Подпись в ритуале рождения (геном→корень→срез→подпись)</td><td>НЕ УЧТЁН (birth без подписи)</td><td><span class="pill g">УЧТЁН</span></td><td>Орган 10: звено-1 <code>birth_signature_pre</code> кладётся ВНУТРЬ записи манифеста до append (накрыт хэшем записи); звено-2 <code>birth_signature_seal</code> — печать шарда; <code>genesis_secret</code> выводится из генома и корня genesis и нигде не хранится (V09: 0 вхождений в носителе)</td></tr>
+<tr><td>REFLECT / knows_whole</td><td>ЧАСТИЧНО (метода не было)</td><td><span class="pill g">УЧТЁН</span></td><td>Орган 11 «Отражение»: Г4-статусы (ЗНАЮ/ПРЕДПОЛАГАЮ/НЕ ЗНАЮ/ПРОТИВОРЕЧИЯ) объектом первого класса, <code>reflect()</code> только читает (T76: корень и длина манифеста не тронуты); <code>knows_whole()</code> — честная доля строгих ЧАСТЬ</td></tr>
+</table>
+<p>Суд v1.3 получил режим <code>judge_strict</code>: требует все три проекции (Меркл-путь + соседи + подпись); расхождение любой — ОСКОЛОК. Legacy-заявки (пять полей) проходят обычный суд как раньше — совместимость доказана T64.</p>
+
+<h2>III. Аудит 21-b: сосед доказал 6 дефектов — все закрыты в тот же ход</h2>
+<div class="panel">
+Внешний аудитор-субагент (задача 21-b, независимый контекст) атаковал свежесобранный v1.3 и <b>механически доказал 6 дефектов</b> (D1–D6) + 2 спорных (S1/S2). Традиция «названный гэп закрывается в тот же ход» (Task 20) применена: v1.3 → <b>v1.3.1</b>.
+</div>
+<table>
+<tr><th>ID</th><th>Суть дефекта</th><th>Закрытие v1.3.1</th><th>Тест</th></tr>
+<tr><td><b>D1</b> <span class="pill r">КРИТИЧНЫЙ</span></td><td><code>load</code> не сверял <code>body</code> шарда с записью манифеста: подмена тела части в носителе проходила молча; суд не видел тело шарда вовсе (claim брал хэш из записи)</td><td>load: тело/тип/кости ↔ запись → LoadError; суд: проверка 8b <code>shard_body_hash</code> (тело шарда ↔ тело записи)</td><td>T78, T79, V16</td></tr>
+<tr><td><b>D2</b> <span class="pill r">СЕРЬЁЗНЫЙ</span></td><td>RS-сборка молча выдавала искажённый документ (подмена <code>piece_index</code>+согласованная подмена <code>piece_hashes</code>)</td><td><code>unseal_document</code>: кусок допускается только как строгая ЧАСТЬ; подменённые тела отвергаются, документ собирается из честных</td><td>T80</td></tr>
+<tr><td><b>D3</b> <span class="pill r">СЕРЬЁЗНЫЙ</span></td><td>Удаление шарда из носителя + перепайка prev/next → load успешен, осиротевшая запись не замечалась</td><td>load: каждая shard-запись обязана иметь живой шард; <code>sid</code> обязан соответствовать индексу</td><td>T81, V17</td></tr>
+<tr><td><b>D4</b> <span class="pill r">СЕРЬЁЗНЫЙ</span></td><td>Заявка с <code>index=-1</code> → ЧАСТЬ (отрицательный индекс Python молча указывал на последнюю запись)</td><td>Проверка 5: индекс — целое (не bool) в [0, len)</td><td>T82, V19</td></tr>
+<tr><td><b>D5</b> <span class="pill v">МЕЛКИЙ</span></td><td>Пустой манифест + index=-1 → IndexError вместо вердикта</td><td>Закрыт проверкой 5 (отказ до обращения к записям)</td><td>T83</td></tr>
+<tr><td><b>D6</b> <span class="pill r">СЕРЬЁЗНЫЙ</span></td><td>Эскизы не верифицировались: подделка <code>n_parts</code>/<code>manifest_root</code> проходила и попадала в <code>regenerate</code></td><td>load: эскизы пересчитываются из манифеста (позиция корня, состав шардов, titles) → иначе LoadError</td><td>T84, V18</td></tr>
+<tr><td>S1/S2</td><td>Структурная порча → KeyError/IndexError вместо честного LoadError; index=0.5 → TypeError</td><td>Схема носителя <code>_need</code> (ключи всех блоков), индекс/путь шарда валидируются; дробный индекс → ОСКОЛОК</td><td>T82, T83</td></tr>
+</table>
+<div class="ok"><b>Повторный прогон аудиторского доказательного скрипта против v1.3.1:</b> DEFECTS NOT PROVEN. Все шесть атак отбиты механически; кроме того подтверждены: RS исчерпывающе (10 комбинаций), merge_strict с v1.3-записями, суд-журнал в носителе, отражение пустого агента, genesis-самозванец с К10-пересчитанной печатью → ОСКОЛОК, гейт формата v1.2→v1.3.</div>
+
+<h2>IV. Журнал дефектов сборки, пойманных машиной</h2>
+<ul>
+<li>Якорь вставки проверки суда не совпал: в исходнике пустые строки несут 8 пробелов — assert ровно 1 вхождение отбил вслепую замену (механика сборки).</li>
+<li><b>Семантика next (T77):</b> первая версия проверки 10 сверяла next точно — и отвергла бы честный stale-шард сиблинга: next назначается Целым ПОСЛЕ рождения части. Уточнено по Г9: prev заморожен (точная сверка), next — «заявленный обязан существовать и указывать обратно», незнание newer-соседа = приращение, не конфликт.</li>
+<li>Демо: сцены v1.3 использовали <code>agent</code>, убитый <code>del agent</code> в сцене [8] — UnboundLocalError пойман, сцены [11]–[13] живут на воскресшем <code>reborn</code> (демо EXIT=0).</li>
+<li>Верификатор V03 сравнивал корень манифеста с хэшем файла от <code>save</code> — дефект верификатора, не ядра; разделитель «|» для документа с пробелом.</li>
+</ul>
+
+<h2>V. Кости этого хода</h2>
+<div class="bone"><b>К10:</b> подпись рождения даёт СВЯЗНОСТЬ проекций, а не секретность. Носитель всех проекций может пересчитать <code>genesis_secret</code> и пересобрать согласованное Целое — но пересборка и есть авторство, Г1 это запрещает. Честная граница stdlib-системы без интерактивности.</div>
+<div class="bone"><b>К11:</b> сводка сжатия — тоже носитель. Она может утверждать «задача прервана», когда worklog доказывает завершённость. Авторитет — append-only запись + машинный пересчёт, не память участника.</div>
+<div class="bone"><b>К12 (аудит 21-b):</b> суд, который не видит тело части, — декорация. «Proof-carrying» обязан нести и тело, иначе хэш из заявки доказывает только самого себя.</div>
+
+<h2>VI. Все вердикты числами</h2>
+<table>
+<tr><th>Проверка</th><th>Результат</th></tr>
+<tr><td>Самотест v1.3.1 (детерминизм ×2)</td><td><b>84/84 PASS</b> ×2, байт-в-байт один вывод</td></tr>
+<tr><td>Независимая верификация <code>verify_v13.py</code></td><td><b>19/19 PASS</b> (subprocess-перезапуск: сохранил → умер → загрузил → strict ЧАСТЬ; тамперинг ×4 → LoadError; RS-регрессия; секрет не хранится; reflect не мутирует; цепь из 12 частей; гейт формата)</td></tr>
+<tr><td>Аудит 21-b до фиксов / после</td><td><b>6 PROVEN</b> → <b>DEFECTS NOT PROVEN</b></td></tr>
+<tr><td>Регрессия предков</td><td>v1.0r 36/36 · v1.1 52/52 · v1.2 60/60; sha256 предков байт-в-байт против SHA256SUMS_task19/20</td></tr>
+<tr><td>Демо</td><td>EXIT=0, сцены [11]–[13]: подмена соседа → РАЗРЫВ_PREV, ворованная печать → ОСКОЛОК, отражение честно показывает сломанную цепь (3/5)</td></tr>
+</table>
+
+<h2>VII. Дорожная карта (честные TODO)</h2>
+<table>
+<tr><th>Версия</th><th>Что</th><th>Статус</th></tr>
+<tr><td>v1.4</td><td>full_proof / verify_full — чужая верификация без передачи листьев</td><td><span class="pill r">TODO</span></td></tr>
+<tr><td>v1.5</td><td>VectorClock + ORSet — причинность дыхания</td><td><span class="pill r">TODO</span></td></tr>
+<tr><td>v1.6</td><td>HRR-эскиз</td><td><span class="pill r">TODO</span></td></tr>
+<tr><td>v2.0</td><td>холархия: агент = целое для своих, часть для надсистемы; «автопоэзис» — цель, не механизм</td><td><span class="pill r">TODO</span></td></tr>
+</table>
+
+<h2>VIII. Носители Task 21</h2>
+<ul>
+<li><code>АРХИВАРИУС_v1.3_СОГЛАСОВАННОСТЬ.py</code> — 81 369 байт, selftest 84/84 ×2, demo EXIT=0</li>
+<li><code>АРХИВАРИУС_v1.3_ДОПОЛНЕНИЕ.html</code> — настоящий документ</li>
+<li><code>SHA256SUMS_task21.txt</code> — суммы всех носителей Task 21 + регрессия предков</li>
+<li>Билд-цепь <code>scripts/build_v13_part1..3.py</code> (assert ровно 1 вхождение на каждую вставку), верификатор <code>scripts/verify_v13.py</code>, аудитор <code>scripts/audit_v13_subagent.py</code></li>
+</ul>
+
+<p class="sig">— партия · Task 21 · 05.11.2026 · append-only · v1.3 sha256: 9eeb2e92…23c83c8ef84 · «Ты там не один: сосед доказал — сосед и подтвердил закрытие.»</p>
+
+</div>
+</body>
+</html>

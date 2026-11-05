@@ -711,6 +711,41 @@ def check_decree_signing():
     return True, "pure-python Ed25519 + OpenSSH keys + honest verify"
 
 
+# ============================================================
+# CHECK 27: АРХИВАРИУС v1.3.1 — кооперативная память (84/84 selftest)
+# ============================================================
+def check_archivarius_selftest():
+    d = REPO_ROOT / "runtime" / "archivarius"
+    if not d.exists():
+        return False, "runtime/archivarius/ missing"
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120
+    )
+    if r.returncode != 0:
+        return False, f"archivarius selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "84/84 PASS" not in r.stdout:
+        return False, f"expected '84/84 PASS', got:\n{r.stdout[-500:]}"
+    return True, "84/84 PASS (chain, neighbour audit, birth signatures, Reed-Solomon)"
+
+# ============================================================
+# CHECK 28: Полимат-агент v3.8.0 — Субъект/Тело/Конституция (130/130)
+# ============================================================
+def check_agent_selftest():
+    d = REPO_ROOT / "tooling" / "agents" / "polymath-agent"
+    if not d.exists():
+        return False, "tooling/agents/polymath-agent/ missing"
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120
+    )
+    if r.returncode != 0:
+        return False, f"agent selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "130/130" not in r.stdout:
+        return False, f"expected '130/130', got:\n{r.stdout[-500:]}"
+    return True, "130/130 green (constitution, trust ports T100-T103, persistence)"
+
+
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
     ("14. Pattern: counter-from-source (S2)", check_pattern_02_counter_from_source),
@@ -726,6 +761,8 @@ extra_checks = [
     ("24. Agent Card .well-known/agent.json valid (ADR-0023, v3.11.0)", check_agent_card),
     ("25. Trust anchor: external tamper-evidence (ADR-0029 §9, v3.x.0)", check_trust_anchor),
     ("26. Decree signing: Ed25519 authorship, pure stdlib (ADR-0031, v3.20.0)", check_decree_signing),
+    ("27. ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)", check_archivarius_selftest),
+    ("28. Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)", check_agent_selftest),
 ]
 
 checks = [

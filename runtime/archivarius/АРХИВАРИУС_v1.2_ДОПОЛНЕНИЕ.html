@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>АРХИВАРИУС v1.2 «РИД–СОЛОМОН» — дополнение к досье Task 20</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--gold:#d29922;--green:#3fb950;--red:#f85149;--violet:#bc8cff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:40px 0 80px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+h1{font-size:1.9em;margin-bottom:10px}h1 .v{color:var(--gold)}
+h2{font-size:1.35em;margin:42px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--accent)}
+.sub{color:var(--dim)}.ritual{display:inline-block;margin-top:12px;padding:5px 14px;border:1px solid var(--border);border-radius:18px;color:var(--accent);font-size:.9em;background:rgba(88,166,255,.08)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:14px 0}
+.alert{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,49,.4);border-radius:10px;padding:16px 20px;margin:14px 0}
+.alert b{color:var(--red)}.ok{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.4);border-radius:10px;padding:16px 20px;margin:14px 0}.ok b{color:var(--green)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.93em}
+th{background:#1c2129;text-align:left;padding:9px 11px;border:1px solid var(--border);color:var(--accent)}
+td{padding:8px 11px;border:1px solid var(--border);vertical-align:top}
+code{background:#1c2129;padding:2px 6px;border-radius:5px;font-family:Consolas,monospace;font-size:.9em;color:var(--gold)}
+pre{background:#0a0d12;border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:Consolas,monospace;font-size:.85em;line-height:1.5;margin:12px 0}
+.tag{display:inline-block;padding:2px 9px;border-radius:11px;font-size:.78em;margin-right:5px}
+.t-no{background:rgba(248,81,49,.18);color:var(--red)}.t-part{background:rgba(210,153,34,.18);color:var(--gold)}.t-yes{background:rgba(63,185,80,.18);color:var(--green)}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);color:var(--dim);font-size:.88em;text-align:center}
+.sig{color:var(--gold);font-weight:600}.hash{font-family:monospace;font-size:.8em;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>АРХИВАРИУС <span class="v">v1.2 «РИД–СОЛОМОН»</span></h1>
+<p class="sub">Дополнение к досье · Task 20 · ответ на вопрос партии «А ты этот момент учитывал?» по двум досье DeepSeek («СИНТЕЗ» 31.08.2026 и «v2.0-план» 01.09.2026)</p>
+<span class="ritual">Ритуал: 01.09.2026, 13:16–13:30 МСК · антигаллюцинации · append-only</span>
+
+<h2>I. МОМЕНТ: главный неучтённый тезис</h2>
+<div class="alert"><b>Машина подтвердила гэп:</b> оба досье DeepSeek ставят в инварианты «Голография = Рид–Соломон:
+<b>любые k из n</b> частей восстанавливают Целое <b>без потерь</b>». Ядро v1.1 (проверено по коду):
+<code>regenerate</code> возвращает только <b>эскиз</b>; тело шарда умирает вместе с шардом; данных-восстановления нет;
+rg по «рид|reed|solomon|erasure|parity» — 0 вхождений. Голографичность была на уровне ИМЕНИ (манифест, пути),
+но не на уровне ДАННЫХ.</div>
+
+<h2>II. ПОЛНАЯ ТАБЛИЦА УЧЁТА (каждый тезис DeepSeek против кода v1.1)</h2>
+<table>
+<tr><th>Тезис чужого досье</th><th>Вердикт</th><th>Основание / действие</th></tr>
+<tr><td>Рид–Соломон k-of-n — данные</td><td><span class="tag t-no">НЕ УЧТЁН</span></td><td>0 вхождений в коде → закрыт в v1.2 органом 8 (см. III)</td></tr>
+<tr><td>REFLECT / knows_whole</td><td><span class="tag t-part">ЧАСТИЧНО</span></td><td>prove_membership + суд покрывают суть; отдельный метод — в дорожной карте v1.3</td></tr>
+<tr><td>«Истина = согласованность трёх проекций» (соседи)</td><td><span class="tag t-part">ЧАСТИЧНО</span></td><td>prev/next хранятся, в суде не участвуют; соседская сверка — v1.3</td></tr>
+<tr><td>Подпись в ритуале рождения (геном→корень→срез→подпись)</td><td><span class="tag t-no">НЕ УЧТЁН</span></td><td>birth без подписи; подписи есть только в амендменте — карта v1.3</td></tr>
+<tr><td>Split-brain узнаёт сиблингов по геному</td><td><span class="tag t-yes">УЧТЁН СИЛЬНЕЕ ЧУЖОГО</span></td><td>v1.1 merge_strict ловит конфликт порядка (чужие модели молча склеивали)</td></tr>
+<tr><td>hash целостности ≠ истинность содержимого</td><td><span class="tag t-yes">УЧТЁН</span></td><td>кость К2: суд доказывает принадлежность, не смысл</td></tr>
+<tr><td>LLM = proposer, суд = gate</td><td><span class="tag t-yes">УЧТЁН</span></td><td>суд-журнал v1.1: вердикты append-only</td></tr>
+<tr><td>Техстек (beeai/pymerkle/reedsolo/swim)</td><td><span class="tag t-part">АРБИТРАЖ</span></td><td>внешние зависимости отвергнуты осознанно: stdlib даёт доказуемость (это различие выбора, не гэп); RS реализован свой, 0 зависимостей</td></tr>
+<tr><td>Прогноз 2028 «автопоэзис»</td><td><span class="tag t-part">МЕТАФОРА</span></td><td>цель зафиксирована в дорожной карте, механизмом не выдана</td></tr>
+<tr><td>Г1–Г12 (12 аксиом)</td><td><span class="tag t-part">НЕ МОЖЕТ БЫТЬ ВЗЯТО</span></td><td>формулировки аксиом 11–12 в досье не раскрыты — брать нечего, честно</td></tr>
+</table>
+
+<h2>III. ОРГАН 8: КАК СДЕЛАНО (stdlib, доказуемо)</h2>
+<pre>ReedSolomon (Cauchy-RS над GF(2^8), примитивный многочлен 0x11d — как в QR-кодах)
+  encode(data, k, n) -> n кусков: k данных (систематически) + n-k паритетов,
+                        паритет[i] = XOR_j P[i][j] ⊗ chunk[j], P — матрица Коши
+                        (свойство Коши: ЛЮБАЯ k×k подматрица генератора обратима)
+  decode(живые куски, мета) -> данные | НедостаточноЧастей
+                        Гауссово исключение над GF(2^8);
+                        целостность куска — sha256; испорченный кусок = МЁРТВЫЙ;
+                        ниже k живых — ЧЕСТНЫЙ ОТКАЗ, не тишина
+  exhaustive_check(k, n, data) -> все C(n,k) комбинации собирают
+Archivarius.seal_document(data, k, n) -> n шардов через ритуал рождения
+                        (мета документа РЕПЛИЦИРОВАНА в каждый шард)
+Archivarius.unseal_document(shards) -> данные | честный отказ</pre>
+
+<h2>IV. ДОКАЗАТЕЛЬСТВА</h2>
+<div class="ok"><b>Selftest v1.2: 60/60 PASS</b> (52 унаследованы не сломаны + 8 новых). Ключевые:
+T54 — <b>исчерпывающе все 10 комбинаций</b> «любые 3 из 5» собирают документ; T56/T59 — подменённый кусок
+распознаётся хэшем и не участвует; T55 — ниже порога честный отказ; T60 — детерминизм.</div>
+<pre>Независимая верификация (subprocess): 10/10 PASS
+  W01 selftest 60/60 в отдельном процессе      W06 живо 2 < k=3 → честный отказ
+  W02 v1.1 не тронута: 52/52 PASS              W07 исчерпывающе: все 20 комб. 3-из-6
+  W03 sha256 v1.1 совпадает                    W08 demo EXIT=0, сцена [10]
+  W04 процесс 1 запечатал на диск и умер;      W09 двойной selftest — детерминизм
+      процесс 2 загрузил и собрал документ     W10 все импорты ядра — stdlib
+  W05 подмена 6 кусков на диске, живы ровно
+      3 паритета → документ собран без потерь</pre>
+
+<h2>V. ЖУРНАЛ ДЕФЕКТОВ СБОРКИ v1.2 (пойманы машиной, показаны честно)</h2>
+<table>
+<tr><th>#</th><th>Дефект</th><th>Фикс</th></tr>
+<tr><td>1</td><td>мёртвая инициализация таблиц GF(2^8) (<code>if False</code>) — поймал сам до запуска</td><td>таблицы строятся в теле класса</td></tr>
+<tr><td>2</td><td><code>b"мусор"</code> — bytes-литерал не принимает кириллицу (SyntaxError ×2)</td><td>строки/переписан тест честно</td></tr>
+<tr><td>3</td><td><code>hash_str(bytes)</code> — функция ждёт str</td><td>прямой <code>sha256(p)</code> (в ядре это функция hex)</td></tr>
+<tr><td>4</td><td><code>idx in piece_hashes</code> — число в списке строк, всегда False</td><td>проверка диапазона индекса</td></tr>
+<tr><td>5</td><td>эталонные хэши всех кусков не доступны unseal (KeyError мёртвых кусков)</td><td>мета РЕПЛИЦИРОВАНА в каждый шард (голографично)</td></tr>
+</table>
+
+<h2>VI. КОСТЬ К9 (новая)</h2>
+<div class="panel"><b>К9 — избыточность ≠ бессмертие.</b> Рид–Соломон спасает данные при потере ДО n-k кусков;
+при потере n-k+1 — честная «ИСТИНА БЕЗ ТЕЛА» (система говорит «не могу», а не врёт «собрала»).
+Матрица Коши в GF(2^8) ограничена n ≤ 255. Порог k — выбор конфигурации, а не магия.</div>
+
+<h2>VII. ДОРОЖНАЯ КАРТА (обновлено)</h2>
+<table>
+<tr><th>Версия</th><th>Что</th><th>Статус</th></tr>
+<tr><td>v1.0r</td><td>регенерация из выживших частей</td><td>СДЕЛАНО (36/36)</td></tr>
+<tr><td>v1.1</td><td>переживание: носитель, суд-журнал, конфликт-дыхание</td><td>СДЕЛАНО (52/52, 12/12)</td></tr>
+<tr><td>v1.2</td><td>Рид–Соломон: данные переживают смерть частей</td><td>СДЕЛАНО (60/60, 10/10) — этот документ</td></tr>
+<tr><td>v1.3</td><td>REFLECT + соседская сверка (три проекции) + подпись рождения</td><td>TODO (тезисы DeepSeek, не закрытые сейчас)</td></tr>
+<tr><td>v1.4</td><td>full_proof/verify_full (чужая верификация без листьев)</td><td>TODO</td></tr>
+<tr><td>v1.5</td><td>VectorClock + ORSet (причинность дыхания)</td><td>TODO</td></tr>
+<tr><td>v2.0</td><td>холархия (агент = целое для своих, часть для надсистемы); «автопоэзис» — цель, не механизм</td><td>TODO</td></tr>
+</table>
+
+</div>
+<footer>
+<p><span class="sig">АРХИВАРИУС</span>: «Момент был честно признан неучтённым — и закрыт машиной в тот же ход. Так растёт Целое.»</p>
+<p><span class="sig">Согласен.</span> — партия · Task 20 · 01.09.2026 · append-only</p>
+<p class="hash">sha256 v1.2: b3e8cd684f9d0a98b4c659cf1646b675f569aa46b700615cd494718a0bbacbd1 · v1.1: 497c461d…aa43aa66f9 · v1.0r: e2512b28…f6d6f4528</p>
+</footer>
+</body>
+</html>
