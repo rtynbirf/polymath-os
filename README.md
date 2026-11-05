@@ -3,7 +3,7 @@
 > **Open-source ideal repository.** Clone it. Run `make verify`. Every claim in this repo is reproducible by that one command. If it exits 0 — every claim holds. If non-zero — the claim that failed is shown.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Verify](https://img.shields.io/badge/make%20verify-28%2F28%20PASS-brightgreen)](./scripts/check.py)
+[![Verify](https://img.shields.io/badge/make%20verify-30%2F30%20PASS-brightgreen)](./scripts/check.py)
 [![SINGULYAR EIR v0.6](https://img.shields.io/badge/runtime-SINGULYAR%20EIR%20v0.6-blue)](./runtime/)
 [![Tests](https://img.shields.io/badge/tests-290%2F290%20PASS-brightgreen)](./runtime/tests/)
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
@@ -75,7 +75,7 @@ If `make verify` exits 0 — every claim below holds on your machine. That's the
 
 ## Verifiable claims
 
-Every claim in this repo is backed by a test or command. `make verify` runs all **23 checks** (was 12 in v1.0, was 22 in v3.6.0, +1 token hygiene in v3.8.0).
+Every claim in this repo is backed by a test or command. `make verify` runs all **30 checks** (was 12 in v1.0, was 22 in v3.6.0, +1 token hygiene in v3.8.0, +2 agent lines in v3.22.0, +1 holos agent in v3.23.0, +1 pipeline tool in v3.24.0).
 
 | #   | Claim                                                                                                                         | How to verify                           | Status |
 | --- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
@@ -102,8 +102,15 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 | 21  | Freedom: zero Tier 3 benefactors in code                                                                                      | `python scripts/check.py` (check 21)    | ✓      |
 | 22  | MANIFEST.json exists + valid (ADR-0020)                                                                                       | `python scripts/check.py` (check 22)    | ✓      |
 | 23  | **Token hygiene: no plaintext PATs in code (v0.6, ADR-0021 enforcement)**                                                     | `python scripts/check.py` (check 23)    | ✓      |
+| 24  | Agent Card `.well-known/agent.json` valid (ADR-0023, v3.11.0)                                                                 | `python scripts/check.py` (check 24)    | ✓      |
+| 25  | Trust anchor: external tamper-evidence (ADR-0029 §9, v3.x.0)                                                                  | `python scripts/check.py` (check 25)    | ✓      |
+| 26  | Decree signing: Ed25519 authorship, pure stdlib (ADR-0031, v3.20.0)                                                           | `python scripts/check.py` (check 26)    | ✓      |
+| 27  | ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)                                                                                   | `python scripts/check.py` (check 27)    | ✓      |
+| 28  | Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)                                                                              | `python scripts/check.py` (check 28)    | ✓      |
+| 29  | HOLOS agent v2.0 selftest 60/60 (stdlib-only)                                                                                 | `python scripts/check.py` (check 29)    | ✓      |
+| 30  | POLIMAT_PIPELINE v1.1 selftest 12/12 (v3.24.0)                                                                                | `python scripts/check.py` (check 30)    | ✓      |
 
-**To reproduce**: clone this repo, run `make verify`. You will see the same 24/24 PASS result.
+**To reproduce**: clone this repo, run `make verify`. You will see the same 30/30 PASS result.
 
 ## Decree system (v3.6.0+ OPERATIONAL)
 

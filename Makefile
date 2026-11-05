@@ -7,8 +7,8 @@
 help: ## Show this message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-verify: ## Run all 28 verifiable claims. Exits 0 if all hold.
-	@echo "→ Running 28 verification checks..."
+verify: ## Run all 30 verifiable claims. Exits 0 if all hold.
+	@echo "→ Running 30 verification checks..."
 	@python3 scripts/check.py
 
 test: verify ## Run all tests (alias for verify + runtime tests)

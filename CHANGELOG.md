@@ -4,6 +4,19 @@
 
 ### Added
 
+- **feat(pipeline) — POLIMAT_PIPELINE v1.1 as canon tool**: `tooling/pipeline/`
+  — the owner's fill-in mechanism (`POLIMAT_AUTO_PUSH/FINISH/MERGE.bat`,
+  snapshot `123.7z`) reproduced as a Linux canon tool: 7 commands
+  (prepare/commit/verify/push/pr/merge/audit), verify-gate (push blocked
+  unless `make verify` exits 0), patches via `git am` with content-based
+  idempotency (`git apply --reverse --check`; defect D1 of v1.0 — the
+  "already applied" string detector — caught by machine, closed), token
+  only in process memory (`POLIMAT_TOKEN` env), post-push audit on a
+  fresh clone with seal recount. Offline selftest 12/12 (repair,
+  token-in-memory, gate open/closed, DCO commit, patch idempotency T12).
+  **make verify: 29 → 30 claims** (claim 30; renumbered 29→30 after
+  HOLOS agent took claim 29 in #16). Additive: no previous claim
+  touched. README claims table un-drifted to 30 rows.
 - **feat(agents) — ARCHIVARIUS v1.3.1 + polymath-agent v3.8.0 lines**:
   `runtime/archivarius/` — cooperative append-only memory for multi-agent
   environments (Merkle path + bidirectional neighbour chain + birth
