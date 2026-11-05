@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **docs(dossier) — RLHF annotator evidence pack**: `docs/RLHF_DOSSIER.md`
+  (markdown hub, canon format) + self-contained artifacts in `docs/dossier/`
+  (HTML, PDF, SHA-256 manifest). 7 claims → 4 statuses
+  (ПОДТВЕРЖДЕНО / ЧАСТИЧНО / ОПРОВЕРГНУТО / НЕДОКАЗАНО), 20+ verified
+  sources, 10-minute manual checklist. Operationalizes Manifesto
+  principle 6 for external claims. Docs-only: no runtime change,
+  `make verify` 26/26 untouched.
+
 ## [v3.20.0] — 2026-10-17 (FULLY OPERATIONAL — ADR-0031 decree signing)
 
 Decrees now carry the human's cryptographic authorship. CI red → green.
