@@ -4,6 +4,16 @@
 
 ### Added
 
+- **feat(agents) — ARCHIVARIUS v1.3.1 + polymath-agent v3.8.0 lines**:
+  `runtime/archivarius/` — cooperative append-only memory for multi-agent
+  environments (Merkle path + bidirectional neighbour chain + birth
+  signatures + judge verdicts + Reed-Solomon redundancy; pure stdlib,
+  zero deps). `tooling/agents/polymath-agent/` — standalone agent harness
+  (Subject/Body/Constitution, trust ports T100-T103, persistence across
+  restarts). Both lines are bit-for-bit transfers with SHA256SUMS.txt.
+  **make verify: 26 → 28 claims** (claim 27: archivarius selftest 84/84;
+  claim 28: agent selftest 130/130). Additive: runtime/src untouched,
+  all previous 26 claims unchanged.
 - **docs(dossier) — RLHF annotator evidence pack**: `docs/RLHF_DOSSIER.md`
   (markdown hub, canon format) + self-contained artifacts in `docs/dossier/`
   (HTML, PDF, SHA-256 manifest). 7 claims → 4 statuses

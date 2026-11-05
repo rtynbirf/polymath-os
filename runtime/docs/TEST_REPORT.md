@@ -100,41 +100,41 @@ test_register_and_list (test_agent_mesh.AgentMeshRegistrationTests.test_register
 test_unregister (test_agent_mesh.AgentMeshRegistrationTests.test_unregister) ... ok
 test_send_no_decree_log_no_decree_check (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_no_decree_log_no_decree_check) ... ok
 test_send_unknown_agent_returns_error (test_agent_mesh.AgentMeshRoutingNoDecreeLogTests.test_send_unknown_agent_returns_error) ... ok
-test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-11-05T09:49:04Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
+test_agent_card_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_agent_card_endpoint) ... [2026-11-05T18:17:24Z] 127.0.0.1 - "GET /.well-known/agent.json HTTP/1.1" 200 -
 ok
-test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-11-05T09:49:04Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_health_endpoint (test_agent_mesh_server.AgentMeshServerBasicTests.test_health_endpoint) ... [2026-11-05T18:17:25Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-11-05T09:49:04Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
+test_root_redirects_to_health (test_agent_mesh_server.AgentMeshServerBasicTests.test_root_redirects_to_health) ... [2026-11-05T18:17:25Z] 127.0.0.1 - "GET / HTTP/1.1" 200 -
 ok
-test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-11-05T09:49:04Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
+test_unknown_path_404 (test_agent_mesh_server.AgentMeshServerBasicTests.test_unknown_path_404) ... [2026-11-05T18:17:25Z] 127.0.0.1 - "GET /nonexistent HTTP/1.1" 404 -
 ok
-test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-11-05T09:49:05Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
+test_cors_headers_present (test_agent_mesh_server.AgentMeshServerCorsTests.test_cors_headers_present) ... [2026-11-05T18:17:25Z] 127.0.0.1 - "GET /health HTTP/1.1" 200 -
 ok
-test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-11-05T09:49:05Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
+test_options_preflight (test_agent_mesh_server.AgentMeshServerCorsTests.test_options_preflight) ... [2026-11-05T18:17:25Z] 127.0.0.1 - "OPTIONS /health HTTP/1.1" 204 -
 ok
 test_full_scenario_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_blocked)
-Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-11-05T09:49:05Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Full HTTP cycle — DECREE_BLOCK on Google DNS violation. ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_chrome_blocked (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_chrome_blocked)
-Chrome decree (LIST classification) — single word match. ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+Chrome decree (LIST classification) — single word match. ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
 test_full_scenario_compliant (test_agent_mesh_server.AgentMeshServerEndToEndTests.test_full_scenario_compliant)
-Full HTTP cycle — compliant intent passes through. ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+Full HTTP cycle — compliant intent passes through. ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
-test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
+test_invalid_json_returns_parse_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_invalid_json_returns_parse_error) ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 400 -
 ok
-test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_missing_method_returns_invalid_request (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_missing_method_returns_invalid_request) ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_blocked_intent_returns_decree_block_403 (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_blocked_intent_returns_decree_block_403)
-CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
+CRITICAL: decree blocks → HTTP 403, execute_fn NOT called. ... [2026-11-05T18:17:26Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 403 -
 ok
-test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+test_send_compliant_intent_returns_success (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_compliant_intent_returns_success) ... [2026-11-05T18:17:27Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_send_to_cell65_llm_uses_different_agent (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_cell65_llm_uses_different_agent)
-Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
+Verify routing — /agent/cell65-host.llm dispatches to cell65 agent. ... [2026-11-05T18:17:27Z] 127.0.0.1 - "POST /agent/cell65-host.llm HTTP/1.1" 200 -
 ok
 test_send_to_unknown_agent_returns_503_or_error (test_agent_mesh_server.AgentMeshServerJsonRpcTests.test_send_to_unknown_agent_returns_503_or_error)
-Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-11-05T09:49:06Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
+Unknown agent_id → mesh.send() returns AGENT_NOT_FOUND error. ... [2026-11-05T18:17:27Z] 127.0.0.1 - "POST /agent/nonexistent.local HTTP/1.1" 403 -
 ok
 test_circuit_breaker_blocks_all_intents_when_tripped (test_circuit_breaker.CircuitBreakerTests.test_circuit_breaker_blocks_all_intents_when_tripped)
 Once OPEN, ALL Intents are blocked — even ones that don't violate ... ok
@@ -279,17 +279,17 @@ test_rfc8032_vector_1_empty_message (test_decree_signing.Ed25519CoreTests.test_r
 test_rfc8032_vector_2_two_octets (test_decree_signing.Ed25519CoreTests.test_rfc8032_vector_2_two_octets) ... ok
 test_verify_rejects_tampered_message (test_decree_signing.Ed25519CoreTests.test_verify_rejects_tampered_message) ... ok
 test_verify_rejects_wrong_key_and_bad_sig (test_decree_signing.Ed25519CoreTests.test_verify_rejects_wrong_key_and_bad_sig) ... ok
-test_garbage_file_raises (test_decree_signing.OpenSSHKeyTests.test_garbage_file_raises) ... /tmp/polymath-os/runtime/tests/test_decree_signing.py:155: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp5n0p1mwe/junk' mode='w' encoding='UTF-8'>
+test_garbage_file_raises (test_decree_signing.OpenSSHKeyTests.test_garbage_file_raises) ... /home/z/my-project/repos/polymath-os-work/runtime/tests/test_decree_signing.py:155: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmppy4zwa1s/junk' mode='w' encoding='UTF-8'>
   open(p, "w").write("hello world\n")
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
 test_load_roundtrip (test_decree_signing.OpenSSHKeyTests.test_load_roundtrip) ... ok
 test_missing_file_raises (test_decree_signing.OpenSSHKeyTests.test_missing_file_raises) ... ok
-test_pem_like_wrong_header_raises (test_decree_signing.OpenSSHKeyTests.test_pem_like_wrong_header_raises) ... /tmp/polymath-os/runtime/tests/test_decree_signing.py:161: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp1gu14sbw/pem' mode='w' encoding='UTF-8'>
+test_pem_like_wrong_header_raises (test_decree_signing.OpenSSHKeyTests.test_pem_like_wrong_header_raises) ... /home/z/my-project/repos/polymath-os-work/runtime/tests/test_decree_signing.py:161: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmppjuuoiav/pem' mode='w' encoding='UTF-8'>
   open(p, "w").write(
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
-test_publine_parse_from_file_and_inline (test_decree_signing.OpenSSHKeyTests.test_publine_parse_from_file_and_inline) ... /tmp/polymath-os/runtime/tests/test_decree_signing.py:142: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpcquw5j6v/k1.pub' mode='r' encoding='UTF-8'>
+test_publine_parse_from_file_and_inline (test_decree_signing.OpenSSHKeyTests.test_publine_parse_from_file_and_inline) ... /home/z/my-project/repos/polymath-os-work/runtime/tests/test_decree_signing.py:142: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpdpturmde/k1.pub' mode='r' encoding='UTF-8'>
   line = open(self.pub).read().strip()
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -317,13 +317,13 @@ Removing a link must make at least one scenario unsafe; otherwise the link prove
 test_eir_regression_guard_on_scenario_matrix (test_experiment.ExperimentTests.test_eir_regression_guard_on_scenario_matrix) ... ok
 test_generated_artifacts_are_fresh_and_deterministic (test_experiment.ExperimentTests.test_generated_artifacts_are_fresh_and_deterministic) ... ok
 test_federate_decrees_fetches_from_remote (test_federation.FederationDecreeRpcTests.test_federate_decrees_fetches_from_remote)
-A2AClient.federate_decrees() fetches active laws from a remote ... [2026-11-05T09:49:08Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+A2AClient.federate_decrees() fetches active laws from a remote ... [2026-11-05T18:17:29Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_get_active_laws_via_http (test_federation.FederationDecreeRpcTests.test_get_active_laws_via_http)
-POST method=decree.get_active_laws → returns the active laws list. ... [2026-11-05T09:49:08Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+POST method=decree.get_active_laws → returns the active laws list. ... [2026-11-05T18:17:29Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_get_all_decrees_via_http (test_federation.FederationDecreeRpcTests.test_get_all_decrees_via_http)
-POST method=decree.get_all → returns ALL decrees (full record). ... [2026-11-05T09:49:09Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
+POST method=decree.get_all → returns ALL decrees (full record). ... [2026-11-05T18:17:29Z] 127.0.0.1 - "POST /agent/singulyar-eir.local HTTP/1.1" 200 -
 ok
 test_real_http_4xx_raises_runtime_error (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_4xx_raises_runtime_error) ... ok
 test_real_http_5xx_get_raises_not_executed (test_http_adapter.HTTPAdapterNetworkTests.test_real_http_5xx_get_raises_not_executed)
@@ -338,10 +338,10 @@ ADR-0010 S15 cross-check for HTTPAdapter. ... ok
 test_runtime_with_http_adapter_get (test_http_adapter.IntegrationWithRuntimeTests.test_runtime_with_http_adapter_get)
 Runtime with HTTPAdapter — execute a GET via kernel. ... ok
 test_analyze_not_tripped (test_incident_response.IncidentAnalyzerTests.test_analyze_not_tripped)
-When the breaker is CLOSED (no trip), the analyser returns ... /tmp/polymath-os/runtime/src/decree_log.py:480: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=19, family=2, type=1, proto=6>
+When the breaker is CLOSED (no trip), the analyser returns ... /home/z/my-project/repos/polymath-os-work/runtime/src/decree_log.py:480: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=19, family=2, type=1, proto=6>
   rows = self.db.execute(
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
-/tmp/polymath-os/runtime/src/decree_log.py:480: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=23, family=2, type=1, proto=6>
+/home/z/my-project/repos/polymath-os-work/runtime/src/decree_log.py:480: ResourceWarning: unclosed <ssl.SSLSocket [closed] fd=23, family=2, type=1, proto=6>
   rows = self.db.execute(
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -464,7 +464,7 @@ test_s15_partial_cache_miss_does_not_pollute_sibling (test_webrtc_adapter.WebRTC
 ADR-0010 S15 cross-check for WebRTCAdapter. ... ok
 
 ----------------------------------------------------------------------
-Ran 290 tests in 8.863s
+Ran 290 tests in 9.427s
 
 OK (skipped=4)
 ```
