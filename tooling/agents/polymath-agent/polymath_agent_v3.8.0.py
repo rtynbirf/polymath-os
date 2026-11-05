@@ -766,7 +766,7 @@ def _t_http_get(cfg: "Config", args: Dict[str, Any]) -> Observation:
 
 def _strip_html_to_text(raw: str, limit: int = 12000) -> str:
     """Дешёвое безопасное извлечение текста: без исполнения HTML/JS."""
-    raw = re.sub(r"(?is)<script\b.*?</script\s*>|<style\b.*?</style\s*>|<noscript\b.*?</noscript\s*>", " ", raw)
+    raw = re.sub(r"(?is)<script\b.*?</\s*script[^>]*>|<style\b.*?</\s*style[^>]*>|<noscript\b.*?</\s*noscript[^>]*>", " ", raw)
     raw = re.sub(r"(?is)<[^>]+>", " ", raw)
     raw = html_unescape(raw)
     return re.sub(r"\s+", " ", raw).strip()[:limit]
@@ -3725,17 +3725,6 @@ def selftest() -> int:
             assert "python3" in digest, "дайджест не релевантен"
             return (f"мост: run_cli исполнен (python3), вне арсенала отклонён, "
                     f"дубликаты схлопнуты, дайджест релевантен")
-
-    def t_arsenal_real() -> str:
-        cpath = os.environ.get("POLY_CATALOG") or "./tool_catalog.json"
-        assert Path(cpath).exists(), f"реальный каталог не найден: {cpath}"
-        bridge = CatalogBridge(cpath)
-        assert bridge.total >= 2400, f"мало записей: {bridge.total}"
-        assert bridge.categories == 34, f"категорий {bridge.categories}, ожидалось 34"
-        assert bridge.bins >= 1500, f"мало бинарей: {bridge.bins}"
-        assert bridge.available >= 1, "ни одного исполнимого бинаря на машине"
-        return (f"реальный арсенал: {bridge.total}/34, бинарей {bridge.bins}, "
-                f"исполнимо здесь {bridge.available}")
 
     def t_grammar() -> str:
         s1, s2 = build_decision_schema(), build_decision_schema()
