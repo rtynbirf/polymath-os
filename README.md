@@ -3,7 +3,7 @@
 > **Open-source ideal repository.** Clone it. Run `make verify`. Every claim in this repo is reproducible by that one command. If it exits 0 — every claim holds. If non-zero — the claim that failed is shown.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Verify](https://img.shields.io/badge/make%20verify-30%2F30%20PASS-brightgreen)](./scripts/check.py)
+[![Verify](https://img.shields.io/badge/make%20verify-31%2F31%20PASS-brightgreen)](./scripts/check.py)
 [![SINGULYAR EIR v0.6](https://img.shields.io/badge/runtime-SINGULYAR%20EIR%20v0.6-blue)](./runtime/)
 [![Tests](https://img.shields.io/badge/tests-290%2F290%20PASS-brightgreen)](./runtime/tests/)
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
@@ -109,8 +109,9 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 | 28  | Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)                                                                              | `python scripts/check.py` (check 28)    | ✓      |
 | 29  | HOLOS agent v2.0 selftest 60/60 (stdlib-only)                                                                                 | `python scripts/check.py` (check 29)    | ✓      |
 | 30  | POLIMAT_PIPELINE v1.2 selftest 13/13 (v3.24.1)                                                                                | `python scripts/check.py` (check 30)    | ✓      |
+| 31  | POLIMAT-ARCHIVARIUS v2.1 selftest 30/30 (holon agent, genome v2)                                                              | `python scripts/check.py` (check 31)    | ✓      |
 
-**To reproduce**: clone this repo, run `make verify`. You will see the same 30/30 PASS result.
+**To reproduce**: clone this repo, run `make verify`. You will see the same 31/31 PASS result.
 
 ## Decree system (v3.6.0+ OPERATIONAL)
 

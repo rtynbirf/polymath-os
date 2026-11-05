@@ -782,6 +782,30 @@ def check_pipeline_selftest():
     return True, "13/13 green (verify-gate, token in memory, DCO, patch idempotency, 204-empty-body)"
 
 
+# ============================================================
+# CHECK 31: POLIMAT-ARCHIVARIUS selftest 30/30 (tooling/agents/)
+# ============================================================
+def check_polimat_archivarius_selftest():
+    """Холон-агент из контекста владельца: геном (Merkle DAG, 387 частей),
+    Рид–Соломон k=8-из-n=12, Дыхание (gossip-CRDT, сходимость к общему
+    корню), Суд (эхо-детектор: тройка адрес+корень+путь, trust scoring).
+    Selftest 30/30 — офлайн, stdlib-only, состояние во временном каталоге."""
+    d = REPO_ROOT / "tooling/agents/polimat-archivarius"
+    if not d.exists():
+        return False, "tooling/agents/polimat-archivarius missing"
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"  # claim 11: no *.pyc in tree
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120, env=env,
+    )
+    if r.returncode != 0:
+        return False, f"polimat-archivarius selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "30/30" not in r.stdout:
+        return False, f"expected '30/30', got:\n{r.stdout[-500:]}"
+    return True, "30/30 green (genome Merkle DAG, RS k-of-n + honest failure, gossip-CRDT, judge/echo-detector)"
+
+
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
     ("14. Pattern: counter-from-source (S2)", check_pattern_02_counter_from_source),
@@ -801,6 +825,7 @@ extra_checks = [
     ("28. Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)", check_agent_selftest),
     ("29. HOLOS agent v2.0 selftest 60/60 (stdlib-only)", check_holos_selftest),
     ("30. POLIMAT_PIPELINE v1.1 selftest 13/13 (v3.24.1)", check_pipeline_selftest),
+    ("31. POLIMAT-ARCHIVARIUS selftest 30/30 (genome v2)", check_polimat_archivarius_selftest),
 ]
 
 checks = [
