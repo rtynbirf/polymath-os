@@ -14,6 +14,13 @@
   **make verify: 26 → 28 claims** (claim 27: archivarius selftest 84/84;
   claim 28: agent selftest 130/130). Additive: runtime/src untouched,
   all previous 26 claims unchanged.
+- **feat(agents) — HOLOS agent v2.0**: `tooling/agents/holos-agent/` —
+  голографический холон с противогаллюцинационным контуром (шесть органов:
+  ГЕНОМ, МАНИФЕСТ-Меркла append-only, ТЕЛО, ЭСКИЗ HRR, ДЫХАНИЕ CRDT, СУД;
+  расширения: ПАМЯТЬ E/S/P/W/I, PERSISTENCE, ВЕБ-СЕНСОР Evidence). Only
+  stdlib, Python 3.8+, selftest 60/60 подключён к `make verify` (check 29,
+  claims 28 → 29). Корпус в пакет не входит (default-deny, ADR-0002) —
+  приватный, подаётся при запуске.
 - **docs(dossier) — RLHF annotator evidence pack**: `docs/RLHF_DOSSIER.md`
   (markdown hub, canon format) + self-contained artifacts in `docs/dossier/`
   (HTML, PDF, SHA-256 manifest). 7 claims → 4 statuses
