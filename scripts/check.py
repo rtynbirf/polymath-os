@@ -745,6 +745,23 @@ def check_agent_selftest():
         return False, f"expected '130/130', got:\n{r.stdout[-500:]}"
     return True, "130/130 green (constitution, trust ports T100-T103, persistence)"
 
+# ============================================================
+# CHECK 29: HOLOS agent v2.0 — голографический холон (60/60 selftest)
+# ============================================================
+def check_holos_selftest():
+    d = REPO_ROOT / "tooling" / "agents" / "holos-agent"
+    if not d.exists():
+        return False, "tooling/agents/holos-agent/ missing"
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120
+    )
+    if r.returncode != 0:
+        return False, f"holos selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "60/60 PASS" not in r.stdout:
+        return False, f"expected '60/60 PASS', got:\n{r.stdout[-500:]}"
+    return True, "60/60 green (геном, манифест-Меркла, тело, эскиз HRR, дыхание CRDT, суд, память E/S/P/W/I)"
+
 
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
@@ -763,6 +780,7 @@ extra_checks = [
     ("26. Decree signing: Ed25519 authorship, pure stdlib (ADR-0031, v3.20.0)", check_decree_signing),
     ("27. ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)", check_archivarius_selftest),
     ("28. Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)", check_agent_selftest),
+    ("29. HOLOS agent v2.0 selftest 60/60 (stdlib-only)", check_holos_selftest),
 ]
 
 checks = [
