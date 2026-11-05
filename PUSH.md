@@ -101,3 +101,12 @@ This repo is not "done". It's a starting point. The roadmap (`ROADMAP.md`) and l
 - New ADRs (0001-0012 exist, next is 0013+)
 
 **Совершенству нет предела — но каждая итерация должна проходить `make verify`.**
+
+## Автоматизация: ЗАЛИВКА.bat (push-bat)
+
+Ручной путь выше автоматизирован: [`scripts/push-bat/zalivka.bat`](scripts/push-bat/zalivka.bat) —
+Windows-батник с режимами `sync` / `patch` / `fixcrlf` / `push` / `force`.
+Токен остаётся на машине владельца (Git Credential Manager); транспорт
+работы без токена — патчи в `<репо>\_patches\`. Фантомные CRLF-диффы
+снимаются `renormalize` до коммита. Подробности и гарантии —
+[`scripts/push-bat/README.md`](scripts/push-bat/README.md).

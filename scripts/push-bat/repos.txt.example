@@ -1,0 +1,6 @@
+# repos.txt - по одному абсолютному пути на строку, # = комментарий
+# Пример:
+# C:\github\polymath-os
+# C:\github
+ous
+# D:\workuvson-rse2
