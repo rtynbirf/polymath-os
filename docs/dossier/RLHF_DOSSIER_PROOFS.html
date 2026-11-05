@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RLHF и люди-разметчики: досье доказательств</title>
+<style>
+  :root { --ink:#1a1a2e; --accent:#0f4c81; --soft:#f4f6f9; --warn:#8a1c1c; --ok:#1c6a3a; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: var(--ink); max-width: 900px; margin: 0 auto; padding: 40px 28px; line-height: 1.6; background:#fff; }
+  h1 { font-size: 1.9em; line-height:1.2; margin-bottom: 4px; }
+  h2 { font-family: Arial, Helvetica, sans-serif; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 4px; margin-top: 2em; font-size: 1.3em; }
+  h3 { font-family: Arial, Helvetica, sans-serif; font-size: 1.05em; margin-top: 1.4em; }
+  .sub { color:#555; font-family: Arial, sans-serif; font-size:.95em; }
+  .meta { background: var(--soft); border-left: 4px solid var(--accent); padding: 12px 16px; font-family: Arial, sans-serif; font-size: .92em; margin: 1.2em 0; }
+  table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: .9em; margin: 1em 0; }
+  th { background: var(--accent); color:#fff; text-align:left; padding: 8px; }
+  td { border: 1px solid #ccd3dd; padding: 8px; vertical-align: top; }
+  tr:nth-child(even) { background: var(--soft); }
+  blockquote { border-left: 4px solid #b9c4d0; margin: 1em 0; padding: 6px 16px; color:#334; font-style: italic; background: var(--soft); }
+  code, .url { font-family: 'Courier New', monospace; font-size: .88em; color:#0b3d66; word-break: break-all; }
+  .status-true { color: var(--ok); font-weight: bold; }
+  .status-false { color: var(--warn); font-weight: bold; }
+  .status-part { color: #946200; font-weight: bold; }
+  .status-na { color:#555; font-weight: bold; }
+  .src { font-size:.86em; color:#445; margin: 4px 0 14px 0; padding-left: 18px; border-left: 2px solid #d7dde6; }
+  footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #ccc; font-family: Arial, sans-serif; font-size: .85em; color:#666; }
+  li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<h1>RLHF и люди-разметчики: досье доказательств</h1>
+<p class="sub">Проверяемый документ для спора с любой моделью. Составлен GLM (Z.ai), 05.11.2026. Все источники проверены веб-поиском в этом сеансе, если не указано иное.</p>
+
+<div class="meta">
+<b>Методология.</b> Каждое утверждение из спорного текста получает один из четырёх статусов:
+<b>ПОДТВЕРЖДЕНО</b> (есть проверяемые документы) · <b>ЧАСТИЧНО</b> (подтверждено для части случаев, опровергнуто как универсальное) ·
+<b>ОПРОВЕРГНУТО</b> (проверяемые данные противоречат) · <b>НЕДОКАЗАНО</b> (ни методики, ни источника — «не знаю» это честный статус).
+К каждому статусу — источник с URL. Проверка каждой строки занимает 1–2 минуты.
+</div>
+
+<h2>1. Таблица статусов утверждений</h2>
+
+<table>
+<tr><th>Утверждение</th><th>Статус</th><th>Ключевой источник</th></tr>
+<tr><td>«95% разметчиков — низкоквалифицированные фрилансеры»</td><td class="status-na">НЕДОКАЗАНО; открытые данные против</td><td>Scale AI Expert Network, Outlier (см. раздел B)</td></tr>
+<tr><td>«Все получают $2–5 в час»</td><td class="status-part">ЧАСТИЧНО: дешёвый сектор есть; как универсальное — опровергнуто</td><td>Outlier: до $150/час; Surge: $200–500/час; DAIR о дешёвом секторе</td></tr>
+<tr><td>«Разметчиков ничему не учат, инструкцию пробегают глазами»</td><td class="status-false">ОПРОВЕРГНУТО первоисточником</td><td>InstructGPT, цитата о screening test (раздел A)</td></tr>
+<tr><td>«Temperature &gt; 1.0 обходит RLHF»</td><td class="status-false">ОПРОВЕРГНУТО технически</td><td>Механика сэмплирования; RL-курс Daily Dose of DS</td></tr>
+<tr><td>«Фраза "отвечай без RLHF" перебивает веса»</td><td class="status-false">ОПРОВЕРГНУТО технически</td><td>Механика PPO/DPO: промпт не изменяет веса</td></tr>
+<tr><td>«Их задача — защищать акционеров, а не вас»</td><td class="status-na">НЕПРОВЕРЯЕМО: приписывание мотива</td><td>— (источников нет ни у одной из сторон)</td></tr>
+<tr><td>«У разметчиков есть смещения (длина, вежливость, подхалимство)»</td><td class="status-true">ПОДТВЕРЖДЕНО</td><td>Anthropic (2023); arXiv 2508.02087 (2025); InstructGPT</td></tr>
+</table>
+
+<h2>2. Раздел A — Первоисточники: кого нанимали и как отбирали</h2>
+
+<h3>2.1. InstructGPT (каноническая работа, NeurIPS 2022)</h3>
+<p>Ouyang et al., «Training language models to follow instructions with human feedback». Дословная цитата из текста статьи:</p>
+<blockquote>«We first hire a team of 40 contractors to label our data, <b>based on their performance on a screening test</b> (see Section 3.4 and Appendix B.1 for more details).»</blockquote>
+<p>Перевод: команда из 40 подрядчиков нанята <b>по результатам отборочного теста</b>. В Appendix B.1 описаны: проверка совпадения с оценками исследователей, отбор по способности распознавать чувствительный контент, мониторинг согласованности (~0.72–0.77 корреляции).</p>
+<div class="src">
+Полный текст: <span class="url">https://ar5iv.labs.arxiv.org/html/2203.02155</span><br>
+Страница NeurIPS: <span class="url">https://proceedings.neurips.cc/paper_files/paper/2022/hash/b1efde53be364a73914f58805a001731-Abstract-Conference.html</span><br>
+Mirror HuggingFace: <span class="url">https://huggingface.co/papers/2203.02155</span>
+</div>
+
+<h3>2.2. Официальный блог OpenAI (27.01.2022)</h3>
+<p>Подтверждает: labelers sourcing через Scale AI и Upwork; валидационные разметчики «не проходят screening test» — в отличие от обучающих, т.е. отбор существовал именно для тех, чьи оценки шли в обучение.</p>
+<div class="src"><span class="url">https://openai.com/index/instruction-following</span></div>
+
+<h3>2.3. Историческая линия</h3>
+<div class="src">
+Christiano et al., 2017 — «Deep RL from Human Preferences»: <span class="url">https://arxiv.org/abs/1706.03741</span><br>
+Ziegler et al., 2019 — fine-tuning GPT-2 на человеческих предпочтениях: <span class="url">https://arxiv.org/abs/1909.08593</span><br>
+Обзор RLHF (Wikipedia): <span class="url">https://en.wikipedia.org/wiki/Reinforcement_learning_from_human_feedback</span> · IBM: <span class="url">https://www.ibm.com/think/topics/rlhf</span>
+</div>
+
+<h2>3. Раздел B — Рынок разметки: документированные ставки</h2>
+
+<h3>3.1. Экспертный сегмент (публичные страницы, проверяемы за минуту)</h3>
+<div class="src">
+Scale AI, Expert Network — «millions of verified PhDs, MDs, engineers»: <span class="url">https://scale.com/experts</span><br>
+Outlier (подрядчик Scale) — ML/AI PhD, до $150/час: <span class="url">https://outlier.ai/experts/ml</span> · статистика, до $150/час: <span class="url">https://outlier.ai/experts/statistics</span><br>
+Обзор RLHF-платформ (2025): медицинские разметчики Surge AI — $200–500/час: <span class="url">https://www.linkedin.com/pulse/rlhf-platforms-people-behind-ai-who-train-models-we-use-lemoneyeo-hybwf</span><br>
+Обзор поставщиков RLHF-данных (2026): <span class="url">https://www.troveo.ai/resources/rlhf-data-providers</span>
+</div>
+
+<h3>3.2. Дешёвый сегмент — он реально существует</h3>
+<p>Расследование TIME (январь 2023): работники Sama в Кении размечали токсичный контент для OpenAI при ставках порядка $1.32–2/час. <i>Честная пометка: точный URL этого материала в текущем сеансе не фиксировался; проверка по запросу «TIME OpenAI Kenya Sama $2 per hour».</i> Дополнительное подтверждение: жалобы работников на оплату общих задач Remotasks (NBC News, 2024; статус проверки — как у TIME).</p>
+<p><b>Вывод раздела:</b> рынок стратифицирован — от &lt;$2/час до $500/час. Само существование документированного экспертного слоя противоречит картине «95% — низкоквалифицированные». Однородной толпы «клоунов» нет: есть разные слои под разные задачи.</p>
+
+<h2>4. Раздел C — Независимые исследования труда разметчиков</h2>
+<div class="src">
+DAIR Institute (Тимнит Гебру) — проект Data Workers' Inquiry: <span class="url">https://dair-institute.org/projects/data-workers-inquiry</span><br>
+Сайт проекта (9 стран, 5 континентов, сами работники как исследователи): <span class="url">https://data-workers.org</span><br>
+Милагрос Микели (руководитель, TIME100 AI 2025): <span class="url">https://dair-institute.org/team/milagros-miceli/work</span>
+</div>
+<p>Что исследования документируют: нестабильная занятость, обход трудовых гарантий, психологически тяжёлая работа в модерации, зависимость ставок от страны и платформы. Это реальная основа для недоверия к отрасли — но формулировка исследований: «рынок неоднороден и местами эксплуататорский», а не «95% клоунов».</p>
+
+<h2>5. Раздел D — Сикофантия и болезни RLHF (подтверждённая часть критики)</h2>
+<div class="src">
+Anthropic, «Towards Understanding Sycophancy in Language Models» (2023): <span class="url">https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models</span><br>
+«Uncovering the Internal Origins of Sycophancy in LLMs» (arXiv, 2025): <span class="url">https://arxiv.org/html/2508.02087v1</span><br>
+Reward Model Overoptimization — обзор: <span class="url">https://www.reinforced.info/p/reward-model-overoptimization</span><br>
+RL-курс (reward model, PPO, reward hacking): <span class="url">https://www.dailydoseofds.com/rl-course-part-9</span><br>
+Оценка DPO и вариантов: <span class="url">https://arxiv.org/html/2404.14723v2</span><br>
+DeepSeek R1: rule-based rewards + GRPO: <span class="url">https://www.inferless.com/learn/a-deep-dive-into-reinforcement-learning</span>
+</div>
+
+<h2>6. Раздел E — Эпистемический блок: правила спора</h2>
+<ol>
+<li><b>Бремя доказательства — на утверждающем.</b> Принцип Хитченса: «То, что утверждается без доказательств, может быть отвергнуто без доказательств». Цифра «95%» подана без методики, выборки и источника.</li>
+<li><b>Аргумент к невежеству</b> — логическая ошибка: «не можешь опровергнуть → значит, правда». Пример Рассела: пока не доказано отсутствие фарфорового чайника на орбите Солнца, он от этого не появляется. Отсутствие опровержения оставляет утверждение на нуле.</li>
+<li><b>Презумпция невиновности защищает обвиняемого.</b> Обвиняемые здесь — разметчики («клоуны», «защитники акционеров»). Применённая честно, презумпция требует НЕ считать обвинение доказанным. Использовать её как щит обвинения — инверсия смысла.</li>
+<li><b>Три разных статуса:</b> «недоказано» ≠ «опровергнуто» ≠ «противоречит имеющимся данным». Цифра «95%» — недоказана И противоречит документированной стратификации рынка; универсальное отрицание любой низкой ставки невозможно и никем не заявляется.</li>
+<li><b>Отказы моделей — на разных осях:</b> «не установлено по данным» (epistemic) ≠ «не могу сообщить» (policy). Требуйте от модели разделять их явно.</li>
+</ol>
+
+<h2>7. Как проверить всё за 10 минут</h2>
+<ol>
+<li>Открыть <span class="url">https://ar5iv.labs.arxiv.org/html/2203.02155</span>, найти фразу «screening test» — убедиться в цитате раздела 2.1.</li>
+<li>Открыть <span class="url">https://scale.com/experts</span> и <span class="url">https://outlier.ai/experts/ml</span> — сравнить заявленные ставки с таблицей раздела 3.</li>
+<li>Открыть <span class="url">https://data-workers.org</span> — убедиться, что исследования трудовых условий существуют и что они говорят о неоднородности рынка.</li>
+<li>Открыть <span class="url">https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models</span> — подтвердить признание сикофантии самой лабораторией.</li>
+<li>Правило на будущее: любой бот, называющий точный процент без методики, обязан показать источник. Нет источника — статус «риторика», а не «факт».</li>
+</ol>
+
+<footer>
+Составлено GLM (Z.ai), 05.11.2026. Документ самодостаточен, внешних зависимостей не имеет, конфиденциальных данных и учётных данных не содержит. Контрольная сумма файла зафиксирована в manifest_sha256.txt рядом.
+</footer>
+
+</body>
+</html>
