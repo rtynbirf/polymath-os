@@ -82,10 +82,8 @@ import time
 import urllib.error
 import urllib.request
 import urllib.parse
+import contextlib
 import fnmatch
-import csv
-import io
-import stat as _stat
 import zipfile
 import tarfile
 from dataclasses import dataclass, field, asdict, replace
@@ -768,7 +766,7 @@ def _t_http_get(cfg: "Config", args: Dict[str, Any]) -> Observation:
 
 def _strip_html_to_text(raw: str, limit: int = 12000) -> str:
     """Дешёвое безопасное извлечение текста: без исполнения HTML/JS."""
-    raw = re.sub(r"(?is)<script\b.*?</script>|<style\b.*?</style>|<noscript\b.*?</noscript>", " ", raw)
+    raw = re.sub(r"(?is)<script\b.*?</script\s*>|<style\b.*?</style\s*>|<noscript\b.*?</noscript\s*>", " ", raw)
     raw = re.sub(r"(?is)<[^>]+>", " ", raw)
     raw = html_unescape(raw)
     return re.sub(r"\s+", " ", raw).strip()[:limit]
@@ -1810,8 +1808,7 @@ class ProofCompiler:
                 else:
                     _raw=str(row.get("artifact") or "")
                     if _raw and Path(_raw).is_file():
-                        try: _edges[_raw]=sha256_hex(Path(_raw).read_bytes())
-                        except OSError: pass
+                        with contextlib.suppress(OSError): _edges[_raw]=sha256_hex(Path(_raw).read_bytes())
                 self.evidence.append(EvidenceObject(
                     id=f"evidence:step:{row.get('step')}:{row.get('action')}",
                     claim_id="",
@@ -2062,8 +2059,7 @@ class FalsificationProbe:
                         for eid in dn.get("inputs",[]):
                             parts=str(eid).split(":")
                             if len(parts)>=3 and parts[1]=="step":
-                                try: steps.append(int(parts[2]))
-                                except ValueError: pass
+                                with contextlib.suppress(ValueError): steps.append(int(parts[2]))
             if steps: ev_step[cid]=max(steps)
         for cid in sorted(proof.claim_ids):
             if cid not in node_claims or cid not in ev_step: continue
@@ -2103,10 +2099,9 @@ class ProofAnchorLedger:
     def append(self,payload:Dict[str,Any])->str:
         prev="0"*64
         if self.path.exists():
-            try:
+            with contextlib.suppress(Exception):
                 last=self.path.read_text(encoding="utf-8").splitlines()[-1]
                 prev=json.loads(last).get("hash",prev)
-            except Exception: pass
         rec={"ts":now_iso(),"prev_hash":prev,"payload":payload}
         rec["hash"]=sha256_hex(canonical_json(rec))
         with self.path.open("a",encoding="utf-8") as f: f.write(canonical_json(rec)+"\n")
@@ -2849,7 +2844,7 @@ class ProofCarryingGovernor:
         reconciliation=EpistemicReconciler.reconcile(state,proof)
         StateCAS.assert_unchanged(state,proof)
         if reconciliation["world_verdict"] != "VERIFIED_MATCH":
-            mismatches=RevocationCascade.apply(state,proof)
+            RevocationCascade.apply(state,proof)
             raise ProofCarryingCommitError("COMMIT: WorldState mismatch")
         # v3.8.0 ROOT TRUST GATE (закрытие N-RT3 «мёртвый слой»): дуга
         # ROOT EPOCH CHAIN → Proof → CAS → Revocation → Reconciliation → COMMIT
@@ -2956,8 +2951,7 @@ class ProvenanceLedger:
         if not self.path.exists(): return []
         out=[]
         for ln in self.path.read_text(encoding="utf-8").splitlines()[-k:]:
-            try: out.append(json.loads(ln))
-            except Exception: pass
+            with contextlib.suppress(Exception): out.append(json.loads(ln))
         return out
 
 
@@ -3469,11 +3463,9 @@ class Agent:
                               if "(0 символов)" not in f).lower()
         art_blob = ""
         for pth in state.get("_artifact_paths", []):
-            try:
+            with contextlib.suppress(Exception):
                 art_blob += Path(pth).read_text(encoding="utf-8",
                                                 errors="replace").lower() + "\n"
-            except Exception:
-                pass
         missing = []
         for crit in state.get("criteria", []):
             tokens = [t for t in re.findall(r"[\w\./\-]+", crit.lower()) if len(t) >= 4]
@@ -3581,7 +3573,6 @@ def selftest() -> int:
             cfg, _ = _fresh_cfg(tmp)
             audit = AuditChain(Path(tmp) / "a.jsonl")
             gov = Governor(cfg, audit)
-            errs = []
             e1 = gov.validate_args(gov.registry["write_file"], {"path": 123, "content": "x"})
             e2 = gov.validate_args(gov.registry["write_file"], {"path": "f.txt"})
             e3 = gov.validate_args(gov.registry["write_file"], {"path": "f", "content": "", "hack": 1})
@@ -3601,7 +3592,6 @@ def selftest() -> int:
             tampered["record"]["n"] = 999
             lines[2] = json.dumps(tampered, ensure_ascii=False)
             path.write_text("\n".join(lines), encoding="utf-8")
-            ac2 = AuditChainVerifyProbe
             ok2, bad2 = AuditChainVerifyProbe.verify_from(path)
             assert ok2 is False and bad2 == 2, f"подмена не детектирована: {(ok2, bad2)}"
             return "подмена записи №3 детектирована"
@@ -4048,11 +4038,9 @@ def selftest() -> int:
             srv=http.server.HTTPServer(("127.0.0.1",0), Redirect)
             th=threading.Thread(target=srv.serve_forever, daemon=True); th.start()
             try:
-                try:
+                with contextlib.suppress(PolicyViolation):
                     obs=_t_http_get(cfg, {"url": f"http://127.0.0.1:{srv.server_address[1]}/"})
                     assert not obs.ok
-                except PolicyViolation:
-                    pass
             finally: srv.shutdown()
             return "HTTP redirect не следует автоматически в потенциально внутренний адрес"
 
@@ -4111,7 +4099,7 @@ def selftest() -> int:
         with tempfile.TemporaryDirectory(prefix="poly_t25_") as td:
             pl=ProvenanceLedger(Path(td)/"provenance.jsonl")
             a=pl.append("observation", task_id="t25", step=1, tool="read_file", kind="read", content_hash="abc")
-            b=pl.append("verification", task_id="t25", outcome="verified", evidence_id=a["id"])
+            pl.append("verification", task_id="t25", outcome="verified", evidence_id=a["id"])
             rows=pl.recent(5)
             assert rows[-2]["id"] == a["id"] and rows[-1]["evidence_id"] == a["id"]
             return "observation→verification causal связь сохраняется в append-only provenance ledger"
@@ -4213,7 +4201,7 @@ def selftest() -> int:
         with tempfile.TemporaryDirectory(prefix="poly_t42_") as td:
             cfg,_=_fresh_cfg(td); gov=Governor(cfg, AuditChain(Path(td)/"a.jsonl"), CatalogBridge(""))
             spec=FormalGoalCompiler().compile_spec("создай файл",gov.registry,CapabilityPlanner(CapabilityGraph(gov.registry)))
-            eg=ExecutionGraph(spec).compile(); st={"execution_graph":{}}
+            eg=ExecutionGraph(spec).compile()
             eg.transition("preflight"); eg.transition("execute"); assert eg.state=="execute"
             return "execution state machine имеет корректный runtime-контур"
 
@@ -4562,8 +4550,7 @@ def selftest() -> int:
         p=ProofObject("p","verified",["c"],["e"],"r",[],"1",
           [{"id":"c","kind":"claim","claim_id":"c","inputs":["e"],"rule_id":"r"}],[],{"e":"h"})
         state={"falsification":[{"claim_id":"c","verdict":"CONTESTED","reason":"contradicting source"}]}
-        try: FalsificationProbe.probe(state,p)["status"] == "CLEAR"
-        except Exception: pass
+        with contextlib.suppress(Exception): FalsificationProbe.probe(state,p)
         assert FalsificationProbe.probe(state,p)["status"]=="CONTESTED"
         return "CONTESTED блокирует поддержку"
 

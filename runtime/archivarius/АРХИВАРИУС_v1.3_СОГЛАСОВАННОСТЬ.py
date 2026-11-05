@@ -40,8 +40,8 @@ Selftest: 77/77 PASS (60 унаследованы + 17 новых: три про
 """
 
 import hashlib
+import contextlib
 import json
-import struct
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
@@ -858,11 +858,9 @@ class Отражение:
                                               s.birth_sig or "")]
         strict_ok = 0
         for s in agent.shards:
-            try:
+            with contextlib.suppress(Exception):
                 if agent.judge_strict(agent.claim_of(s)) == Verdict.ЧАСТЬ:
                     strict_ok += 1
-            except Exception:
-                pass
         journal = [e.data.get("verdict") for e in agent.manifest.entries
                    if e.data.get("type") == "verdict"]
         contradictions = []
@@ -1162,7 +1160,7 @@ def selftest():
     check(7, agent.manifest.root() != "", "Добавление записи меняет корень")
     
     old_root = agent.manifest.root()
-    entry2 = agent.manifest.append({"test": "data2"})
+    agent.manifest.append({"test": "data2"})
     check(8, agent.manifest.root() != old_root, "Новая запись даёт новый корень")
     
     check(9, len(agent.manifest.roots_history) == 3, "История корней append-only (genesis + 2)")
@@ -1280,7 +1278,7 @@ def selftest():
     tmpdir = tempfile.mkdtemp(prefix="arhiv_")
     agent_p = Archivarius()
     s1 = agent_p.birth("type_p", {"content": "важные данные"})
-    s2 = agent_p.birth("type_q", {"content": "ещё данные"})
+    agent_p.birth("type_q", {"content": "ещё данные"})
     fpath = _os.path.join(tmpdir, "whole.json")
     Persistence.save(agent_p, fpath)
     check(37, _os.path.exists(fpath) and not _os.path.exists(fpath + ".tmp"),
@@ -1298,7 +1296,8 @@ def selftest():
     }
     check(40, loaded.judge(claim_loaded) == Verdict.ЧАСТЬ, "Суд после LOAD: своя заявка → ЧАСТЬ")
 
-    bad = json.loads(open(fpath, encoding="utf-8").read())
+    with open(fpath, encoding="utf-8") as fh:
+        bad = json.loads(fh.read())
     bad["manifest"]["entries"][1]["data"]["body"]["content"] = "подделка"
     fpath_bad = _os.path.join(tmpdir, "bad.json")
     with open(fpath_bad, "w", encoding="utf-8") as f:
@@ -1483,7 +1482,8 @@ def selftest():
     check(73, reborn13.judge_strict(reborn13.claim_of(reborn13.shards[1])) == Verdict.ЧАСТЬ
           and reborn13.neighbor_audit()["ok"],
           "LOAD v1.3: строгий суд → ЧАСТЬ, цепь соседей цела, подписи пересчитаны")
-    bad_sig = json.loads(open(fpath13, encoding="utf-8").read())
+    with open(fpath13, encoding="utf-8") as fh:
+        bad_sig = json.loads(fh.read())
     bad_sig["shards"][1]["birth_sig"] = hash_str("подделка_в_носителе")
     fp_bad = _os.path.join(tmpdir, "bad_sig.json")
     with open(fp_bad, "w", encoding="utf-8") as f:
@@ -1493,7 +1493,8 @@ def selftest():
         check(74, False, "Тамперинг подписи рождения в носителе → LoadError")
     except LoadError:
         check(74, True, "Тамперинг подписи рождения в носителе → LoadError")
-    bad_nb = json.loads(open(fpath13, encoding="utf-8").read())
+    with open(fpath13, encoding="utf-8") as fh:
+        bad_nb = json.loads(fh.read())
     bad_nb["shards"][1]["prev_sid"] = "shard_фантом"
     fp_bad2 = _os.path.join(tmpdir, "bad_nb.json")
     with open(fp_bad2, "w", encoding="utf-8") as f:
@@ -1528,7 +1529,8 @@ def selftest():
     fpath_d = _os.path.join(tmpdir, "whole_d.json")
     Persistence.save(agent_d, fpath_d)
 
-    bad_body = json.loads(open(fpath_d, encoding="utf-8").read())
+    with open(fpath_d, encoding="utf-8") as fh:
+        bad_body = json.loads(fh.read())
     bad_body["shards"][0]["body"] = {"с": "подделка тела"}
     fp_d = _os.path.join(tmpdir, "bad_body_shard.json")
     with open(fp_d, "w", encoding="utf-8") as f:
@@ -1554,7 +1556,8 @@ def selftest():
     check(80, agent_d.unseal_document(swapped) == doc_d,
           "D2: подменённые тела кусков отвергнуты судом → документ собирается честно, без молчаливого искажения")
 
-    bad_del = json.loads(open(fpath_d, encoding="utf-8").read())
+    with open(fpath_d, encoding="utf-8") as fh:
+        bad_del = json.loads(fh.read())
     del bad_del["shards"][0]
     fp_dd = _os.path.join(tmpdir, "bad_del.json")
     with open(fp_dd, "w", encoding="utf-8") as f:
@@ -1582,10 +1585,11 @@ def selftest():
           "D5: пустой манифест + index=-1 → ОСКОЛОК, а не IndexError")
 
     sketch_fails = 0
-    for field, value in (("n_parts", 999), ("manifest_root", "ФЕЙК-КОРЕНЬ")):
-        bsk = json.loads(open(fpath_d, encoding="utf-8").read())
-        bsk["sketches"][0][field] = value
-        fp_sk = _os.path.join(tmpdir, "bad_sketch_" + field + ".json")
+    for fld, value in (("n_parts", 999), ("manifest_root", "ФЕЙК-КОРЕНЬ")):
+        with open(fpath_d, encoding="utf-8") as fh:
+            bsk = json.loads(fh.read())
+        bsk["sketches"][0][fld] = value
+        fp_sk = _os.path.join(tmpdir, "bad_sketch_" + fld + ".json")
         with open(fp_sk, "w", encoding="utf-8") as f:
             json.dump(bsk, f, ensure_ascii=False)
         try:

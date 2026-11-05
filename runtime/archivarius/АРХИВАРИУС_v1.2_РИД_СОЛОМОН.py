@@ -28,7 +28,6 @@ Selftest: 60/60 PASS (52 унаследованы + 8 новых: erasure coding
 
 import hashlib
 import json
-import struct
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
@@ -838,7 +837,7 @@ def selftest():
     check(7, agent.manifest.root() != "", "Добавление записи меняет корень")
     
     old_root = agent.manifest.root()
-    entry2 = agent.manifest.append({"test": "data2"})
+    agent.manifest.append({"test": "data2"})
     check(8, agent.manifest.root() != old_root, "Новая запись даёт новый корень")
     
     check(9, len(agent.manifest.roots_history) == 3, "История корней append-only (genesis + 2)")
@@ -956,7 +955,7 @@ def selftest():
     tmpdir = tempfile.mkdtemp(prefix="arhiv_")
     agent_p = Archivarius()
     s1 = agent_p.birth("type_p", {"content": "важные данные"})
-    s2 = agent_p.birth("type_q", {"content": "ещё данные"})
+    agent_p.birth("type_q", {"content": "ещё данные"})
     fpath = _os.path.join(tmpdir, "whole.json")
     Persistence.save(agent_p, fpath)
     check(37, _os.path.exists(fpath) and not _os.path.exists(fpath + ".tmp"),
@@ -974,7 +973,8 @@ def selftest():
     }
     check(40, loaded.judge(claim_loaded) == Verdict.ЧАСТЬ, "Суд после LOAD: своя заявка → ЧАСТЬ")
 
-    bad = json.loads(open(fpath, encoding="utf-8").read())
+    with open(fpath, encoding="utf-8") as fh:
+        bad = json.loads(fh.read())
     bad["manifest"]["entries"][1]["data"]["body"]["content"] = "подделка"
     fpath_bad = _os.path.join(tmpdir, "bad.json")
     with open(fpath_bad, "w", encoding="utf-8") as f:

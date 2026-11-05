@@ -15,10 +15,10 @@ import sys
 import tempfile
 import hashlib
 
-BASE = "/home/z/my-project"
-V13 = BASE + "/download/АРХИВАРИУС_v1.3_СОГЛАСОВАННОСТЬ.py"
-V11 = BASE + "/download/АРХИВАРИУС_v1.1_ПЕРЕЖИВАНИЕ.py"
-SUMS = [BASE + "/download/SHA256SUMS_task19.txt", BASE + "/download/SHA256SUMS_task20.txt"]
+HERE = os.path.dirname(os.path.abspath(__file__))  # runtime/archivarius/
+V13 = os.path.join(HERE, "АРХИВАРИУС_v1.3_СОГЛАСОВАННОСТЬ.py")
+V11 = os.path.join(HERE, "АРХИВАРИУС_v1.1_ПЕРЕЖИВАНИЕ.py")
+SUMS = [os.path.join(HERE, "SHA256SUMS_ancestors.txt")]
 
 passed, failed = 0, 0
 
@@ -102,24 +102,31 @@ if not ok3:
 check(3, ok3, "Subprocess ×2: процесс-1 сохранил и умер → процесс-2: strict ЧАСТЬ, цепь цела, документ собран, корень совпал")
 
 # --- V04-V06: тамперинг носителя ---
-good = json.loads(open(fpath, encoding="utf-8").read())
+with open(fpath, encoding="utf-8") as fh:
+    good = json.loads(fh.read())
 
 bad = json.loads(json.dumps(good)); bad["shards"][0]["birth_sig"] = "0" * 64
-fp = os.path.join(tmpdir, "bad_sig.json"); json.dump(bad, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir, "bad_sig.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bad, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(4, False, "Тамперинг birth_sig в носителе → LoadError")
 except m.LoadError:
     check(4, True, "Тамперинг birth_sig в носителе → LoadError")
 
 bad = json.loads(json.dumps(good)); bad["shards"][2]["next_sid"] = "shard_фантом"
-fp = os.path.join(tmpdir, "bad_next.json"); json.dump(bad, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir, "bad_next.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bad, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(5, False, "Тамперинг next_sid в носителе → LoadError")
 except m.LoadError:
     check(5, True, "Тамперинг next_sid в носителе → LoadError")
 
 bad = json.loads(json.dumps(good)); bad["manifest"]["entries"][1]["data"]["body"]["с"] = "подделка"
-fp = os.path.join(tmpdir, "bad_body.json"); json.dump(bad, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir, "bad_body.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bad, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(6, False, "Тамперинг записи манифеста → LoadError (регрессия v1.1)")
 except m.LoadError:
@@ -145,7 +152,8 @@ alive = [s for s in sealed if s.body["piece_index"] in (1, 3, 4)]
 check(8, agent.unseal_document(alive) == doc, "RS-регрессия: 2 из 5 мертвы → документ собран из 3")
 
 # --- V09: genesis_secret не хранится в носителе ---
-carrier = open(fpath, encoding="utf-8").read()
+with open(fpath, encoding="utf-8") as fh:
+    carrier = fh.read()
 check(9, "genesis_secret" not in carrier and "геном_рождения" not in carrier,
       "Секрет рождения НЕ хранится в носителе (только пересчёт)")
 
@@ -183,22 +191,26 @@ except m.LoadError:
     check(12, r5.returncode == 0, "Носитель v1.1 → v1.3: LoadError (гейт формата, честная эволюция)")
 
 # --- V13: регрессия предков: selftest + sha256 ---
-r6 = subprocess.run([sys.executable, BASE + "/download/АРХИВАРИУС_v1.0r_ЯДРО.py", "--selftest"], capture_output=True, text=True, timeout=300)
+r6 = subprocess.run([sys.executable, os.path.join(HERE, "АРХИВАРИУС_v1.0r_ЯДРО.py"), "--selftest"], capture_output=True, text=True, timeout=300)
 r7 = subprocess.run([sys.executable, V11, "--selftest"], capture_output=True, text=True, timeout=300)
-r8 = subprocess.run([sys.executable, BASE + "/download/АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py", "--selftest"], capture_output=True, text=True, timeout=300)
+r8 = subprocess.run([sys.executable, os.path.join(HERE, "АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py"), "--selftest"], capture_output=True, text=True, timeout=300)
 ancestors_ok = ("36/36 PASS" in r6.stdout and "52/52 PASS" in r7.stdout and "60/60 PASS" in r8.stdout)
 check(13, ancestors_ok, "Регрессия предков: v1.0r 36/36, v1.1 52/52, v1.2 60/60")
 
 fixed = {}
 for sfile in SUMS:
-    for line in open(sfile, encoding="utf-8"):
-        h, name = line.split()
-        fixed[name] = h
-targets = {"АРХИВАРИУС_v1.0r_ЯДРО.py": BASE + "/download/АРХИВАРИУС_v1.0r_ЯДРО.py",
+    with open(sfile, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            h, name = line.split()
+            fixed[name] = h
+targets = {"АРХИВАРИУС_v1.0r_ЯДРО.py": os.path.join(HERE, "АРХИВАРИУС_v1.0r_ЯДРО.py"),
            "АРХИВАРИУС_v1.1_ПЕРЕЖИВАНИЕ.py": V11,
-           "АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py": BASE + "/download/АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py"}
+           "АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py": os.path.join(HERE, "АРХИВАРИУС_v1.2_РИД_СОЛОМОН.py")}
 hashes_ok = all(sh256(p) == fixed[n] for n, p in targets.items())
-check(14, hashes_ok, "sha256 предков байт-в-байт совпали с SHA256SUMS_task19/20 (v1.3 их не тронул)")
+check(14, hashes_ok, "sha256 предков совпали с SHA256SUMS_ancestors.txt (печать v1.3.1 после CodeQL-гигиены)")
 
 # --- V15: demo EXIT=0 ---
 r9 = subprocess.run([sys.executable, V13, "--demo"], capture_output=True, text=True, timeout=300)
@@ -211,24 +223,31 @@ agent_d = A()
 agent_d.birth("д", {"с": "доктрина"})
 fd = os.path.join(tmpdir2, "whole_d.json")
 m.Persistence.save(agent_d, fd)
-good_d = json.loads(open(fd, encoding="utf-8").read())
+with open(fd, encoding="utf-8") as fh:
+    good_d = json.loads(fh.read())
 
 bd = json.loads(json.dumps(good_d)); bd["shards"][0]["body"] = {"с": "фальшивка"}
-fp = os.path.join(tmpdir2, "bd.json"); json.dump(bd, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir2, "bd.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bd, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(16, False, "D1-закрыт: подмена тела шарда в носителе → LoadError")
 except m.LoadError:
     check(16, True, "D1-закрыт: подмена тела шарда в носителе → LoadError")
 
 bd = json.loads(json.dumps(good_d)); del bd["shards"][0]
-fp = os.path.join(tmpdir2, "bd2.json"); json.dump(bd, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir2, "bd2.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bd, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(17, False, "D3-закрыт: удаление шарда из носителя → LoadError")
 except m.LoadError:
     check(17, True, "D3-закрыт: удаление шарда из носителя → LoadError")
 
 bd = json.loads(json.dumps(good_d)); bd["sketches"][0]["n_parts"] = 999
-fp = os.path.join(tmpdir2, "bd3.json"); json.dump(bd, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+fp = os.path.join(tmpdir2, "bd3.json")
+with open(fp, "w", encoding="utf-8") as fh:
+    json.dump(bd, fh, ensure_ascii=False)
 try:
     m.Persistence.load(fp); check(18, False, "D6-закрыт: подделка эскиза → LoadError")
 except m.LoadError:
