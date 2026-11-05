@@ -4,6 +4,27 @@
 
 ### Added
 
+- **feat(agents) — POLIMAT-ARCHIVARIUS v2.1, holon agent of the owner's
+  context**: `tooling/agents/polimat-archivarius/` — холон, собранный из
+  корпуса владельца (архив «СУММАРНЫЕ ОТВЕТЫ НА ГАЛЛОГРАММУ.txt» + досье
+  «СУММАРНЫЕ ОТВЕТЫ НА ГАЛЛОГРАММУ_1.txt» (HOLOS, протокол «Одно другое
+  не исключает», POLYMAT-HOLO, HHA) + КОНСТИТУЦИЯ_ХОЛОНА.md): 387
+  content-addressed частей, геном-корень `38f6d815…`. Пять органов живут
+  в коде (pure stdlib): ГЕНОМ (Merkle DAG, уникальность адресов сквозь
+  файлы), ТЕЛО (Рид–Соломон k=8-из-n=12, матрица Коши MDS над GF(2^8)),
+  ДЫХАНИЕ (gossip-CRDT G-set: секторная рождаемость по Уолперту +
+  перекрытие, слияние дельт, сходимость к единому корню без лидера),
+  СУД (эхо-детектор: тройка членства адрес+корень+путь Меркла; эхо не
+  изгоняется — не допускается к сборке; trust scoring, карантин),
+  ПРОЕКЦИЯ (TF-IDF retrieval с русским стеммером; ядро-цикл 5 фаз на
+  каждый ответ; цитаты несут Merkle-доказательства, гомоглифы hex-id
+  нормализуются). Офлайн selftest 30/30 (генезис, подмена рвёт
+  доказательство, k-из-n + честный отказ, gossip-сходимость, суд: 4
+  кейса, журнал, детерминизм, self-scan секретов). Корпус санитизирован:
+  истёкшие presigned S3-креды заменены на REDACTED (6 замен; текст не
+  тронут). **make verify: 30 → 31 claims** (claim 31). Additive: no
+  previous claim touched. README badge un-drifted to 31/31.
+
 - **feat(pipeline) — POLIMAT_PIPELINE v1.1 as canon tool**: `tooling/pipeline/`
   — the owner's fill-in mechanism (`POLIMAT_AUTO_PUSH/FINISH/MERGE.bat`,
   snapshot `123.7z`) reproduced as a Linux canon tool: 7 commands
