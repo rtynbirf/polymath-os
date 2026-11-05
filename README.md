@@ -108,7 +108,7 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 | 27  | ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)                                                                                   | `python scripts/check.py` (check 27)    | ✓      |
 | 28  | Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)                                                                              | `python scripts/check.py` (check 28)    | ✓      |
 | 29  | HOLOS agent v2.0 selftest 60/60 (stdlib-only)                                                                                 | `python scripts/check.py` (check 29)    | ✓      |
-| 30  | POLIMAT_PIPELINE v1.1 selftest 12/12 (v3.24.0)                                                                                | `python scripts/check.py` (check 30)    | ✓      |
+| 30  | POLIMAT_PIPELINE v1.2 selftest 13/13 (v3.24.1)                                                                                | `python scripts/check.py` (check 30)    | ✓      |
 
 **To reproduce**: clone this repo, run `make verify`. You will see the same 30/30 PASS result.
 

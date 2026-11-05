@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-POLIMAT_PIPELINE v1.1 — Linux-канон механизма заливки в репо.
+POLIMAT_PIPELINE v1.2 — Linux-канон механизма заливки в репо.
+v1.2: дефект D2 закрыт — api_req возвращает {} на пустое тело (204
+No Content при DELETE ветки после merge; поймано машиной в живом merge
+PR#17, доказано T13).
 v1.1: дефект D1 закрыт — идемпотентность патчей по СОДЕРЖИМОМУ
 (git apply --reverse --check), а не по строке «already applied», которую
 git не печатает (реальное сообщение — «patch does not apply»; поймано
@@ -91,9 +94,13 @@ def api_req(method: str, path: str, body: dict | None = None):
                  "Accept": "application/vnd.github+json"})
     try:
         with urllib.request.urlopen(req) as r:
-            return json.loads(r.read().decode())
+            raw = r.read().decode()
+            # v1.2 D2: 204 No Content (DELETE ветки после merge) — пустое тело,
+            # парсер обязан вернуть {}, а не падать JSONDecodeError (доказано T13)
+            return json.loads(raw) if raw.strip() else {}
     except urllib.error.HTTPError as e:
-        return json.loads(e.read().decode() or "{}")
+        raw = e.read().decode() or "{}"
+        return json.loads(raw) if raw.strip() else {}
 
 
 def cmd_prepare(a):
