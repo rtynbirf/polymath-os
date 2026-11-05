@@ -20,10 +20,29 @@
     "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.4",
     "@changesets/cli": "^2.27.0",
-    "turbo": "^2.11.10",
-    "typescript": "^5.5.0",
     "prettier": "^3.3.0",
-    "@biomejs/biome": "^2.6.4"
+    "turbo": "^2.11.10",
+    "typescript": "^5.5.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp@<0.35.0": ">=0.35.0",
+      "@xmldom/xmldom@>=0.9.0 <=0.9.11": ">=0.9.12",
+      "toml@<4.2.0": ">=4.2.0",
+      "toml@<4.1.2": ">=4.1.2",
+      "@xmldom/xmldom@>=0.9.0-beta.1 <=0.9.11": ">=0.9.12",
+      "@xmldom/xmldom@>=0.9.0-beta.9 <=0.9.10": ">=0.9.11",
+      "@xmldom/xmldom@>=0.9.0 <=0.9.10": ">=0.9.11",
+      "@xmldom/xmldom@>=0.9.10 <=0.9.11": ">=0.9.12",
+      "sharp@<0.35.4": ">=0.35.4",
+      "katex@>=0.11.0 <0.18.2": ">=0.18.2",
+      "sharp@<0.35.5": ">=0.35.5",
+      "toml@<=5.0.0": ">=5.0.1",
+      "satori@>=0.0.27 <0.33.5": ">=0.33.5",
+      "minimatch@>=7.0.0 <11.0.1": ">=11.0.1",
+      "fflate@<0.7.5": ">=0.7.5"
+    }
   }
 }
