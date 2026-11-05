@@ -15,6 +15,7 @@
 ### Changed
 
 - **chore(deps) — security overrides in pnpm**: 24 advisories (19 high, 4 moderate, 1 low) → 0. `pnpm.overrides` for transitive deps of `quartz` (github dep): sharp ≥0.35.5, @xmldom/xmldom ≥0.9.12, toml ≥5.0.1, katex ≥0.18.2, minimatch ≥11.0.1, satori ≥0.33.5, fflate ≥0.7.5. Validated: `pnpm install --frozen-lockfile`, make verify 26/26, turbo lint + typecheck.
+- **chore(deps) — decree-portal (electron) ^31.0.0 → ^45.2.3**: закрыты 2 advisory (high: electron, extract-zip); добавлен package-lock.json для точного сканирования Dependabot. npm audit: 0 vulnerabilities.
 
 ## [v3.20.0] — 2026-10-17 (FULLY OPERATIONAL — ADR-0031 decree signing)
 
