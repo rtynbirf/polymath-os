@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SELFTEST инструмента POLIMAT_PIPELINE (claim #29 канона polymath-os).
-12 машинных проверок офлайн-семантики механизма заливки: БЕЗ сети,
-БЕЗ токена, БЕЗ GitHub. Печатает «12/12 PASS» и EXIT=0; первый провал —
+SELFTEST инструмента POLIMAT_PIPELINE (claim #30 канона polymath-os).
+13 машинных проверок офлайн-семантики механизма заливки: БЕЗ сети,
+БЕЗ токена, БЕЗ GitHub. Печатает «13/13 PASS» и EXIT=0; первый провал —
 подробности и EXIT=1. Все временные репо — в tempfile и стираются.
 
-Покрытие (T01–T12): синтаксис; целостность канона 9 шагов; ремонт
+Покрытие (T01–T13): синтаксис; целостность канона 9 шагов; ремонт
 rebase-мусора; секрет только в памяти процесса; идентичность коммитов
 (дефолт DCO + переопределение env); CLI 7 подкоманд; гигиена (0 ghp_);
 verify-гейт ОТКРЫТ; verify-гейт ЗАКРЫТ (пуш блокирован); коммит с DCO
 и идемпотентность «изменений нет»; идемпотентность патча ПО СОДЕРЖИМОМУ
-(git apply --reverse --check, дефект D1 v1.0 закрыт).
+(git apply --reverse --check, дефект D1 v1.0 закрыт); пустое тело 204
+(DELETE ветки) не роняет api_req (дефект D2 v1.1 закрыт).
 """
 import subprocess
 import sys
@@ -25,7 +26,7 @@ sys.path.insert(0, str(HERE))
 import polimat_pipeline as pp  # noqa: E402
 
 PASSED = 0
-TOTAL = 12
+TOTAL = 13
 
 
 def ok(n, name):
@@ -204,13 +205,44 @@ def t12():
         assert cnt == "2", f"дубль коммита: HEAD count={cnt}"
 
 
+# T13 — пустое тело 204 No Content (DELETE ветки после merge) не роняет
+# api_req: парсер обязан вернуть {} (дефект D2 v1.1, пойман в живом merge PR#17)
+def t13():
+    import io
+    import os
+    import urllib.error
+    from unittest import mock
+
+    class Fake204:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return b""
+
+    os.environ["POLIMAT_TOKEN"] = "smoke-value-T13"
+    try:
+        with mock.patch("urllib.request.urlopen", return_value=Fake204()):
+            assert pp.api_req("DELETE", "/repos/x/y/git/refs/heads/z") == {}
+        with mock.patch("urllib.request.urlopen") as m:
+            m.side_effect = urllib.error.HTTPError(
+                "u", 404, "nf", {}, io.BytesIO(b""))
+            assert pp.api_req("GET", "/repos/x/y") == {}
+    finally:
+        os.environ.pop("POLIMAT_TOKEN", None)
+
+
 TESTS = [(1, t01, "py_compile"), (2, t02, "канон 9 шагов"),
          (3, t03, "ремонт rebase-мусора"), (4, t04, "секрет: нет env → отказ"),
          (5, t05, "секрет: только env"), (6, t06, "идентичность DCO"),
          (7, t07, "CLI 7 подкоманд"), (8, t08, "гигиена 0 ghp_"),
          (9, t09, "гейт ОТКРЫТ"), (10, t10, "гейт ЗАКРЫТ"),
          (11, t11, "коммит DCO + идемпотентность"),
-         (12, t12, "патч: идемпотентность по содержимому")]
+         (12, t12, "патч: идемпотентность по содержимому"),
+         (13, t13, "api_req: 204/пустое тело → {}")]
 
 for n, fn, name in TESTS:
     try:

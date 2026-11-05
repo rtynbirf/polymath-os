@@ -777,9 +777,9 @@ def check_pipeline_selftest():
     )
     if r.returncode != 0:
         return False, f"pipeline selftest exited {r.returncode}\n{r.stderr[-500:]}"
-    if "12/12" not in r.stdout:
-        return False, f"expected '12/12', got:\n{r.stdout[-500:]}"
-    return True, "12/12 green (verify-gate, token in memory, DCO, patch idempotency)"
+    if "13/13" not in r.stdout:
+        return False, f"expected '13/13', got:\n{r.stdout[-500:]}"
+    return True, "13/13 green (verify-gate, token in memory, DCO, patch idempotency, 204-empty-body)"
 
 
 extra_checks = [
@@ -800,7 +800,7 @@ extra_checks = [
     ("27. ARCHIVARIUS v1.3.1 selftest 84/84 (v3.22.0)", check_archivarius_selftest),
     ("28. Polymath-agent v3.8.0 selftest 130/130 (v3.22.0)", check_agent_selftest),
     ("29. HOLOS agent v2.0 selftest 60/60 (stdlib-only)", check_holos_selftest),
-    ("30. POLIMAT_PIPELINE v1.1 selftest 12/12 (v3.24.0)", check_pipeline_selftest),
+    ("30. POLIMAT_PIPELINE v1.1 selftest 13/13 (v3.24.1)", check_pipeline_selftest),
 ]
 
 checks = [

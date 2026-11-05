@@ -1,4 +1,4 @@
-# POLIMAT_PIPELINE — канон механизма заливки в репо (v1.1)
+# POLIMAT_PIPELINE — канон механизма заливки в репо (v1.2)
 
 Linux-воспроизведение Windows-пака владельца (`POLIMAT_AUTO_PUSH.bat` /
 `POLIMAT_FINISH.bat` / `POLIMAT_MERGE.bat`, снапшот `123.7z`) — тот же
@@ -36,8 +36,8 @@ audit    --repo OWNER/REPO          # свежий клон + verify + плом�
 
 ## Верификация
 
-`python3 selftest.py` → `12/12 PASS` (офлайн: без сети, без токена,
-без GitHub). Встроен в канон как **claim #29** (`make verify`).
+`python3 selftest.py` → `13/13 PASS` (офлайн: без сети, без токена,
+без GitHub). Встроен в канон как **claim #30** (`make verify`).
 
 ## Журнал дефектов
 
@@ -48,6 +48,12 @@ audit    --repo OWNER/REPO          # свежий клон + verify + плом�
   `git apply --reverse --check` (обратное применение валидно ⇔ контент
   уже в ветке). Доказано T12: повторный `commit --patch` по влитому
   патчу — без дубля коммита и без падения.
+- **D2 (v1.1, закрыт в v1.2)**: `api_req` падал JSONDecodeError на пустое
+  тело ответа — GitHub отвечает 204 No Content на DELETE ветки после
+  merge. Пойман машиной в живом merge PR#17 (merge удался, ветка
+  удалилась серверно — упал только клиентский парсер). Лечение:
+  пустое тело → `{}` (и для успеха, и для HTTPError). Доказано T13
+  (mock-подмена urlopen: 204 и HTTPError с пустым телом → `{}`).
 
 ## Пломба
 

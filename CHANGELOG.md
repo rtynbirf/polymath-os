@@ -42,6 +42,17 @@
   principle 6 for external claims. Docs-only: no runtime change,
   `make verify` 26/26 untouched.
 
+### Fixed
+
+- **fix(pipeline) — POLIMAT_PIPELINE v1.2, defect D2**: `api_req` crashed
+  with JSONDecodeError on empty response body — GitHub returns 204 No
+  Content when deleting the branch after merge (caught live in merge of
+  PR#17: merge succeeded, branch deleted server-side, client parser
+  fell). Fix: empty body → `{}` for both success and HTTPError paths.
+  Proven offline by selftest T13 (mocked urlopen: 204 + empty HTTPError
+  → `{}`). Selftest 12/12 → 13/13 (claim 30 text updated to v3.24.1);
+  seal recomputed. No previous claim touched — make verify stays 30/30.
+
 ### Changed
 
 - **chore(deps) — security overrides in pnpm**: 24 advisories (19 high, 4 moderate, 1 low) → 0. `pnpm.overrides` for transitive deps of `quartz` (github dep): sharp ≥0.35.5, @xmldom/xmldom ≥0.9.12, toml ≥5.0.1, katex ≥0.18.2, minimatch ≥11.0.1, satori ≥0.33.5, fflate ≥0.7.5. Validated: `pnpm install --frozen-lockfile`, make verify 26/26, turbo lint + typecheck.
