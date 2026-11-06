@@ -765,7 +765,7 @@ def _t_http_get(cfg: "Config", args: Dict[str, Any]) -> Observation:
 
 def _strip_html_to_text(raw: str, limit: int = 12000) -> str:
     """Дешёвое безопасное извлечение текста: без исполнения HTML/JS."""
-    raw = re.sub(r"(?is)<script\b.*?</script\s*>|<style\b.*?</style\s*>|<noscript\b.*?</noscript\s*>", " ", raw)
+    raw = re.sub(r"(?is)<script\b.*?</script[^>]*>|<style\b.*?</style[^>]*>|<noscript\b.*?</noscript[^>]*>", " ", raw)
     raw = re.sub(r"(?is)<[^>]+>", " ", raw)
     raw = html_unescape(raw)
     return re.sub(r"\s+", " ", raw).strip()[:limit]
