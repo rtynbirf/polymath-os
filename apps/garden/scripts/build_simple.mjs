@@ -10,8 +10,8 @@
 // `publish: true` in frontmatter are rendered; canary marker must never
 // appear in the output (negative test, exit 2 blocks deploy).
 
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
-import { join, dirname, resolve, relative, basename, sep } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
