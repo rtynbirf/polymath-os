@@ -826,6 +826,26 @@ def check_polymath_v3100_selftest():
     return True, "135/135 green (C5 GATE ANTI-VACUUM: вакуумный отказ невыразим, GATE_REGISTRY 51 пара свидетелей, T140 мета-гейт)"
 
 
+# ============================================================
+# CHECK 33: Polymath-agent v3.10.1 — головная версия ядра линии СуперЗ (135/135 selftest, CODEQL HYGIENE)
+# ============================================================
+def check_polymath_v3101_selftest():
+    d = REPO_ROOT / "tooling" / "agents" / "polymath-agent-v3101"
+    if not d.exists():
+        return False, "tooling/agents/polymath-agent-v3101 missing"
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"  # claim 11: no *.pyc in tree
+    r = subprocess.run(
+        ["python3", "selftest.py"], cwd=str(d),
+        capture_output=True, text=True, timeout=120, env=env,
+    )
+    if r.returncode != 0:
+        return False, f"polymath-agent-v3101 selftest exited {r.returncode}\n{r.stderr[-500:]}"
+    if "135/135" not in r.stdout:
+        return False, f"expected '135/135', got:\n{r.stdout[-500:]}"
+    return True, "135/135 green (CODEQL HYGIENE: 1 high + 16 notes закрыты без изменения поведения, лестница 16/16 zero-flip, батареи 6/6 REPRODUCED=0)"
+
+
 extra_checks = [
     ("13. Pattern: manifest exclusivity (S17)", check_pattern_01_manifest_exclusivity),
     ("14. Pattern: counter-from-source (S2)", check_pattern_02_counter_from_source),
@@ -847,6 +867,7 @@ extra_checks = [
     ("30. POLIMAT_PIPELINE v1.1 selftest 13/13 (v3.24.1)", check_pipeline_selftest),
     ("31. POLIMAT-ARCHIVARIUS selftest 30/30 (genome v2)", check_polimat_archivarius_selftest),
     ("32. Polymath-agent v3.10.0 selftest 135/135 (C5 GATE ANTI-VACUUM)", check_polymath_v3100_selftest),
+    ("33. Polymath-agent v3.10.1 selftest 135/135 (CODEQL HYGIENE)", check_polymath_v3101_selftest),
 ]
 
 checks = [

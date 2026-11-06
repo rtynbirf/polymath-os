@@ -21,7 +21,8 @@
       "!**/runtime",
       "!**/docs",
       "!**/vault",
-      "!**/tooling/agents/polymath-agent-v3100"
+      "!**/tooling/agents/polymath-agent-v3100",
+      "!**/tooling/agents/polymath-agent-v3101"
     ]
   },
   "formatter": {
