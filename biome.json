@@ -22,7 +22,9 @@
       "!**/docs",
       "!**/vault",
       "!**/tooling/agents/polymath-agent-v3100",
-      "!**/tooling/agents/polymath-agent-v3101"
+      "!**/tooling/agents/polymath-agent-v3101",
+      "!**/tooling/agents/polymath-agent-v128",
+      "!PULSE.md"
     ]
   },
   "formatter": {
@@ -61,5 +63,11 @@
       }
     }
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
 }

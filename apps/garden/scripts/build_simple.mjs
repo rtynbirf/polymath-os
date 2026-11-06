@@ -53,8 +53,7 @@ for (const name of readdirSync(VAULT_DIR).sort()) {
   if (!/^publish:.*true/m.test(head)) continue;
   const stem = basename(name, ".md");
   const body = stripFrontmatter(readFileSync(f, "utf8")).join("\n");
-  const html =
-    PAGE_HEAD(stem) + "\n" + body + "\n<hr><a href='index.html'>← Garden</a></body></html>";
+  const html = `${PAGE_HEAD(stem)}\n${body}\n<hr><a href='index.html'>← Garden</a></body></html>`;
   writeFileSync(join(OUT_DIR, `${stem}.html`), html, "utf8");
   count += 1;
   console.log(`[garden-simple] ✓ ${stem}.html`);
