@@ -1,0 +1,14 @@
+root ::= plan-obj | act-obj | final-obj
+plan-obj ::= "{" ws "thought" ws ":" ws string ws "," ws "status" ws ":" ws "plan" ws "," ws "success_criteria" ws ":" ws str-array ws "," ws "plan" ws ":" ws str-array ws "}"
+act-obj ::= "{" ws "thought" ws ":" ws string ws "," ws "status" ws ":" ws "act" ws "," ws "actions" ws ":" ws action-array ws "}"
+final-obj ::= "{" ws "thought" ws ":" ws string ws "," ws "status" ws ":" ws "final" ws "," ws "outcome" ws ":" ws outcome ws "," ws "final_answer" ws ":" ws string ws "," ws "lesson" ws ":" ws string ws "}"
+action ::= "{" ws "name" ws ":" ws string ws "," ws "args" ws ":" ws json-value ws "," ws "why" ws ":" ws string ws "}"
+action-array ::= "[" ws (action (ws "," ws action)*)? ws "]"
+str-array ::= "[" ws (string (ws "," ws string)*)? ws "]"
+outcome ::= "verified" | "failed" | "aborted"
+string ::= "\"" ( [^"\\\x00-\x1F] | "\\" (["\\bfnrt] | "u" [0-9a-fA-F]{4}) )* "\""
+json-value ::= object | array | string | number | "true" | "false" | "null"
+object ::= "{" ws ( string ws ":" ws json-value ( ws "," ws string ws ":" ws json-value )* )? ws "}"
+array ::= "[" ws ( json-value ( ws "," ws json-value )* )? ws "]"
+number ::= "-"? ([0-9] | [1-9] [0-9]*) ("." [0-9]+)? ([eE] [+-]? [0-9]+)?
+ws ::= [ \t\n]*

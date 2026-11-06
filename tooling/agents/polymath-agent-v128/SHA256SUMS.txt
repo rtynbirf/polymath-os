@@ -1,0 +1,5 @@
+# Пломба пакета polymath-agent-v128 (GNU sha256sum -c; freshly-verified, hashlib.sha256)
+be18fb7885d9791c6c2df8d4b3ba12e505cd51691610e1fa09913170ad2436cb  polymath_agent_v1.2.8.py
+e78a9fc847242fb6b8923af3dccfc290ffa403388289e2a0bdc0452e1712514e  tool_catalog.json
+7ebd5d8214be7ca2fb8784016a2bfd1c055992183ca73e0232f6a6de0072a02b  decision_schema.json
+d6d7b981dd29fccd95aec41dfabb28e0140029ac6f8a1c7deab1acf7d65b7915  decision_schema.gbnf
