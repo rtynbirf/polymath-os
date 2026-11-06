@@ -10,7 +10,8 @@
   },
   "scripts": {
     "quartz": "./quartz/bootstrap-cli.mjs",
-    "build": "npx quartz build -d content -o public",
+    "build": "node scripts/build_simple.mjs",
+    "build:quartz": "npx quartz build -d content -o public",
     "serve": "npx quartz build -d content -o public --serve",
     "clean": "rm -rf public .quartz-cache",
     "check": "tsc --noEmit -p tsconfig.json",

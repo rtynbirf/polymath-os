@@ -65,6 +65,23 @@
 
 ### Fixed
 
+- **fix(garden) — `pnpm -r run build` зелёный: канон zero-dep билдера
+  переехал в build_simple.mjs**: garden «build» звал pre-bootstrap
+  Quartz (`npx quartz build`), но скаффолд `apps/garden/quartz/` никогда
+  не генерировался (сам конфиг помечен «Pre-bootstrap») — на живом
+  прогоне 2026-11-06 это роняло весь рекурсивный билд
+  (`ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL … Could not resolve
+  "./quartz/build.ts"`). Канон по publish-garden.yml и ТЗ — zero-dep
+  конвейер (фильтр `publish: true` → HTML → canary negative test,
+  ADR-0009): логика build_simple.sh портирована в
+  `apps/garden/scripts/build_simple.mjs` (node stdlib; на Windows нет
+  bash, а node есть всюду, где есть pnpm), `.sh` стал тонкой обёрткой с
+  тем же argv-контрактом (publish-garden.yml и ссылка в ТЗ не тронуты),
+  `"build"` указывает на node-версию, сломанный pre-bootstrap путь
+  сохранён явно как `"build:quartz"`. Проверено: node из корня, node из
+  apps/garden (как зовёт pnpm) и bash-обёртка (как зовёт CI) — exit 0,
+  2 заметки опубликованы, canary не утёк; make verify 33/33.
+
 - **fix(check) — чистый `make verify` на Windows: путь в argv, python →
   sys.executable**: item 10 («runtime/src/*.py compile») интерполировал
   путь файла внутрь `python -c "…open('{pf}')…"`: на nt бэкслеши пути
