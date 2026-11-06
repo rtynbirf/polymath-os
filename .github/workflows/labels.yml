@@ -33,8 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/labeler@v7
-        with:
+      - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7with:
           configuration-path: .github/labeler.yml
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           sync-labels: true # убирает label, когда паттерн перестал match
@@ -45,9 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Sync labels (create + update, never delete)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7- name: Sync labels (create + update, never delete)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

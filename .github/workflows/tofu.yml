@@ -57,9 +57,7 @@ jobs:
     timeout-minutes: 5
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Install OpenTofu (1.6+)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7- name: Install OpenTofu (1.6+)
         uses: opentofu/setup-opentofu@v2
         with:
           tofu_version: "1.8.0"
@@ -101,8 +99,7 @@ jobs:
       matrix:
         environment: [personal, shared]
     steps:
-      - uses: actions/checkout@v7
-        with: { fetch-depth: 0 }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7with: { fetch-depth: 0 }
 
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v2
@@ -142,8 +139,7 @@ jobs:
 
       - name: Post plan as PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v9
-        with:
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9with:
           script: |
             const fs = require('fs');
             const planJson = JSON.parse(fs.readFileSync('/tmp/tfplan.json', 'utf8'));
@@ -176,9 +172,7 @@ jobs:
       # prod env: 2 approvers (CODEOWNERS + extra)
       name: ${{ github.event.inputs.environment }}
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Install OpenTofu
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7- name: Install OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
           tofu_version: "1.8.0"

@@ -41,21 +41,18 @@ jobs:
       SBOM_FILE: sbom.cyclonedx.json
     steps:
       - name: Checkout (full history for changelog parsing)
-        uses: actions/checkout@v7
-        with:
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7with:
           fetch-depth: 0
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v7
-        with:
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7with:
           python-version: "3.10"
 
       - name: Run `make verify` (open-source contract — must stay green on release)
         run: make verify
 
       - name: Set up Node 20
-        uses: actions/setup-node@v7
-        with:
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7with:
           node-version: "20"
 
       - name: Set up pnpm (version from package.json)

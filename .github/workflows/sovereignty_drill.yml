@@ -51,11 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v7
-        with:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7- name: Set up Python 3.10
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7with:
           python-version: "3.10"
 
       - name: Run sovereignty drill
@@ -82,16 +79,14 @@ jobs:
 
       - name: Upload drill report
         if: always()
-        uses: actions/upload-artifact@v7
-        with:
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7with:
           name: sovereignty-drill-report-${{ github.event.inputs.service || 'openrouter' }}
           path: drill-report.json
           retention-days: 90
 
       - name: Open issue if drill failed
         if: failure()
-        uses: actions/github-script@v9
-        with:
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9with:
           script: |
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('drill-report.json', 'utf8'));
