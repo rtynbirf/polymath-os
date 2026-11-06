@@ -9,7 +9,7 @@
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
 [![CI](https://img.shields.io/badge/CI-5%2F5%20green-brightgreen)](https://github.com/rtynbirf/polymath-os/actions)
 
-**Current version: v3.8.0** (commit `3f279c0`, 2026-10-17) — see [CHANGELOG.md](./CHANGELOG.md).
+**Current version: v3.25.0** (2026-11-07) — see [CHANGELOG.md](./CHANGELOG.md).
 
 ---
 
@@ -33,7 +33,7 @@
 | **Layer 1**              | Repository Structure — pnpm + Turborepo + Changesets + CODEOWNERS                                                                  | repo root                                                       |
 | **Cross-cutting**        | Security (cosign/SLSA/SBOM) + OTel + git + token hygiene                                                                           | everywhere                                                      |
 
-For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**28 ADRs**: 0001-0022).
+For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**35 ADRs**: 0001-0029, 0031-0036).
 
 ## Quick start
 
@@ -44,7 +44,7 @@ cd polymath-os
 
 # 2. Verify every claim in this repo (no installation required, Python 3.10+)
 make verify
-# → Result: 23 passed, 0 failed (of 23 claims)
+# → Result: 33 passed, 0 failed (of 33 claims)
 
 # 3. Issue the 7 foundational decrees (creates ~/.polymath-os/decrees.db)
 python3 ~/scripts/issue_decrees.py
@@ -67,7 +67,7 @@ cd apps/browser/electron && npm install && npm start
 
 # 7. If you want to develop:
 make bootstrap   # pnpm install + nix develop (optional)
-make test        # runs all tests (123 runtime + MCP coverage)
+make test        # runs all tests (290 runtime + MCP coverage)
 make ci-local    # reproduces CI locally via `act`
 ```
 
@@ -75,13 +75,13 @@ If `make verify` exits 0 — every claim below holds on your machine. That's the
 
 ## Verifiable claims
 
-Every claim in this repo is backed by a test or command. `make verify` runs all **33 checks** (was 12 in v1.0, was 22 in v3.6.0, +1 token hygiene in v3.8.0, +2 agent lines in v3.22.0, +1 holos agent in v3.23.0, +1 pipeline tool in v3.24.0).
+Every claim in this repo is backed by a test or command. `make verify` runs all **33 checks** (was 12 in v1.0, was 22 in v3.6.0, +1 token hygiene in v3.8.0, +2 agent lines in v3.22.0, +1 holos agent in v3.23.0, +1 pipeline tool in v3.24.0, +1 holon archivarius +2 agent-line selftests in v3.25.0).
 
 | #   | Claim                                                                                                                         | How to verify                           | Status |
 | --- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
-| 01  | SINGULYAR EIR passes all 220 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓      |
+| 01  | SINGULYAR EIR passes all 290 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓      |
 | 02  | JSON Schemas (Intent / Capability / Evidence) parse and validate                                                              | `python scripts/check.py` (check 02)    | ✓      |
-| 03  | 28 ADRs (0001-0028) all present                                                                                               | `ls docs/adr/`                          | ✓      |
+| 03  | 35 ADRs (0001-0029, 0031-0036) all present                                                                                    | `ls docs/adr/`                          | ✓      |
 | 04  | Every ADR follows template (Date/Status/Context/Decision/Consequences)                                                        | `python scripts/check.py` (check 04)    | ✓      |
 | 05  | `AUDIT_RESPONSE.md` cross-references every ADR                                                                                | `python scripts/check.py` (check 05)    | ✓      |
 | 06  | Sovereignty Registry covers every `package.json` dependency                                                                   | `python scripts/check.py` (check 06)    | ✓      |
@@ -200,10 +200,10 @@ Emergence here is a **falsifiable hypothesis**, not a slogan. The ablation ladde
 | [`ROADMAP_v3.7.0.md`](./ROADMAP_v3.7.0.md)                                           | **Consolidated roadmap (history of 28 releases + 30/90/180/365-day vision)**                 |
 | [`TZ.md`](./TZ.md)                                                                   | Original technical spec (Layer 1-4 view, pre-decree)                                         |
 | [`ROADMAP.md`](./ROADMAP.md)                                                         | Phased plan (Phase 0-4, exit-gate based)                                                     |
-| [`CHANGELOG.md`](./CHANGELOG.md)                                                     | Release history (v1.0.0 → v3.8.0, all changes logged)                                        |
+| [`CHANGELOG.md`](./CHANGELOG.md)                                                     | Release history (v1.0.0 → v3.25.0, all changes logged)                                       |
 | [`MANIFEST.json`](./MANIFEST.json)                                                   | Root manifest (ADR-0020 — manifest-driven architecture)                                      |
 | [`docs/AUDIT_RESPONSE.md`](./docs/AUDIT_RESPONSE.md)                                 | Audit findings A1-A11 → ADR → action mapping                                                 |
-| [`docs/adr/`](./docs/adr)                                                            | **28 ADRs (0001-0028)** — every architectural decision                                       |
+| [`docs/adr/`](./docs/adr)                                                            | **35 ADRs (0001-0029, 0031-0036)** — every architectural decision                            |
 | [`docs/MANIFESTO.md`](./docs/MANIFESTO.md)                                           | System manifesto (4 theses: PID=1, PAROLE>LANGUE, LFS, security context)                     |
 | [`docs/SOVEREIGNTY_CONTRACT.md`](./docs/SOVEREIGNTY_CONTRACT.md)                     | Sovereignty contract (Tier 1/2/3 dependency classification)                                  |
 | [`docs/01-principles.md`](./docs/01-principles.md)                                   | 18 principles (constitution)                                                                 |
@@ -251,6 +251,8 @@ This repo was built through an iterative dialogue:
 12. **v3.13.0 (HTTP inbound)**: ADR-0027 Decree-Enforced HTTP JSON-RPC Server (stdlib only). .well-known/agent.json теперь actually serves a real JSON-RPC endpoint. Closes ADR-0023 endpoint loop. СИНГУЛЯР полный в 4 направлениях.
 13. **v3.14.0 (Decree revocation)**: ADR-0028 Decree Supersession Mechanism. Decrees can now be revoked via supersession decree category. Decree system CLOSED under all natural operations (issue + enforce + supersede). Append-only + revocable, no contradiction.
 14. **v3.15.0 (ALL GAPS CLOSED)**: Production DB reset to 7 decrees (was 8 from manual test). MANIFEST.json synced (v3.14.0, adrs=28, tests=220, ci_checks=24, expanded features). ARCHITECTURE.md ADR table 28 rows. README "7 foundational + N" instead of stale "7". AgentMeshServer real Runtime integration (replace _demo_execute_fn). AdrAmender production use (create amendments.log). Audit of sovereignty_drill + cross-repo-governance workflows. Electron install test.
-15. **v3.20.0 (FULLY OPERATIONAL, current)**: ADR-0031 decree cryptographic signing — pure-python Ed25519 (RFC 8032, stdlib only), ssh-keygen-compatible keys, signatures over chain hash in append-only `decree_signatures` table. Honest verification (integrity_failed/not_signed/signature_mismatch). provenance_report(). 20 tests. make verify 25→26 claims (26/26 green). Production decrees signed by PID=1 key (7/7, chain OK, trust anchor VERIFIED). FIXED: CI red on main (biome lint in decree-bridge.js), Electron 31 portal sandbox (npm start showed no decrees — sandbox:false in main.js).
+15. **v3.20.0 (FULLY OPERATIONAL)**: ADR-0031 decree cryptographic signing — pure-python Ed25519 (RFC 8032, stdlib only), ssh-keygen-compatible keys, signatures over chain hash in append-only `decree_signatures` table. Honest verification (integrity_failed/not_signed/signature_mismatch). provenance_report(). 20 tests. make verify 25→26 claims (26/26 green). Production decrees signed by PID=1 key (7/7, chain OK, trust anchor VERIFIED). FIXED: CI red on main (biome lint in decree-bridge.js), Electron 31 portal sandbox (npm start showed no decrees — sandbox:false in main.js).
+
+16. **v3.25.0 (CRYSTALLIZE, current)**: 39 commits since v3.21.1 released as one version — POLIMAT-ARCHIVARIUS v2.1 holon (387 content-addressed parts, Merkle DAG, Reed-Solomon k=8/n=12, gossip-CRDT, суд), POLIMAT_PIPELINE v1.1/1.2 canon tool (verify-gate, git am idempotency, D2 fix), agent lines v3.8.0/v3.10.0/v3.10.1/v128-Хронотоп, HOLOS v2.0, evidence packs (RLHF, RAZBOR-9, emergent protocol), self-audit ПУЛЬС v2, Windows-green fixes (selftest 130/130 и 135/135 на nt). make verify 33/33, 290 runtime tests, CI green.
 
 Worklog: `~/worklog.md` (10+ Task IDs across multiple release sessions — full audit trail of every change).

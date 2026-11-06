@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- Nothing yet — следующая партия стартует отсюда.
+
+## [v3.25.0] — 2026-11-07 (CRYSTALLIZE — 39 коммитов после v3.21.1)
+
+39 коммитов после v3.21.1 выпущены одной версией (метки v3.22.0–v3.24.1 в текстах клейм — внутренние маркеры фич, релизных тегов для них не создавалось): 3 агентные линии, holon-агент, канон-пайплайн, 2 evidence-пака, самоаудит ПУЛЬС, Windows-green фиксы. `make verify` 33/33, 290 runtime-тестов, CI зелёный.
+
 ### Added
 
 - **docs(protocol) — emergent protocol evidence pack**: `docs/EMERGENT_PROTOCOL.md`
