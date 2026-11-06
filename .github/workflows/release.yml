@@ -177,7 +177,7 @@ jobs:
           import re, sys, pathlib
           ver = sys.argv[1]
           text = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
-          pattern = rf"## \[{re.escape(ver)}\][^\n]*\n(.*?)(?=\n## |\Z)"
+          pattern = rf"## \[v?{re.escape(ver)}\][^\n]*\n(.*?)(?=\n## |\Z)"
           m = re.search(pattern, text, re.DOTALL)
           body = m.group(1).strip() if m else "(no changelog entry for this version)"
           pathlib.Path("release_notes.md").write_text(body, encoding="utf-8")
