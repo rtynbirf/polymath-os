@@ -23,16 +23,18 @@ const OUT_DIR = resolve(REPO_ROOT, process.argv[3] ?? "apps/garden/content");
 const CANARY_MARKER = process.argv[4] ?? "__CANARY_p1m0s_8f3a2e91_dnp_v1__";
 const CANARY_PATH = resolve(REPO_ROOT, process.argv[5] ?? "vault/90-meta/canary-secret.md");
 
-console.log(`[garden-simple] Building from ${relative(REPO_ROOT, VAULT_DIR)} → ${relative(REPO_ROOT, OUT_DIR)}`);
+console.log(
+  `[garden-simple] Building from ${relative(REPO_ROOT, VAULT_DIR)} → ${relative(REPO_ROOT, OUT_DIR)}`,
+);
 mkdirSync(OUT_DIR, { recursive: true });
 
 const PAGE_HEAD = (title) =>
-`<!doctype html><html lang='ru'><head><meta charset='utf-8'>` +
-`<meta name='viewport' content='width=device-width,initial-scale=1'>` +
-`<title>${title} — Polymath OS Garden</title>` +
-`<style>body{max-width:720px;margin:0 auto;padding:2rem;font:16px/1.6 sans-serif;color:#333}` +
-`pre{white-space:pre-wrap;word-wrap:break-word}</style></head><body>` +
-`<h1>Polymath OS Garden</h1>`;
+  `<!doctype html><html lang='ru'><head><meta charset='utf-8'>` +
+  `<meta name='viewport' content='width=device-width,initial-scale=1'>` +
+  `<title>${title} — Polymath OS Garden</title>` +
+  `<style>body{max-width:720px;margin:0 auto;padding:2rem;font:16px/1.6 sans-serif;color:#333}` +
+  `pre{white-space:pre-wrap;word-wrap:break-word}</style></head><body>` +
+  `<h1>Polymath OS Garden</h1>`;
 
 // Filter: only publish: true notes (ADR-0009 default-deny). Same rule as the
 // bash original: the flag is looked for in the first 20 lines of frontmatter.
@@ -76,14 +78,14 @@ console.log("[garden-simple] ✓ canary not in output");
 
 // Create index.html
 let index =
-`<!doctype html><html lang='ru'><head><meta charset='utf-8'>` +
-`<meta name='viewport' content='width=device-width,initial-scale=1'>` +
-`<title>Polymath OS Garden</title>` +
-`<style>body{max-width:720px;margin:0 auto;padding:2rem;font:16px/1.6 sans-serif}</style>` +
-`</head><body><h1>🌱 Polymath OS Garden</h1>` +
-`<p>Permanent notes published via default-deny filter (ADR-0009).</p>` +
-`<p><a href='https://github.com/rtynbirf/polymath-os'>→ Source repo</a></p>` +
-`<hr><h2>Notes</h2>`;
+  `<!doctype html><html lang='ru'><head><meta charset='utf-8'>` +
+  `<meta name='viewport' content='width=device-width,initial-scale=1'>` +
+  `<title>Polymath OS Garden</title>` +
+  `<style>body{max-width:720px;margin:0 auto;padding:2rem;font:16px/1.6 sans-serif}</style>` +
+  `</head><body><h1>🌱 Polymath OS Garden</h1>` +
+  `<p>Permanent notes published via default-deny filter (ADR-0009).</p>` +
+  `<p><a href='https://github.com/rtynbirf/polymath-os'>→ Source repo</a></p>` +
+  `<hr><h2>Notes</h2>`;
 for (const name of readdirSync(OUT_DIR).sort()) {
   if (!name.endsWith(".html") || name === "index.html") continue;
   const stem = basename(name, ".html");
@@ -93,4 +95,5 @@ index += "</body></html>";
 writeFileSync(join(OUT_DIR, "index.html"), index, "utf8");
 console.log("[garden-simple] ✓ index.html created");
 console.log(`[garden-simple] Done: ${count} note(s) published`);
-void sep; void dirname; // keep imports honest for linters
+void sep;
+void dirname; // keep imports honest for linters
