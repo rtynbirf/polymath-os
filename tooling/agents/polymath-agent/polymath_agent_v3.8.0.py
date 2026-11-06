@@ -391,9 +391,14 @@ def _t_read_file(cfg: "Config", args: Dict[str, Any]) -> Observation:
         return Observation(False, "read", f"файл не существует: {args['path']}")
     if p.is_dir():
         return Observation(False, "read", f"это каталог, используй list_dir: {args['path']}")
-    text = p.read_text(encoding="utf-8", errors="replace")
+    # Windows-fix 2026-11-06: хэш артефакта — по СЫРЫМ байтам диска, а не по тексту
+    # после universal newlines: read_text молча превращает \r\n в \n, и хэш read
+    # расходился с хэшем write (сырые байты) — контракт COMMIT честно ловил
+    # «evidence-bound artifact mutation» → REVOKED → T16 aborted на Windows.
+    data = p.read_bytes()
+    text = data.decode("utf-8", errors="replace")
     return Observation(True, "read", text[:cfg.max_read_chars],
-                       meta={"path": str(p), "sha256": sha256_hex(text)})
+                       meta={"path": str(p), "sha256": sha256_hex(data)})
 
 
 def _t_write_file(cfg: "Config", args: Dict[str, Any]) -> Observation:
@@ -913,7 +918,8 @@ def _t_run_cli(cfg: "Config", args: Dict[str, Any], bridge: "CatalogBridge") -> 
     try:
         proc = subprocess.run([abs_bin] + raw_args,
                               input=stdin.encode("utf-8"), capture_output=True,
-                              timeout=cfg.exec_timeout_s, preexec_fn=_exec_preexec())
+                              timeout=cfg.exec_timeout_s,
+                              preexec_fn=_exec_preexec() if (_resource and os.name == "posix") else None)
     except subprocess.TimeoutExpired:
         return Observation(False, "exec", f"run_cli: таймаут {cfg.exec_timeout_s}s у {bin_name}")
     out = (proc.stdout or b"").decode("utf-8", errors="replace").strip()

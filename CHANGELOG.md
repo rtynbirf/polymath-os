@@ -65,6 +65,24 @@
 
 ### Fixed
 
+- **fix(agents) — Windows selftest зелёный: 135/135 и 130/130 на nt**:
+  два Windows-блокера из живого прогона 2026-11-06 (133/135 у v3.10.0,
+  128/130 у v3.8.0). (1) T11 (мост каталог→Registry): `run_cli` передавал
+  `preexec_fn` безусловно — `ValueError: preexec_fn is not supported on
+  Windows platforms`; гедж идентичен уже починенному `execute_python`:
+  `if (_resource and os.name == "posix") else None`. (2) T16 (переменная
+  `$last_output`): `_t_read_file` хэшировал текст после universal
+  newlines (`\r\n` → `\n`), а write-наблюдение биндит сырые байты диска —
+  хэши read/write одного файла расходились, контракт COMMIT честно
+  ревокал артефакт (`[COMMIT] REVOKED — evidence-bound artifact
+  mutation`), verified отклонялся, шестой вызов мозга выжигал сценарий
+  MockBrain → aborted. Теперь read-хэш — по `read_bytes()`: артефакт
+  биндится так, как лежит на диске, на любой ОС. Форензика из лога:
+  write `1cff344b…` (CRLF-байты) vs read `5b577520…` (LF-нормализованные)
+  — обе суммы воспроизведены. Линии v3.8.0 / v3.10.0 / v3.10.1.
+  POSIX-поведение не изменено: selftest 130/130, 135/135, 135/135
+  (Linux, py3.12); смок CRLF/LF — PASS по всем трём линиям.
+
 - **fix(pipeline) — POLIMAT_PIPELINE v1.2, defect D2**: `api_req` crashed
   with JSONDecodeError on empty response body — GitHub returns 204 No
   Content when deleting the branch after merge (caught live in merge of
