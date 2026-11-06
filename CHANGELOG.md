@@ -65,6 +65,18 @@
 
 ### Fixed
 
+- **fix(check) — чистый `make verify` на Windows: путь в argv, python →
+  sys.executable**: item 10 («runtime/src/*.py compile») интерполировал
+  путь файла внутрь `python -c "…open('{pf}')…"`: на nt бэкслеши пути
+  становились эскейп-последовательностями (`\a` = BEL, `\b` = backspace,
+  `\f` = formfeed) — ребёнок падал с `OSError: [Errno 22] Invalid
+  argument` и сыпал `SyntaxWarning: invalid escape sequence '\.'`; это и
+  был весь «шум» Windows-прогона 2026-11-06. Теперь путь передаётся
+  через argv (`ast.parse(open(sys.argv[1], encoding='utf-8').read())`),
+  а все subprocess-вызовы check.py идут через `sys.executable` вместо
+  литерального `python3` (устраняет класс 9009 «Python was not found» на
+  nt). Linux: 33/33 claims, stderr — 0 строк (был и остался зелёным).
+
 - **fix(agents) — Windows selftest зелёный: 135/135 и 130/130 на nt**:
   два Windows-блокера из живого прогона 2026-11-06 (133/135 у v3.10.0,
   128/130 у v3.8.0). (1) T11 (мост каталог→Registry): `run_cli` передавал

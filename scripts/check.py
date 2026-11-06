@@ -46,7 +46,7 @@ def check_singulyar_tests():
     if not runtime.exists():
         return False, "runtime/ directory missing"
     r = subprocess.run(
-        ["python3", "scripts/check.py"],
+        [sys.executable, "scripts/check.py"],
         cwd=str(runtime),
         capture_output=True, text=True, timeout=120
     )
@@ -190,8 +190,14 @@ def check_python_compiles():
     py_files = list(runtime_src.glob("*.py"))
     errors = []
     for pf in py_files:
+        # Windows-fix 2026-11-06: путь передаётся через argv, а не интерполируется
+        # внутрь -c-строки: на nt бэкслеши пути превращались в эскейпы (\a, \b, \f…)
+        # — SyntaxWarning + OSError [Errno 22] Invalid argument у ребёнка.
+        # sys.executable вместо "python3": на Windows python3 может отсутствовать.
         r = subprocess.run(
-            ["python3", "-c", f"import ast; ast.parse(open('{pf}').read())"],
+            [sys.executable, "-c",
+             "import ast,sys; ast.parse(open(sys.argv[1], encoding='utf-8').read())",
+             str(pf)],
             capture_output=True, text=True
         )
         if r.returncode != 0:
@@ -535,7 +541,7 @@ def check_token_hygiene():
     if not script.exists():
         return False, "scripts/check_token_hygiene.py missing"
     r = subprocess.run(
-        ["python3", str(script)],
+        [sys.executable, str(script)],
         cwd=str(REPO_ROOT),
         capture_output=True, text=True, timeout=60,
     )
@@ -719,7 +725,7 @@ def check_archivarius_selftest():
     if not d.exists():
         return False, "runtime/archivarius/ missing"
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120
     )
     if r.returncode != 0:
@@ -736,7 +742,7 @@ def check_agent_selftest():
     if not d.exists():
         return False, "tooling/agents/polymath-agent/ missing"
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120
     )
     if r.returncode != 0:
@@ -753,7 +759,7 @@ def check_holos_selftest():
     if not d.exists():
         return False, "tooling/agents/holos-agent/ missing"
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120
     )
     if r.returncode != 0:
@@ -772,7 +778,7 @@ def check_pipeline_selftest():
     if not d.exists():
         return False, "tooling/pipeline/ missing"
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120
     )
     if r.returncode != 0:
@@ -796,7 +802,7 @@ def check_polimat_archivarius_selftest():
     env = dict(os.environ)
     env["PYTHONDONTWRITEBYTECODE"] = "1"  # claim 11: no *.pyc in tree
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120, env=env,
     )
     if r.returncode != 0:
@@ -816,7 +822,7 @@ def check_polymath_v3100_selftest():
     env = dict(os.environ)
     env["PYTHONDONTWRITEBYTECODE"] = "1"  # claim 11: no *.pyc in tree
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120, env=env,
     )
     if r.returncode != 0:
@@ -836,7 +842,7 @@ def check_polymath_v3101_selftest():
     env = dict(os.environ)
     env["PYTHONDONTWRITEBYTECODE"] = "1"  # claim 11: no *.pyc in tree
     r = subprocess.run(
-        ["python3", "selftest.py"], cwd=str(d),
+        [sys.executable, "selftest.py"], cwd=str(d),
         capture_output=True, text=True, timeout=120, env=env,
     )
     if r.returncode != 0:
