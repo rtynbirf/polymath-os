@@ -20,7 +20,8 @@
       "!**/pnpm-lock.yaml",
       "!**/runtime",
       "!**/docs",
-      "!**/vault"
+      "!**/vault",
+      "!**/tooling/agents/polymath-agent-v3100"
     ]
   },
   "formatter": {

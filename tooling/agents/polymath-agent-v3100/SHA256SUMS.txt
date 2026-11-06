@@ -1,0 +1,3 @@
+# Пломба линии v3.10.0 (копии бит-в-бит с верифицированным релизом; GNU sha256sum -c)
+ef73a15881fa4212abe5ab0ff5ff4ee947255048b342f90607c731d6621067dd  polymath_agent_v3.10.0.py
+d7e0ce736f8cbbee48890839d99022870d4cfb0f67d2eea2c78bc56327cad05b  tool_catalog.json
