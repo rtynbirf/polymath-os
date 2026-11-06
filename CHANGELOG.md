@@ -4,6 +4,14 @@
 
 ### Added
 
+- **docs(protocol) — emergent protocol evidence pack**: `docs/EMERGENT_PROTOCOL.md`
+  (markdown hub, canon format) + self-contained artifacts in `docs/emergent_protocol/`
+  (HTML, PDF, SHA-256 manifest). 7 claims → 4 statuses (ПОДТВЕРЖДЕНО / ЧАСТИЧНО /
+  ОПРОВЕРГНУТО / НЕДОКАЗАНО), 10 verified sources, 10-minute manual checklist.
+  From the multi-model session «15 ролей → партитура» (artifacts sealed in
+  polimat-task174, external/mezhmodel_lab2). Docs-only: no runtime change,
+  `make verify` 33/33 untouched.
+
 - **feat(agents) — POLIMAT-ARCHIVARIUS v2.1, holon agent of the owner's
   context**: `tooling/agents/polimat-archivarius/` — холон, собранный из
   корпуса владельца (архив «СУММАРНЫЕ ОТВЕТЫ НА ГАЛЛОГРАММУ.txt» + досье
