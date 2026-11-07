@@ -2,13 +2,14 @@
 # infra/scripts/bootstrap-observability.sh
 #
 # Bring up the observability stack on a clean personal VPS:
-#   1. Install Docker + Compose v2 (idempotent — uses get.docker.com)
+#   1. Install Docker + Compose v2 (idempotent — official download.docker.com apt repo)
 #   2. Clone repo (or assume CWD is repo root)
 #   3. `docker compose -f compose.observability.yaml up -d`
 #   4. Verify Grafana reachable at http://localhost:3000
 #
 # Per ADR-0011 (container runtime): on Linux we install Docker via the
-# official script. Podman alternative: see comments inline.
+# official download.docker.com apt repository (GPG-signed — no `curl | sh`,
+# учитель OpenSSF Scorecard: Pinned-Dependencies). Podman alternative: see comments inline.
 #
 # Per ADR-0005 (separate rollback targets): bring down = `docker compose down`
 # (keeps volumes). `down -v` is irreversible — flagged ⛔ in compose file.
@@ -55,12 +56,20 @@ install_docker() {
     ok "docker already installed: $(docker --version)"
     return 0
   fi
-  log "Installing Docker via get.docker.com..."
-  # get.docker.com — official convenience script (only for personal VPS).
-  # For prod: use nix / Ansible / packer — deterministic.
-  curl -fsSL https://get.docker.com | sh
+  log "Installing Docker from official download.docker.com apt repo (GPG-signed)..."
+  # Учитель OpenSSF Scorecard (Pinned-Dependencies): никаких `curl | sh`.
+  # Официальный репозиторий apt: ключ проверяется самим apt (signed-by),
+  # версии пакетов фиксированы репозиторием. Для prod: nix / Ansible / packer.
+  . /etc/os-release
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL "https://download.docker.com/linux/${ID}/gpg" -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} ${VERSION_CODENAME} stable" \
+    > /etc/apt/sources.list.d/docker.list
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io
   systemctl enable --now docker
-  ok "Docker installed and started"
+  ok "Docker installed and started (official apt repo)"
 }
 
 install_podman() {
@@ -83,10 +92,10 @@ esac
 # `docker compose` (Compose v2) — check it exists
 if ! "$CONTAINER_ENGINE" compose version >/dev/null 2>&1; then
   log "Installing compose plugin..."
-  # For docker: compose v2 is a plugin (already bundled by get.docker.com)
+  # For docker: compose v2 is a plugin (bundled with docker-ce)
   # For podman: podman-compose is the alternative
   if [[ "$CONTAINER_ENGINE" == "podman" ]]; then
-    apt-get install -y podman-compose || pip3 install podman-compose
+    apt-get install -y podman-compose || err "podman-compose недоступен в apt — установите вручную (apt/pipx), учитель Scorecard: без непиненного pip install"
   fi
 fi
 ok "Compose v2 available"

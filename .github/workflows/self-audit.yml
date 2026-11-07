@@ -160,6 +160,26 @@ jobs:
           echo "--- PULSE.md ---"
           cat PULSE.md
 
+      - name: Подпись пульсовых коммитов (SSH — учитель Scorecard/Signed-commits)
+        env:
+          PULSE_SIGNING_KEY: ${{ secrets.PULSE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$PULSE_SIGNING_KEY" ]; then
+            echo "::error::Секрет PULSE_SIGNING_KEY не задан — required_signatures отклонит неподписанный пульсовый коммит"
+            exit 1
+          fi
+          KEY_FILE="$RUNNER_TEMP/pulse_signing_key"
+          install -m 600 /dev/null "$KEY_FILE"
+          printf '%s\n' "$PULSE_SIGNING_KEY" > "$KEY_FILE"
+          # Публичный ключ выводим из приватного: он совпадает с зарегистрированным
+          # SSH Signing Key владельца (rtynbirf) — GitHub пометит коммит Verified.
+          ssh-keygen -y -f "$KEY_FILE" > "$KEY_FILE.pub"
+          git config gpg.format ssh
+          git config user.signingkey "$KEY_FILE.pub"
+          git config commit.gpgsign true
+          echo "Подпись настроена (ssh-ed25519, ключ из секрета PULSE_SIGNING_KEY)"
+
       - name: Запись пульса — ритм без шума
         run: |
           set -euo pipefail

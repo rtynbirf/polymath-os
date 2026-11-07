@@ -19,6 +19,20 @@
 - **ci(scorecard)**: воркфлоу OpenSSF Scorecard (action v2.5.0, пин по SHA) —
   еженедельная детерминированная оценка 0-100 публикуется в публичный реестр
   scorecard.dev и SARIF в Code Scanning; ритм смещён от ПУЛЬСа (вт 05:33 UTC).
+- **security(pins) — волна 7**: Pinned-Dependencies: 12 находок в shell-скриптах
+  → 0. Репозиторий больше не скачивает и не исполняет файлы «на лету»:
+  bootstrap.sh требует предустановленный Nix (`docs/INSTALL_NIX.md` —
+  sha256-пин релиза nix-installer v3.24.2; direnv/chezmoi — `nix profile
+  install` из фиксированной ревизии nixpkgs nixos-24.05, как во flake.nix);
+  Docker — официальный apt-репозиторий download.docker.com (GPG-signed)
+  вместо `get.docker.com | sh`; pip-фолбэк podman-compose убран; launch.sh —
+  `npm ci` по lockfile. Попутно вскрыта механика чекера: фантомный файл из
+  basename URL (`.../nix`) ложно флагал команды `nix profile/develop`.
+- **security(signing) — волна 7**: подпись коммитов включена по-настоящему:
+  два SSH Signing Key (агентский + пульсовый) на аккаунте владельца;
+  self-audit.yml подписывает пульсовые коммиты из секрета
+  `PULSE_SIGNING_KEY`; `required_signatures` включён — неподписанный push в
+  `main` отклоняется. `docs/COMMIT_SIGNING.md`: «Как включено».
 
 ### Changed
 

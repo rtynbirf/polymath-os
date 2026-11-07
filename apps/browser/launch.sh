@@ -22,11 +22,12 @@ if [ "$1" = "electron" ]; then
     if command -v electron &>/dev/null; then
         echo "  → electron detected on PATH (will be used by npm start)"
     else
-        echo "  → electron not on PATH; npm install will fetch it (~200MB one-time)"
+        echo "  → electron not on PATH; npm ci will fetch it (~200MB one-time)"
     fi
-    echo "  → installing deps (silent)…"
-    (cd "$ELECTRON_DIR" && npm install --silent) || {
-        echo "  ✗ npm install failed"
+    echo "  → installing deps from lockfile (npm ci — reproducible)…"
+    (cd "$ELECTRON_DIR" && npm ci --silent) || {
+        echo "  ✗ npm ci failed — lockfile out of sync with package.json?"
+        echo "    Run 'npm install' locally, commit the updated package-lock.json, retry."
         exit 1
     }
     echo "  → launching Electron app…"

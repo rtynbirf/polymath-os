@@ -34,10 +34,18 @@ fi
 echo ""
 echo "[1/4] Installing Docker..."
 if ! command -v docker &> /dev/null; then
-    curl -fsSL https://get.docker.com | bash
+    # Учитель OpenSSF Scorecard (Pinned-Dependencies): официальный apt-репозиторий
+    # download.docker.com (GPG-ключ проверяет сам apt) вместо `curl | sh`.
+    . /etc/os-release
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL "https://download.docker.com/linux/${ID}/gpg" -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} ${VERSION_CODENAME} stable" > /etc/apt/sources.list.d/docker.list
+    apt-get update -y
+    apt-get install -y docker-ce docker-ce-cli containerd.io
     systemctl enable docker
     systemctl start docker
-    echo "  ✓ Docker installed"
+    echo "  ✓ Docker installed (official apt repo, GPG-signed)"
 else
     echo "  ✓ Docker already installed"
 fi

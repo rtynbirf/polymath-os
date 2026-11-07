@@ -2,7 +2,7 @@
 # scripts/bootstrap.sh — Polymath OS one-command setup
 #
 # Запускается на чистой машине (macOS или Linux). После выполнения:
-#   - установлен Nix (Determinate Systems installer, рекомендуемый с 2024)
+#   - Nix предустановлен пользователем (см. docs/INSTALL_NIX.md — sha256-пин релиза)
 #   - установлены direnv + nix-direnv (через `nix profile install`)
 #   - установлен chezmoi (для dotfiles, см. ADR-0006 self-bootstrap)
 #   - dev-shell собран через `nix develop --command true` (первый прогон — минуты)
@@ -64,41 +64,40 @@ log "Detected: $PLATFORM / $ARCH"
 # ── Helper: ensure a command is in PATH ─────────────────────────────────────
 have() { command -v "$1" >/dev/null 2>&1; }
 
-# ── 1. Install Nix (Determinate Systems installer, 2024+) ─────────────────
-# Modern multi-user installer. Replaces the legacy `curl https://nixos.org/nix/install`.
-# See: https://github.com/DeterminateSystems/nix-installer
+# ── 1. Nix — только предустановленный ──────────────────────────────────────
+# Учитель OpenSSF Scorecard (Pinned-Dependencies): репозиторий не скачивает
+# и не исполняет скрипты «на лету» (curl|sh — запрещённый паттерн). Nix
+# ставится один раз вручную с sha256-пином релиза nix-installer (инструкция:
+# docs/INSTALL_NIX.md), дальше всё детерминировано: direnv/chezmoi — через
+# nix profile install из фиксированной ревизии nixpkgs (см. ниже).
 if have nix; then
-  log "Nix already installed: $(nix --version 2>&1 | head -n1)"
+  log "Nix found: $(nix --version 2>&1 | head -n1)"
 else
-  log "Installing Nix via Determinate Systems installer (no-confirm)..."
-  # Need curl/wget. Try curl first, fallback to wget.
-  if have curl; then
-    curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
-  elif have wget; then
-    wget -qO- https://install.determinate.systems/nix | sh -s -- install --no-confirm
-  else
-    fail "Need curl or wget to download Nix installer. Install one and re-run."
-  fi
-
-  # Source Nix profile so `nix` is in PATH for the rest of this script.
-  # The Determinate Systems installer writes to /nix/var/nix/profiles/default/
-  # on Linux, and /nix/var/determinate-nix/profiles/default/ on newer versions.
-  NIX_PROFILE_PATHS=(
-    "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-    "/nix/var/determinate-nix/profiles/default/etc/profile.d/nix-daemon.sh"
-    "$HOME/.nix-profile/etc/profile.d/nix.sh"
-  )
-  for profile in "${NIX_PROFILE_PATHS[@]}"; do
-    if [ -f "$profile" ]; then
-      # shellcheck disable=SC1090
-      . "$profile"
-      log "Sourced Nix profile: $profile"
-      break
-    fi
-  done
-
-  have nix || fail "Nix installed but 'nix' not in PATH. Open a NEW shell and re-run bootstrap."
+  fail "Nix not found. Install it first (~2 min): docs/INSTALL_NIX.md — then open a NEW shell and re-run bootstrap."
 fi
+
+# Фиксированная ревизия nixpkgs (head ветки nixos-24.05 на 2026-11-07) —
+# та же ветка, что вход flake.nix; профильные инструменты ставятся из неё же.
+NIXPKGS_REV="b134951a4c9f3c995fd7be05f3243f8ecd65d798"
+
+# Source Nix profile so `nix` is in PATH for the rest of this script.
+# The Determinate Systems installer writes to /nix/var/nix/profiles/default/
+# on Linux, and /nix/var/determinate-nix/profiles/default/ on newer versions.
+NIX_PROFILE_PATHS=(
+  "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+  "/nix/var/determinate-nix/profiles/default/etc/profile.d/nix-daemon.sh"
+  "$HOME/.nix-profile/etc/profile.d/nix.sh"
+)
+for profile in "${NIX_PROFILE_PATHS[@]}"; do
+  if [ -f "$profile" ]; then
+    # shellcheck disable=SC1090
+    . "$profile"
+    log "Sourced Nix profile: $profile"
+    break
+  fi
+done
+
+have nix || fail "Nix present but not in PATH. Open a NEW shell and re-run bootstrap."
 
 # ── 2. Install direnv + nix-direnv (if missing) ───────────────────────────
 # direnv needs to be on the SYSTEM PATH (outside nix develop) because it
@@ -107,8 +106,8 @@ fi
 if have direnv; then
   log "direnv already installed: $(direnv --version 2>&1 | head -n1)"
 else
-  log "Installing direnv + nix-direnv via 'nix profile install'..."
-  nix profile install nixpkgs#direnv nixpkgs#nix-direnv
+  log "Installing direnv + nix-direnv via 'nix profile install' (pinned revision)..."
+  nix profile install "github:NixOS/nixpkgs/${NIXPKGS_REV}#direnv" "github:NixOS/nixpkgs/${NIXPKGS_REV}#nix-direnv"
   warn "Add 'eval \"\$(direnv hook bash)\"' (or zsh/fish) to your shell rc."
   warn "See: https://direnv.net/docs/hook.html"
 fi
@@ -119,8 +118,8 @@ fi
 if have chezmoi; then
   log "chezmoi already installed: $(chezmoi --version 2>&1 | head -n1)"
 else
-  log "Installing chezmoi via 'nix profile install'..."
-  nix profile install nixpkgs#chezmoi
+  log "Installing chezmoi via 'nix profile install' (pinned revision)..."
+  nix profile install "github:NixOS/nixpkgs/${NIXPKGS_REV}#chezmoi"
 fi
 
 # ── 4. Build dev-shell via `nix develop --command true` ────────────────────
