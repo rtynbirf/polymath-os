@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="ru" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>СВЕТ v2 — Шоурум здорового интерфейса</title>
+<style>
+/* ============================================================
+   СВЕТ v2 — Система Внимания, Эргономики и Тишины
+   Закон I  — интерфейс подчиняется пользователю
+   Закон II — цвет вычисляется (OKLCH), а не выбирается
+   Закон III— типографика дышит (clamp / 68ch / 1.6)
+   Закон IV — движение только с meaningful-нагрузкой
+   Закон V  — тёплый континуум, а не режимы
+   ============================================================ */
+
+:root{
+  --hue: 85;                       /* СЕМЯ палитры: тёплый зелёный */
+  color-scheme: light dark;
+
+  /* --- Закон III: флюидная типографика --- */
+  --step--1: clamp(.875rem, .84rem + .18vw, .9375rem);
+  --step-0:  clamp(1rem,     .95rem + .25vw, 1.125rem);
+  --step-1:  clamp(1.25rem,  1.1rem  + .6vw,  1.5rem);
+  --step-2:  clamp(1.55rem,  1.3rem  + 1.2vw, 2.25rem);
+  --step-3:  clamp(2rem,     1.55rem + 2.2vw, 3.4rem);
+  --measure: 68ch;
+  --space:   clamp(1.25rem, 3vw, 2.5rem);
+
+  /* --- Закон II: палитра, выведенная из семени --- */
+  --bg:   oklch(.965 .018 var(--hue));
+  --surf: oklch(1    .012 var(--hue));
+  --ink:  oklch(.30  .025 var(--hue));
+  --mut:  oklch(.48  .020 var(--hue));
+  --line: oklch(.87  .015 var(--hue));
+  --acc:  oklch(.52  .105 var(--hue));
+  --acc-soft: color-mix(in oklch, var(--acc) 14%, var(--bg));
+  --glare: 1;                      /* множитель яркости поверхностей */
+}
+
+/* --- Закон V: тёплый континуум (вечер) --- */
+:root[data-theme="evening"]{
+  --bg:   oklch(.93 .045 75);
+  --surf: oklch(.96 .035 75);
+  --ink:  oklch(.34 .045 55);
+  --mut:  oklch(.50 .040 55);
+  --line: oklch(.82 .040 75);
+  --acc:  oklch(.50 .090 55);
+  color-scheme: light;
+}
+/* --- Закон V: ночь — мягкий серый, НЕ #000 --- */
+:root[data-theme="night"]{
+  --bg:   oklch(.23 .018 var(--hue));
+  --surf: oklch(.27 .020 var(--hue));
+  --ink:  oklch(.90 .012 var(--hue));
+  --mut:  oklch(.70 .015 var(--hue));
+  --line: oklch(.34 .018 var(--hue));
+  --acc:  oklch(.80 .095 var(--hue));
+  color-scheme: dark;
+}
+/* --- Закон I: авто-режим без JS — по системной теме --- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --bg:   oklch(.23 .018 var(--hue));
+    --surf: oklch(.27 .020 var(--hue));
+    --ink:  oklch(.90 .012 var(--hue));
+    --mut:  oklch(.70 .015 var(--hue));
+    --line: oklch(.34 .018 var(--hue));
+    --acc:  oklch(.80 .095 var(--hue));
+  }
+}
+/* --- Закон I: больше контраста по просьбе пользователя --- */
+@media (prefers-contrast: more){
+  :root{ --mut: var(--ink); --line: oklch(.70 .02 var(--hue)); }
+}
+body[data-contrast="more"]{ --mut: var(--ink); }
+
+/* --- e-ink имитация --- */
+html[data-grayscale]{ filter: grayscale(1); }
+
+*,*::before,*::after{ box-sizing: border-box; }
+
+html{ scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.6;                 /* WCAG 1.5+ : комфортный интерлиньяж */
+}
+
+/* --- Закон IV: мастер-выключатель движения --- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+body[data-motion="off"] *, body[data-motion="off"] *::before, body[data-motion="off"] *::after{
+  animation-duration:.01ms !important;
+  transition-duration:.01ms !important;
+}
+
+/* --- Закон III: типографика дышит --- */
+h1,h2,h3{ line-height:1.2; text-wrap: balance; margin: 0 0 .6em; }
+h1{ font-size: var(--step-3); letter-spacing:-.02em; }
+h2{ font-size: var(--step-2); margin-top: 2em; }
+h3{ font-size: var(--step-1); }
+p{ text-wrap: pretty; margin: 0 0 1.5em; max-width: var(--measure); }
+a{ color: var(--acc); text-decoration-thickness: 1px; text-underline-offset: .18em; }
+
+::selection{ background: color-mix(in oklch, var(--acc) 25%, transparent); }
+:focus-visible{ outline: 2px solid var(--acc); outline-offset: 3px; border-radius: 4px; }
+button, input, select, textarea{ accent-color: var(--acc); font: inherit; color: inherit; }
+
+/* ============================================================
+   ШАПКА + прогресс чтения (scroll-driven, чистый CSS)
+   ============================================================ */
+.top-wrap{ container-type: scroll-state; position: sticky; top: 0; z-index: 50; }
+header{
+  position: sticky; top: 0;
+  background: color-mix(in oklch, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+/* scroll-state query: тень у "прилипшей" шапки (Chrome 133+) */
+@container scroll-state (stuck: top){
+  header{ box-shadow: 0 6px 24px oklch(0 0 0 / .08); }
+}
+
+.progress{
+  position: fixed; top:0; left:0; height:3px; width:100%;
+  background: var(--acc); transform-origin: 0 50%;
+  transform: scaleX(0);
+  animation: grow linear both;
+  animation-timeline: scroll(root block);   /* без единой строки JS */
+  z-index: 60;
+}
+@keyframes grow{ from{ transform: scaleX(0);} to{ transform: scaleX(1);} }
+@media (prefers-reduced-motion: reduce){ .progress{ animation:none; transform:none; opacity:.2; } }
+
+/* ============================================================
+   КАРКАС
+   ============================================================ */
+header .bar{
+  max-width: 60rem; margin: 0 auto; padding: .7rem var(--space);
+  display: flex; flex-wrap: wrap; gap: .6rem .9rem; align-items: center;
+  font-size: var(--step--1); color: var(--mut);
+}
+header .bar .spacer{ flex: 1; }
+
+select, input[type="search"], textarea, .field{
+  background: var(--surf); border: 1px solid var(--line);
+  border-radius: 8px; padding: .35rem .6rem;
+}
+textarea{ field-sizing: content; min-height: 2.8rem; max-height: 12rem; width: 100%; resize: vertical; }
+
+.btn{
+  display:inline-block; cursor:pointer;
+  background: var(--acc); color: var(--bg);
+  border: 0; border-radius: 9px; padding: .45rem .9rem;
+  transition: transform .45s linear(0, 0.32 18%, 0.86 55%, 1);
+}
+.btn:hover{ transform: translateY(-2px); }
+.btn.ghost{ background: var(--acc-soft); color: var(--acc); }
+
+main{
+  max-width: 60rem; margin: 0 auto;
+  padding: var(--space) var(--space) 6rem;
+}
+section{ margin-block: 3.5rem; scroll-margin-top: 5rem; }
+.lead{ color: var(--mut); font-size: var(--step-1); }
+
+/* появление секций по view-timeline (scroll-driven) */
+.reveal{
+  animation: fade-up linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 45%;
+}
+@keyframes fade-up{
+  from{ opacity: 0; transform: translateY(18px); }
+  to  { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   КАРТОЧКИ + container queries
+   ============================================================ */
+.cq{ container-type: inline-size; }
+.grid{ display:grid; gap: 1rem; grid-template-columns: 1fr; }
+@container (min-width: 34rem){
+  .grid.two{ grid-template-columns: repeat(2, 1fr); }
+}
+.card{
+  background: var(--surf); border: 1px solid var(--line);
+  border-radius: 14px; padding: 1.1rem 1.25rem;
+  transition: translate .45s linear(0, 0.32 18%, 0.86 55%, 1);
+}
+.card:hover{ translate: 0 -3px; }
+.card h3{ margin-top: 0; }
+.tag{
+  display:inline-block; font-size: .72rem; letter-spacing:.06em; text-transform:uppercase;
+  color: var(--acc); background: var(--acc-soft);
+  padding: .15rem .55rem; border-radius: 999px; margin-bottom: .5rem;
+}
+.mono{ font-variant-numeric: tabular-nums; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .92em; }
+code{ background: var(--acc-soft); padding: .08em .35em; border-radius: 5px; font-size: .9em; }
+
+/* ============================================================
+   ВЕЛНЕС: режим «фонарика» (focus-dimming)
+   ============================================================ */
+body.spotlight .prose p, body.spotlight .prose li{ opacity:.30; transition: opacity .4s ease; }
+body.spotlight .prose p:hover, body.spotlight .prose li:hover,
+body.spotlight .prose p:focus-within{ opacity:1; }
+
+/* ============================================================
+   ВИДЖЕТЫ: dialog / popover / @starting-style
+   ============================================================ */
+dialog, [popover]{
+  background: var(--surf); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 16px;
+  padding: 1.4rem 1.6rem; max-width: 24rem;
+  box-shadow: 0 18px 60px oklch(0 0 0 / .18);
+  transition: opacity .35s ease, transform .35s ease,
+              display .35s allow-discrete, overlay .35s allow-discrete;
+}
+dialog[open], [popover]:popover-open{
+  @starting-style{ opacity: 0; transform: translateY(12px) scale(.97); }
+}
+dialog::backdrop, [popover]::backdrop{
+  background: oklch(0 0 0 / .25);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+
+/* тултип на anchor positioning (Baseline 01.2026) */
+.anchor-src{ anchor-name: --tip-src; }
+.tip{
+  position: fixed; position-anchor: --tip-src;
+  top: calc(anchor(bottom) + 10px);
+  justify-self: anchor-center;
+  margin: 0; font-size: var(--step--1); color: var(--bg);
+  background: var(--ink); padding: .5rem .8rem; border-radius: 10px;
+  max-width: 20rem;
+}
+
+/* длинный список с content-visibility — рендер вне экрана пропускается */
+.cv-list{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.cv-list li{ padding:.45rem .9rem; border-bottom:1px dashed var(--line); content-visibility:auto; contain-intrinsic-size: auto 2.4rem; }
+.cv-list{ margin:0; padding:0; list-style:none; }
+
+footer{
+  border-top: 1px solid var(--line);
+  background: var(--surf);
+  font-size: var(--step--1); color: var(--mut);
+}
+footer .inner{ max-width: 60rem; margin:0 auto; padding: 2.2rem var(--space) 3rem; }
+table{ border-collapse: collapse; width:100%; font-size:.95em; }
+th,td{ text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; }
+th{ color: var(--acc); font-weight:600; }
+.ok{ color: var(--acc); font-weight:600; }
+.no{ color: color-mix(in oklch, var(--ink) 60%, #c0392b); font-weight:600; }
+
+.viewbox{ display:grid; gap:1rem; }
+.viewbox .pane{
+  background: var(--acc-soft); border-radius:12px; padding:1rem 1.2rem;
+  view-transition-name: pane;
+}
+::view-transition-old(pane), ::view-transition-new(pane){ animation-duration:.4s; }
+
+.statusline{ display:flex; gap:1.2rem; flex-wrap:wrap; color:var(--mut); font-size:var(--step--1); }
+kbd{ border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:0 .4em; background:var(--surf); }
+</style>
+</head>
+
+<body>
+<div class="progress" aria-hidden="true"></div>
+
+<div class="top-wrap">
+<header>
+  <div class="bar">
+    <strong style="color:var(--ink)">СВЕТ&nbsp;v2</strong>
+    <span>шоурум здорового интерфейса</span>
+    <span class="spacer"></span>
+
+    <label for="theme">Тема</label>
+    <select id="theme">
+      <option value="auto">Авто (по часам)</option>
+      <option value="day">☀️ День</option>
+      <option value="evening">🌅 Вечер</option>
+      <option value="night">🌙 Ночь</option>
+    </select>
+
+    <label><input type="checkbox" id="motion"> Тишина (без движения)</label>
+    <label><input type="checkbox" id="contrast"> Контраст+</label>
+    <label><input type="checkbox" id="gray"> E-ink</label>
+    <label><input type="checkbox" id="spot"> Фонарик</label>
+  </div>
+</header>
+</div>
+
+<main>
+  <!-- ============ ГЕРОЙ ============ -->
+  <section class="reveal" id="hero">
+    <p class="tag">Перцептивная эргономика · 2026</p>
+    <h1>Интерфейс, который исчезает, оставляя только смысл</h1>
+    <p class="lead">Пять законов СВЕТ и полный арсенал веб-платформы 2025–2026: OKLCH-палитра, вычисляемый контраст, scroll-driven анимации, нативные виджеты и велнес-режимы. Каждая фича подписана прямо в тексте.</p>
+    <div class="statusline">
+      <span>⏱ Сейчас: <strong class="mono" id="clock">—</strong></span>
+      <span>🎨 Тема: <strong id="theme-label">—</strong></span>
+      <span>👁 Вкладка: <strong id="vis">активна</strong></span>
+      <span>🎬 Scroll-driven: <span id="sda">—</span></span>
+    </div>
+  </section>
+
+  <!-- ============ ПАЛИТРА ============ -->
+  <section class="reveal" id="palette">
+    <h2>1. Цвет вычисляется, а не выбирается</h2>
+    <p>Вся страница окрашена из <strong>одного семени</strong> <code>oklch(.52 .105 var(--hue))</code>. Тени, акценты, ховеры выводятся относительным синтаксисом и <code>color-mix()</code> — комфорт наследуется автоматически.</p>
+    <div class="cq">
+      <div class="grid two">
+        <div class="card"><span class="tag">oklch</span>
+          <p>Канал L здесь = реальная воспринимаемая яркость: светлые — светлые, тёмные — тёмные, без сюрпризов HSL.</p>
+        </div>
+        <div class="card"><span class="tag">color-mix()</span>
+          <p>Плашки <code>.tag</code> и фон кода — это <code>color-mix(in oklch, acc 14%, bg)</code>: мягкий, приглушённый, не кричит.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ТИПОГРАФИКА ============ -->
+  <section class="reveal" id="type">
+    <h2>2. Типографика дышит</h2>
+    <p>Размеры заданы <code>clamp()</code> — строка плавно растёт от телефона до 4K. Абзацы получают <code>text-wrap: pretty</code> (нет «сирот»), заголовки — <code>text-wrap: balance</code>. Вот заголовок, который без balance ломался бы уродливо: <span style="white-space:nowrap">Проверка баланса переносов</span> в строке.</p>
+    <div class="card">
+      <span class="tag">text-box-trim</span>
+      <p style="margin:0">Если браузер поддерживает <code>text-box</code>, воздух над этим текстом обрезан точно по кеглю. Таймер с <code>tabular-nums</code> не «пляшет»: <span class="mono" id="timer">00:00:00</span></p>
+    </div>
+  </section>
+
+  <!-- ============ ДВИЖЕНИЕ ============ -->
+  <section class="reveal" id="motion-sec">
+    <h2>3. Движение только с meaningful-нагрузкой</h2>
+    <p>Полоса сверху и появление секций — <strong>scroll-driven animations</strong> на композиторе браузера: ноль JS, ноль jank. Отключаются тумблером «Тишина», системным <code>prefers-reduced-motion</code> — автоматически.</p>
+    <div class="grid two">
+      <div class="card">
+        <span class="tag">View Transitions API</span>
+        <p>Смена содержимого через <code>document.startViewTransition</code> — плавный кросс-фейд средствами браузера.</p>
+        <button class="btn" id="vt">Сменить панель</button>
+      </div>
+      <div class="card">
+        <span class="tag">linear() spring</span>
+        <p>Кнопки приподнимаются на пружинной кривой <code>linear()</code> — физика без JS-библиотек. Попробуй <kbd>Tab</kbd>-ом.</p>
+        <button class="btn ghost">Наведи на меня</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ВИДЖЕТЫ ============ -->
+  <section class="reveal" id="widgets">
+    <h2>4. Нативные виджеты без JS-каркасов</h2>
+    <p><code>&lt;dialog&gt;</code>, Popover API, invoker commands, <code>field-sizing</code> — доступность из коробки браузера. Тултип ниже привязан к кнопке <strong>anchor positioning</strong> (Baseline 2026).</p>
+    <div style="display:flex; gap:.8rem; flex-wrap:wrap; align-items:flex-start;">
+      <button class="btn" id="open-dlg">Модалка &lt;dialog&gt;</button>
+      <button class="btn ghost" popovertarget="pp">Popover</button>
+      <button class="btn ghost anchor-src" popovertarget="tip">Тултип (anchor)</button>
+    </div>
+    <dialog id="dlg">
+      <h3>Нативная модалка</h3>
+      <p>Фокус-ловушка, <kbd>Esc</kbd>, затемнение — всё сделал браузер. Вход анимирован <code>@starting-style</code>.</p>
+      <button class="btn" commandfor="dlg" command="close" id="close-dlg">Понятно</button>
+    </dialog>
+    <div popover id="pp">
+      <h3 style="margin-top:0">Popover API</h3>
+      <p>Top-layer без z-index-войн. Закрытие по клику мимо — бесплатно.</p>
+    </div>
+    <p class="tip" popover id="tip" role="note">Я позиционируюсь от кнопки через <code>anchor(bottom)</code> — без Popper.js.</p>
+
+    <div class="card" style="margin-top:1rem">
+      <span class="tag">field-sizing: content</span>
+      <p style="margin:.3rem 0 .8rem">Печатай — поле растёт само:</p>
+      <textarea id="grow" rows="1" placeholder="Напиши пару строк…"></textarea>
+    </div>
+  </section>
+
+  <!-- ============ ПРОИЗВОДИТЕЛЬНОСТЬ ============ -->
+  <section class="reveal" id="perf">
+    <h2>5. Производительность = спокойные глаза</h2>
+    <p>Список из 300 пунктов ниже рендерится только у видимой части: <code>content-visibility: auto</code> + <code>contain-intrinsic-size</code>. Скролл ровный, без рывков — глазу не за что цепляться.</p>
+    <ul class="cv-list" id="cvlist" start="1"></ul>
+  </section>
+
+  <!-- ============ ВЕЛНЕС ============ -->
+  <section class="reveal prose" id="wellness">
+    <h2>6. Велнес-слой</h2>
+    <p><strong>Фонарик.</strong> Включи тумблер в шапке: активный абзац светлый, остальные приглушены — читается только то, куда смотрит внимание.</p>
+    <p><strong>Голосом.</strong> Устали глаза? Пусть страница читает вслух — Speech Synthesis, бесплатный отдых для зрения.</p>
+    <div style="display:flex; gap:.8rem; flex-wrap:wrap;">
+      <button class="btn" id="speak">▶ Читать раздел голосом</button>
+      <button class="btn ghost" id="wake">🔒 Не гасить экран</button>
+    </div>
+    <p style="margin-top:1.2rem"><strong>E-ink режим</strong> — имитация электронных чернил (<code>filter: grayscale(1)</code>): ноль цветового возбуждения перед сном. <strong>Контраст+</strong> повторяет системную настройку <code>prefers-contrast: more</code>.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="inner">
+    <h2>Честный научный фильтр</h2>
+    <p>На рынке продаётся много «вкусняшек», которые наука не подтверждает. СВЕТ их отфильтровывает:</p>
+    <table>
+      <tr><th>Фича</th><th>Вердикт</th></tr>
+      <tr><td>Bionic Reading (жирные начала слов)</td><td class="no">✗ eye-tracking 2025: время чтения растёт</td></tr>
+      <tr><td>Шрифты «от дислексии» (OpenDyslexic)</td><td class="no">✗ мета-анализ PubMed: стабильного эффекта нет</td></tr>
+      <tr><td>Чистые #FFF / #000</td><td class="no">✗ экстремум яркости → glare-перегрузка</td></tr>
+      <tr><td>Параллакс, автоплей, мигание</td><td class="no">✗ WCAG 2.3.3: вестибулярный риск</td></tr>
+      <tr><td>Строка &gt; 90 символов</td><td class="no">✗ оптимум 50–75 символов (66)</td></tr>
+      <tr><td>OKLCH · clamp · 1.6 · 68ch · reduced-motion</td><td class="ok">✓ подтверждено исследованиями</td></tr>
+    </table>
+    <p style="margin-top:1.4rem">Источники: W3C Media Queries L5 · CSS Color 5 · MDN (scroll-driven, Wake Lock, contrast-color) · web.dev Baseline · Baymard Institute · PubMed 2025 · Evil Martians OKLCH · Amber Case, Calm Technology.</p>
+    <p>СВЕТ v2 · сгенерировано 2026 · <span class="mono">hue&nbsp;=&nbsp;85</span></p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const root = document.documentElement;
+
+  /* --- Тема: авто по часам (Закон V) + ручной выбор --- */
+  const themeSel = $('#theme'), themeLabel = $('#theme-label'), clock = $('#clock');
+  const RU = { day:'☀️ День', evening:'🌅 Вечер', night:'🌙 Ночь' };
+  const resolve = () => { const h = new Date().getHours(); return h>=8&&h<17 ? 'day' : (h>=17&&h<21 ? 'evening' : 'night'); };
+  let autoTimer = null;
+  function applyTheme(){
+    if(themeSel.value === 'auto'){
+      const t = resolve(); root.dataset.theme = t; themeLabel.textContent = RU[t] + ' · авто';
+      if(!autoTimer) autoTimer = setInterval(applyTheme, 60000);
+    } else {
+      root.dataset.theme = themeSel.value; themeLabel.textContent = RU[themeSel.value];
+      clearInterval(autoTimer); autoTimer = null;
+    }
+  }
+  themeSel.addEventListener('change', applyTheme); applyTheme();
+  const tick = () => clock.textContent = new Date().toLocaleTimeString('ru-RU');
+  tick(); setInterval(tick, 1000);
+
+  /* --- Тумблеры --- */
+  $('#motion').addEventListener('change', e => e.target.checked ? root.dataset.motion='off' : delete root.dataset.motion);
+  $('#contrast').addEventListener('change', e => document.body.toggleAttribute('data-contrast', e.target.checked));
+  $('#gray').addEventListener('change', e => e.target.checked ? root.dataset.grayscale='' : delete root.dataset.grayscale);
+  $('#spot').addEventListener('change', e => document.body.classList.toggle('spotlight', e.target.checked));
+
+  /* --- dialog: с фолбэком для invoker commands --- */
+  const dlg = $('#dlg');
+  $('#open-dlg').addEventListener('click', () => dlg.showModal && dlg.showModal());
+  const cmdBtn = $('#close-dlg');
+  if(!('command' in HTMLButtonElement.prototype)) cmdBtn.addEventListener('click', () => dlg.close());
+
+  /* --- View Transitions --- */
+  const lines = ['Панель A → Панель B: анимирует браузер.', 'Панель B → Панель A: снова View Transition.'];
+  let flip = false;
+  $('#vt').addEventListener('click', () => {
+    const paneHTML = `<strong>${flip?'Панель A':'Панель B'}</strong><p style="margin:.4rem 0 0">${flip?lines[1]:lines[0]}</p>`;
+    flip = !flip;
+    if(document.startViewTransition) document.startViewTransition(() => { $('.viewbox .pane').innerHTML = paneHTML; });
+    else $('.viewbox .pane').innerHTML = paneHTML;
+  });
+  /* добавим панель в карточку VT */
+  const vtCard = $('#vt').parentElement; const vb = document.createElement('div');
+  vb.className = 'viewbox'; vb.style.marginTop = '.8rem';
+  vb.innerHTML = '<div class="pane"><strong>Панель A</strong><p style="margin:.4rem 0 0">Нажми кнопку — увидишь переход.</p></div>';
+  vtCard.appendChild(vb);
+
+  /* --- Поддержка scroll-driven (индикатор) --- */
+  $('#sda').textContent = CSS.supports('animation-timeline: scroll()') ? '✓ поддержано' : '✗ фолбэк (без анимаций)';
+
+  /* --- 300 пунктов content-visibility --- */
+  const list = $('#cvlist');
+  const frag = document.createDocumentFragment();
+  for(let i=1;i<=300;i++){ const li=document.createElement('li'); li.textContent=`Пункт № ${i} — отрендерен, только когда виден`; frag.appendChild(li); }
+  list.appendChild(frag);
+
+  /* --- Page Visibility --- */
+  document.addEventListener('visibilitychange', () => $('#vis').textContent = document.hidden ? 'скрыта (пауза)' : 'активна');
+
+  /* --- Speech Synthesis --- */
+  $('#speak').addEventListener('click', () => {
+    if(!('speechSynthesis' in window)) return alert('Браузер не поддерживает озвучку');
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance($('#wellness').innerText.slice(0, 400));
+    u.lang = 'ru-RU'; u.rate = .95; speechSynthesis.speak(u);
+  });
+
+  /* --- Wake Lock --- */
+  let lock = null;
+  $('#wake').addEventListener('click', async e => {
+    try{
+      if(lock){ await lock.release(); lock=null; e.target.textContent='🔒 Не гасить экран'; return; }
+      lock = await navigator.wakeLock.request('screen');
+      e.target.textContent='🔓 Экран активен';
+      lock.addEventListener('release', () => { lock=null; $('#wake').textContent='🔒 Не гасить экран'; });
+    }catch(err){ alert('Wake Lock недоступен: ' + err.message); }
+  });
+})();
+</script>
+</body>
+</html>
