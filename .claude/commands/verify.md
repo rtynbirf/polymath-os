@@ -11,6 +11,7 @@ Run the open-source contract check.
 ## What this does
 
 `make verify` runs `python3 scripts/check.py` — 12 independent checks:
+
 1. SINGULYAR EIR — all 220 tests pass (in `runtime/`)
 2. JSON Schemas (Intent / Capability / Evidence) valid
 3. ADRs 0001-0012 present
@@ -33,6 +34,7 @@ make verify
 ## Reporting
 
 After running:
+
 - If exit 0 → report "All 12 claims verified. Repo is reproducible."
 - If non-zero → list which checks failed and what each failure means.
 - Map each failed check to its corresponding ADR (see `docs/adr/` and

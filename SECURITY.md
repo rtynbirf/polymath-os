@@ -12,6 +12,7 @@
 **НЕ открывай public issue для security vulnerability.**
 
 Репорт через:
+
 1. GitHub Security Advisories (Private): <https://github.com/rtynbirf/polymath-os/security/advisories/new>
 
 Это единственный канал: приватный, привязан к репозиторию, даёт CVE при
@@ -81,6 +82,7 @@ git push origin main
 ### Why this matters
 
 GitHub's secret scanner continuously scans:
+
 - Public git repos (commits, blobs, history)
 - GitHub Issues, PRs, Discussions
 - GitHub Actions logs
@@ -91,6 +93,7 @@ within minutes (often <5 min). This is a security feature, but it means
 any leaked token becomes immediately unusable.
 
 For polymath-os specifically:
+
 - `scripts/check_token_hygiene.py` is added to `make verify` (claim #23)
 - It scans all `.py`, `.sh`, `.js`, `.yml`, `.md` files for known token patterns
 - Threshold: 50+ chars after `github_pat_` prefix (avoids false positives on
@@ -124,6 +127,7 @@ For polymath-os specifically:
 ## Audit checklist
 
 Раз в квартал (см. `docs/01-principles.md`):
+
 - [ ] Все production releases имеют SBOM + cosign signature
 - [ ] Все IAM роли используют OIDC trust (no long-lived keys)
 - [ ] Все MCP-серверы имеют documented scope (least privilege)

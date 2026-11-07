@@ -15,6 +15,7 @@
 **Polymath OS** — персональная операционная система для человека-полимата. Это не дистрибутив Linux и не SaaS-продукт. Это **набор слоёв от репозитория до исполнительного ядра**, которые вместе образуют воспроизводимую среду для разработки, мышления, автоматизации и публикации — при сохранении полного суверенитета человека над системой.
 
 **Система решает следующие задачи:**
+
 1. **Сохранение намерения** — когда человек формулирует Intent («отправить данные в X», «опубликовать заметку», «выполнить команду»), система обязуется сохранить это намерение при смене исполнителя (adapter), восстановить выполнение после сбоя и не объявлять успех без подтверждённого состояния (честный UNKNOWN вместо «наверное получилось»).
 2. **Верховенство воли человека** — текст, который человек печатает в Decree Portal, становится **законом** (decree), который ядро SINGULYAR EIR проверяет перед каждым действием. Декрет append-only, hash-chained, невозможен к изменению или удалению.
 3. **Суверенитет над зависимостями** — каждый компонент системы классифицирован по трёхуровневому реестру: ядро (git, markdown, SQLite, age, Nix), арендуемые сервисы (заменяемые по контракту), запрещённые (Google, Cloudflare, Chrome/Firefox/Edge/Safari и т.п.).
@@ -24,6 +25,7 @@
 ### 1.2. Область применения
 
 Polymath OS применим в следующих сценариях:
+
 - **Личная разработка** — единое дерево git/monorepo для всех своих проектов, пакетов, конфигураций, документации.
 - **Second Brain (PKM)** — Obsidian vault с локальным AI (Copilot+Ollama), git-sync, smart connections.
 - **AI-ассистированные workflow** — MCP-native agents с version-pinning, eval-in-CI, multi-agent research.
@@ -141,6 +143,7 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.1. Layer 1 — Repository Structure
 
 **Цель:** self-contained монорепозиторий с явным владением.
+
 - `pnpm` workspaces (`pnpm-workspace.yaml` → `apps/*`, `packages/*`, `tooling/*`)
 - `turbo.json` — build/lint/test/typecheck/dev pipelines с `dependsOn`
 - `@changesets/cli` — независимое версионирование пакетов
@@ -151,6 +154,7 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.2. Layer 2 — AI Workflows
 
 **Цель:** agent-as-process с eval-in-CI.
+
 - MCP (Model Context Protocol) — version-pinned (`tooling/agents/mcp/`)
 - 4 адаптера: filesystem, git, postgres, web_search
 - CLI: `python3 -m tooling.agents.mcp verify --coverage` — проверка покрытия
@@ -160,6 +164,7 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.3. Layer 3 — Second Brain (PKM)
 
 **Цель:** markdown-first база знаний с локальным AI.
+
 - Obsidian vault в `vault/` (`60-permanent/`, `90-meta/templates/`)
 - git-sync для versioning
 - Smart Connections + Copilot+Ollama для локального AI
@@ -168,6 +173,7 @@ Polymath OS состоит из **5 горизонтальных слоёв** и
 ### 3.4. Layer 4 — DevEx / CI / IaC
 
 **Цель:** одна команда `make bootstrap` → готовая среда.
+
 - `flake.nix` — Nix Flakes для воспроизводимой среды
 - `infra/tofu/` — OpenTofu (Hetzner, Unleash, Cloudflare DNS, Vault cluster)
 - `infra/self-host/docker-compose.yml` — self-hosted services
@@ -200,6 +206,7 @@ CREATED ─► PLANNED ─► EXECUTING ─► VERIFYING ─► CONFIRMED  ✓
 ```
 
 **Ключевые инварианты:**
+
 - **UNKNOWN ≠ CONFIRMED** — никогда не объявлять успех без подтверждённого состояния (ADR-0006 falsifiable)
 - **DECREE_BLOCK → WAITING_FOR_HUMAN** — никогда не downgrade к более мягкому состоянию
 - **Hash-chain integrity** — fail-closed если цепочка нарушена (ADR-0006)
@@ -348,6 +355,7 @@ dl.close()
 | "use Google DNS server explicitly"  | DENIED                      | DENIED (matched_term=google dns) |
 
 **Известные ограничения v0.5 (запланированы для v0.6):**
+
 - Substring matching без word boundaries: `chrome` совпадает с `chromebook` (v0.6 fix: `\bchrome\b` regex)
 - Naive `text.split("use", 1)` парсит "never abuse any services" как prohibited="any services" (v0.6 fix: regex pattern)
 
@@ -372,6 +380,7 @@ dl.close()
 **Файл:** `runtime/src/singulyar_runtime.py` (класс `EvidenceLedger`)
 
 **SQLite WAL база** с hash-chained событиями:
+
 - `INTENT_ACCEPTED` — Intent прошёл валидацию, recorded fingerprint
 - `STATE_TRANSITION` — каждое изменение состояния (CREATED → PLANNED → ...)
 - `EXECUTION_STARTED` — write-ahead запись BEFORE side-effect
@@ -389,11 +398,13 @@ dl.close()
 ### 4.5. Decree Portal (UI)
 
 **Файлы:**
+
 - `apps/browser/decree-portal.html` — HTML/JS интерфейс
 - `apps/browser/decree-bridge.js` — Node bridge к Python DecreeLog
 - `apps/browser/electron/` — Electron desktop wrapper
 
 **UI компоненты:**
+
 - Textarea для ввода текста декрета (до 5000 символов)
 - 5 категорий-кнопок: Директива, Закон, Запрет, Разрешение, Наблюдение
 - Кнопка "⚡ ИЗДАТЬ ДЕКРЕТ"
@@ -422,6 +433,7 @@ function getBridge() {
 ```
 
 **Electron desktop wrapper (новое в v3.7.0):**
+
 - `apps/browser/electron/main.js` — BrowserWindow 1200×800, dark background
 - `apps/browser/electron/preload.js` — `contextBridge.exposeInMainWorld('decreeBridge', ...)`
 - Security: `contextIsolation: true`, `nodeIntegration: false`
@@ -447,6 +459,7 @@ function getBridge() {
 ### 4.7. Garden (Quartz v4)
 
 **Директория:** `apps/garden/`
+
 - Quartz v4 — static site generator
 - Source: `apps/garden/content/` ← default-deny copy of `vault/60-permanent/`
 - Filter: `apps/garden/scripts/filter_vault.py` — копирует только заметки с `publish: true` frontmatter
@@ -521,6 +534,7 @@ node apps/browser/decree-bridge.js check "configure DNS with Google 8.8.8.8"
 ### 7.2. HTML UI
 
 `apps/browser/decree-portal.html` — открывается в любом браузере. Three-tier `getBridge()`:
+
 1. `require('./decree-bridge.js')` — Node/Electron main
 2. `window.decreeBridge` — Electron preload (contextBridge)
 3. `null` → localStorage fallback
@@ -677,6 +691,7 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 ### 11.4. CI status (на v3.7.0)
 
 Все 4 check-runs на commit `6e97a5a` — GREEN:
+
 - ✓ `lint + typecheck + test + build + security`
 - ✓ `make verify (open-source contract)`
 - ✓ `Analyze (javascript-typescript)` (CodeQL)
@@ -769,6 +784,7 @@ PAT (Personal Access Token) для GitHub API передаётся **тольк�
 ### 15.2. Ledger events
 
 Полный список event types:
+
 - `INTENT_ACCEPTED`, `INTENT_REJECTED`
 - `STATE_TRANSITION`
 - `EXECUTION_STARTED`, `ADAPTER_RETURN`, `ADAPTER_NOT_EXECUTED`, `ADAPTER_EXCEPTION`
@@ -798,6 +814,7 @@ DECREE_BLOCK events  : 1 (Intent 2 blocked by decree#3)
 ## 16. Финальная подпись
 
 **Система OPERATIONAL.**
+
 - 22 ADRs зафиксированы
 - 5 слоёв архитектуры реализованы
 - 7 фундаментальных декретов записаны в реальный SQLite

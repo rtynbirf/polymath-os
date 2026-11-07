@@ -140,6 +140,7 @@ Records of each drill — in `docs/runbook/RUNBOOK.md` (per-env RPO/RTO).
 ## LFS-рекомендации
 
 См. `ROADMAP.md` Фаза 1 + Фаза 2. Резюме для `infra/`:
+
 1. flake.nix + direnv → reproducible infra shell (Nixpkgs 24.05)
 2. SOPS+age → secrets in git, decryptable offline (Tier 1)
 3. OpenTofu (MPL, BSL-safe) → no Terraform BSL lock-in

@@ -173,6 +173,7 @@ These files are **scaffolds**: stdlib only, no PyPI deps. The
 is verifiable end-to-end without a real server.
 
 Production migration:
+
 - Replace `_call_mcp_tool` with a real MCP client dispatch
   (`@modelcontextprotocol/sdk` for JS, or a Python MCP client).
 - Wire `read_state` to call the server's read-side tool (independent

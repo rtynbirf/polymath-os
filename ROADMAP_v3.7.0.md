@@ -12,6 +12,7 @@
 Polymath OS развивался по принципу **"каждый коммит — релиз"**. За один день (2026-10-17) сделано **28 релизов** от v3.0.0 до v3.7.0. Это не классический road-map на 90 дней — это **road-map accumulated history + forward vision**.
 
 Документ состоит из 4 частей:
+
 1. **История** — что сделано в каждом релизе v1.0.0 → v3.7.0
 2. **Текущее состояние** — где мы сейчас (v3.7.0)
 3. **Ближайшие планы** — v0.6/v3.8 (30 дней)
@@ -30,6 +31,7 @@ Polymath OS развивался по принципу **"каждый комм�
 Первый публичный выпуск. Репозиторий переведён из «отчёта» в `make verify`-контракт: каждое утверждение в `README.md` воспроизводится одной командой.
 
 **Added:**
+
 - Layer 5 — SINGULYAR EIR v0.3: execution kernel, который сохраняет намерение человека при смене исполнителя и не объявляет успех без подтверждённого состояния. Лестница абляции B0→B3→EIR — каждое звено несущее.
 - 12 ADRs (0001-0012) — каждое архитектурное решение зафиксировано по шаблону Context/Decision/Consequences.
 - Sovereignty Registry (ADR-0002) — двухъярусный реестр зависимостей: суверенное ядро (git, markdown, SQLite, age, Nix) + арендуемые сервисы.
@@ -82,6 +84,7 @@ Integration tests `test_decree_runtime_integration.py` written (3 tests). BUT �
 ### v3.6.0 (2026-10-17) — 🔥 OPERATIONAL: Decree Bridge wired
 
 **Главный релиз.** Система стала OPERATIONAL.
+
 - `apps/browser/decree-bridge.js` (new, 144 lines) — Node bridge to Python DecreeLog
 - 7 foundational decrees recorded in real SQLite (`~/.polymath-os/decrees.db`):
   1. ЧЕЛОВЕК = PID=1 (law)
@@ -105,28 +108,33 @@ Integration tests `test_decree_runtime_integration.py` written (3 tests). BUT �
 4 parallel subagent tracks запущены одновременно, ноль конфликтов, один консолидированный коммит:
 
 **Track 3-a — Production decree enforcement:**
+
 - `runtime/src/demo_with_decree.py` (new, 180 lines) — production demo
 - Демо: Intent 1 → CONFIRMED, Intent 2 → WAITING_FOR_HUMAN, DECREE_BLOCK logged
 
 **Track 3-b — v0.5 NLP phrase matching:**
+
 - `runtime/src/decree_log.py` (+129 lines) — `_extract_prohibited_terms()` helper
 - Классификация: LIST / PHRASE / SINGLE / DEFAULT
 - FALSE POSITIVE FIXED: "configure DNS with local unbound" → compliant=True (was False)
 - 5 новых тестов, всего 111 (was 106)
 
 **Track 3-c — Electron desktop wrapper:**
+
 - `apps/browser/electron/{main.js, preload.js, package.json, README.md}` (new, 244 lines)
 - `apps/browser/launch.sh` — electron mode
 - `apps/browser/decree-portal.html` — getBridge() 3-tier: require → window.decreeBridge → null
 - Security: contextIsolation=true, nodeIntegration=false
 
 **Track 3-d — CI steps 8+ green:**
+
 - `apps/garden/tsconfig.json` (new) — fixed TS5058
 - `apps/garden/package.json` — removed `|| true` masking on typecheck
 - `quartz.config.ts` + `Header.tsx` — added `// @ts-nocheck` (pre-bootstrap stubs)
 - gitleaks scan: 0 leaked tokens
 
 **CI on `6e97a5a` — 4/4 GREEN** (was red on every commit since v3.4.0):
+
 - ✓ lint + typecheck + test + build + security
 - ✓ make verify (open-source contract)
 - ✓ Analyze (javascript-typescript)
@@ -201,6 +209,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Проблема:** v3.7.0 объявил Electron package, но `npm install` (~200MB) и `npm start` не протестированы end-to-end.
 
 **Решение:**
+
 - Запустить `cd apps/browser/electron && npm install`
 - Запустить `npm start` — открыть окно
 - Издать декрет через UI
@@ -212,6 +221,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Проблема:** `scripts/sovereignty_drill.py` существует, но workflow `sovereignty_drill.yml` scheduled — нужно убедиться, что drill реально запускается.
 
 **Решение:**
+
 - Проверить последние 10 запусков `sovereignty_drill.yml`
 - Если не запускается — настроить cron schedule
 - Добавить alerting на drill failure
@@ -221,6 +231,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Проблема:** `apps/garden` build — `continue-on-error: true` в CI. Не блокирует, но и не проверяет.
 
 **Решение:**
+
 - Bootstrap Quartz в `publish-garden.yml` (separate workflow)
 - Убрать `continue-on-error: true` из CI (если garden build стабилен)
 - Или: оставить как есть (separation of concerns — garden это docs deploy, не code CI)
@@ -230,6 +241,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Проблема:** ADR-0015 declares intent — real LLM inference в CI. Текущая стратегия — stub adapter.
 
 **Решение:**
+
 - Stage 1: использовать cell65-llm (self-hosted) в CI
 - Stage 2: fallback на OpenAI/Anthropic API с rate limit
 - Stage 3: полностью sovereign (cell65-llm only)
@@ -239,6 +251,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Проблема:** workflow `cross-repo-governance.yml` существует, но статус неясен.
 
 **Решение:**
+
 - Проверить последние запуски
 - Если не запускается — настроить
 - Документировать, какие межрепозиторные контракты проверяются
@@ -291,6 +304,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 5.1. Polymath OS as portable OS layer
 
 Полимат как **layer over Linux/BSD**, который:
+
 - Бутстрапит из source (LFS-style)
 - Управляет decrees как kernel parameters
 - Координирует agents как процессы (PID=1 = человек)
@@ -333,6 +347,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 6.1. Real LLM inference cost in CI
 
 Сколько стоит real LLM inference в CI на каждый PR? Stub adapter не отражает реальную стоимость. Нужно:
+
 - Benchmark cell65-llm на CI runner
 - Compare с OpenAI/Anthropic API cost
 - Decide: full sovereignty vs cost optimization
@@ -340,6 +355,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 6.2. Sovereignty drill recovery time
 
 `scripts/sovereignty_drill.py` измеряет recovery time, но recent data не собран. Нужно:
+
 - 30 days of drill data
 - P50/P95 recovery time
 - Alerting на regression
@@ -347,6 +363,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 6.3. WebRTC P2P reliability
 
 `adapters/webrtc_adapter.py` существует, но aiortc не всегда устанавливается. Нужно:
+
 - Real P2P test между 2 nodes
 - NAT traversal measurement
 - Fallback strategy
@@ -354,6 +371,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 6.4. Mutation testing coverage gaps
 
 `runtime/scripts/run_mutmut.sh` (ADR-0010). Нужно:
+
 - Mutation score report
 - Identify uncovered code paths
 - Add tests для coverage gaps
@@ -361,6 +379,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ### 6.5. Token hygiene automation
 
 После auto-revoke PAT в этой сессии — нужен automation:
+
 - Pre-commit hook: detect plaintext PAT в staged files
 - CI: gitleaks already scans, но добавить custom rule для `github_pat_[A-Z0-9]{20,}`
 - Documentation: "Best practices for PAT usage" в `SECURITY.md`
@@ -374,6 +393,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** PAT утечёт в plaintext (в bash history, в session logs, в commit'ах).
 
 **Митигация:**
+
 - env-var passing (не inline)
 - Reset remote URL after every push
 - GitHub secret scanner auto-revoke (backup)
@@ -384,6 +404,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** GitHub — Tier 2 rented service. Если GitHub отключит аккаунт — все releases теряются.
 
 **Митигация:**
+
 - Local clone mirrors everything
 - `sovereignty_drill.yml` regularly tests recovery
 - Gitea self-hosted as Tier 1 target (long-term)
@@ -393,6 +414,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** SQLite имеет single-writer limitation. При high concurrency — contention.
 
 **Митигация:**
+
 - WAL mode (concurrent readers + 1 writer)
 - `BEGIN IMMEDIATE` для write transactions
 - Append-only pattern (no UPDATE/DELETE в hot path)
@@ -403,6 +425,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** Node 20+ / Python 3.10+ — но конкретные версии могут ломаться.
 
 **Митигация:**
+
 - `engines` field в package.json
 - `pyproject.toml` requires-python
 - pnpm-lock.yaml frozen
@@ -414,6 +437,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** substring matching имеет edge cases (chromebook, "abuse any services" mis-parsing).
 
 **Митигация:**
+
 - Документировано в `decree_log.py` line 161
 - v0.6 fix scheduled (word-boundary regex)
 - Production demo не зависит от edge cases
@@ -423,6 +447,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 **Риск:** `apps/garden` build требует `git clone jackyzha0/quartz` — network dependency.
 
 **Митигация:**
+
 - `continue-on-error: true` в CI — не блокирует
 - Pre-bootstrap в Docker image (long-term)
 - Mirror quartz repo в own infrastructure
@@ -481,15 +506,18 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ## 9. Релизный ритм
 
 **Текущий паттерн:** каждый значимый коммит — релиз. В этой сессии:
+
 - 5 коммитов → 2 релиза (v3.6.0, v3.7.0)
 - Каждый релиз = annotated git tag + GitHub Release notes
 
 **Предполагаемый ритм на ближайшие 30 дней:**
+
 - v3.7.1 (bug fixes, no new features) — при необходимости
 - v3.8.0 (v0.6 word-boundary + Electron install test) — major
 - v3.9.0 (sovereignty drill automation + real LLM CI experiment) — major
 
 **Цель:** не количество релизов, а **traceable progress**. Каждый релиз имеет:
+
 - CHANGELOG entry
 - Tag
 - Release notes
@@ -501,6 +529,7 @@ Scripts (reusable):      3 (issue_decrees.py, poll_ci.py, create_release.py)
 ## 10. Финальная подпись
 
 **Дорожная карта = история + настоящее + видение.**
+
 - **История:** 28 релизов за один день — не sprint, а concentrated burst. Каждый релиз добавлял функциональность или фиксил баг. От v1.0.0 (initial) до v3.7.0 (multiagent operational).
 - **Настоящее:** система OPERATIONAL. CI green. 22/22 verify. 7 decrees enforced. Production demo работает.
 - **Видение:** v1.0 production с SLSA L3, real LLM, sovereignty from corporate clouds. Polymath OS как OS layer.

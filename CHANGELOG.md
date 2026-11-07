@@ -302,6 +302,7 @@ The user invoked the "perfect OS" command — clean up loose ends, finish everyt
 The v3.6.0 release session had a `github_pat_...` token auto-revoked by
 GitHub's secret scanner because it appeared in plaintext in a bash command.
 v3.8.0 closes this gap with three layers:
+
 1. **`scripts/check_token_hygiene.py`** (new, 234 lines) — scans all
    `.py`, `.sh`, `.js`, `.yml`, `.json`, `.md`, `.ts`, `.tf`, `.nix` files
    for known token patterns: `github_pat_<50+ chars>`, `ghp_<36 chars>`,

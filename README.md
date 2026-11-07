@@ -123,6 +123,7 @@ The decree log is the **human's supreme law layer** — above every ADR, above t
 ### 7 foundational decrees + N supersession/amendment decrees (in `~/.polymath-os/decrees.db`)
 
 The 7 foundational decrees are issued once via `python3 ~/scripts/issue_decrees.py`. After that, additional decrees may be added via the Decree Portal:
+
 - `category=supersession` — revokes a previous decree (per ADR-0028, v3.14.0)
 - `category=amendment` — drives ADR operations: create/amend/supersede/deprecate (per ADR-0026, v3.12.0)
 - `category=law/prohibition/permission/observation/directive` — new rules (existing behavior)
@@ -185,6 +186,7 @@ $ node apps/browser/decree-bridge.js check "buy a chromebook"
 This repo is the answer to: _"Какое новое свойство возникает, когда git, AI-agents, base знаний, CI/CD и recovery соединены именно так — и как доказать, что это не просто красивое название?"_
 
 The answer is **Layer 5 (SINGULYAR EIR)** — an execution kernel that:
+
 - preserves a person's declared intent across interchangeable execution methods
 - makes every completion claim depend on inspectable evidence of the required final state
 - treats "cannot tell" as a first-class outcome (`UNKNOWN`), not as a silent `CONFIRMED`
@@ -238,6 +240,7 @@ MIT — see [`LICENSE`](./LICENSE). Take it. Use it. Fork it. The sovereign core
 ## Origin
 
 This repo was built through an iterative dialogue:
+
 1. **v0.1**: User asked for 100 file formats → 100 messengers → 100 portable apps (philosophical exploration of "human = system")
 2. **v0.2**: User delegated polymath audit → 4 parallel research agents → synthesis into Polymath OS (4 layers + cross-cutting)
 3. **v0.3-v1.1.0**: SINGULYAR EIR v0.3 audit applied → 11 audit findings fixed via 12 ADRs → SINGULYAR integrated as Layer 5 → repo promoted from "report" to "open-source ideal repo" with `make verify` contract

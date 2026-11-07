@@ -39,6 +39,7 @@ make verify   # запускает 12 проверок через scripts/check.
 остаётся зелёным. Скрипт `scripts/check.py` сам по себе валидируется в check 12.
 
 `make verify` делает 12 проверок (см. `scripts/check.py`):
+
 1. SINGULYAR EIR — все 40 тестов в `runtime/` проходят
 2. JSON Schemas (Intent / Capability / Evidence) валидны
 3. ADRs 0001-0012 присутствуют
@@ -59,6 +60,7 @@ make verify   # запускает 12 проверок через scripts/check.
 ## ADRs — читать в этом порядке
 
 `docs/adr/` — 28 ADRs (0001-0028). Если времени мало, читай эти 4 первыми:
+
 1. **ADR-0002** Sovereignty Registry — Tier 1+2+3 реестр зависимостей. Основа
    для всех решений «что добавить в flake.nix», «что взять в SaaS».
 2. **ADR-0011** Container runtime — colima (macOS) / podman (Linux) /
@@ -93,6 +95,7 @@ ADR — immutable после Accepted. Новые решения → superseding
 | `infra/`                         | OpenTofu IaC (to be created).                                       |
 
 **Не коммитить:**
+
 - `.env`, `.env.local` (secrets) → SOPS+age (ADR-0002 Tier 1) для git-ops.
 - `*.age` private keys, `age-identity.txt` (см. `.gitignore`).
 - `vault/.obsidian/workspace*` (mutable state).

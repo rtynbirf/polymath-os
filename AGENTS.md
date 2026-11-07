@@ -26,6 +26,7 @@ Cross-cutting: Security (cosign/SLSA/SBOM) + OpenTelemetry + git.
 ## Порядок чтения ADRs
 
 Если времени мало, читай в порядке:
+
 1. ADR-0002 (Sovereignty Registry) — что суверенное, что арендованное
 2. ADR-0012 (SINGULYAR EIR as Layer 5) — ядро, которое сохраняет намерение
 3. ADR-0006 (Falsifiable self-*) — каждое самодействие имеет отрицательный тест

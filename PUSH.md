@@ -33,6 +33,7 @@ gh repo create polymath-os --public --source=. --remote=origin
 ```
 
 **Option B — via web UI:**
+
 1. Go to https://github.com/new
 2. Repository name: `polymath-os`
 3. Description: `LFS-style rebuild of personal operating system — open-source ideal repo with verifiable claims`
@@ -52,6 +53,7 @@ git push -u origin main
 ### 3. Verify on GitHub
 
 After push, the GitHub Actions workflow (`.github/workflows/ci.yml`) will run automatically:
+
 - Job `verify` — runs `make verify` (12 verifiable claims)
 - Job `ci` — runs pnpm lint + typecheck + test + build + security + SBOM
 
@@ -87,6 +89,7 @@ gh api repos/YOUR_USERNAME/polymath-os/pages \
 ## After push
 
 The repo is **alive** — anyone can:
+
 - `git clone git@github.com:YOUR_USERNAME/polymath-os.git`
 - `cd polymath-os && make verify`
 - Get the same 12/12 PASS result as you
@@ -96,6 +99,7 @@ To iterate further: open issues for what's next (mutation testing setup, vault t
 ## Continuous improvement (на репе)
 
 This repo is not "done". It's a starting point. The roadmap (`ROADMAP.md`) and limitations (`runtime/docs/LIMITATIONS.md`) describe what's NOT yet implemented. Iterate via:
+
 - Issues (per ADR or per layer)
 - PRs (each must pass `make verify`)
 - New ADRs (0001-0012 exist, next is 0013+)

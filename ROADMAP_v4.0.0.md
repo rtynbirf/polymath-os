@@ -29,6 +29,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 ### Синтез — уникальное эмержентное СИНГУЛЯР свойство
 
 Когда вы комбинируете:
+
 - **Decree Log** (human's supreme law, append-only, hash-chained, ADR-0021)
 - **Runtime with decree gate** (already in `_advance()` per ADR-0021)
 - **MCP adapters** (agent-to-tool, ADR-0008, 4 adapters)
@@ -36,6 +37,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 - **AgentMesh with decree-enforced routing** (NEW — ADR-0024, decree gate on inter-agent messages)
 
 Получается: **Decree-Enforced Sovereign Agent Mesh** — единственная в мире система, где:
+
 - Агенты открывают друг друга через A2A-совместимые Agent Cards
 - Каждое межагентское сообщение проверяется против декретов человека ПЕРЕД execution
 - Human's will = supreme law, выше любой ADR, выше любого агента
@@ -122,6 +124,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 ## 3. СИНГУЛЯР — уникальное эмержентное свойство
 
 **Polymath-OS — единственная система в мире, где:**
+
 1. **Decree > ADR > code** — human's word is supreme law, above any architectural decision
 2. **Inter-agent messages are decree-checked BEFORE execution** — agents cannot collude to bypass decrees
 3. **Agent discovery is decree-scoped** — callers know which decrees apply BEFORE issuing Intents
@@ -129,6 +132,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 5. **Local-first with P2P fallback** — zero cloud dependency via cell65-llm + WebRTC
 
 **Что это даёт пользователю:**
+
 - **Sovereignty** — человек контролирует каждый шаг через декреты, не через policy rules
 - **Auditability** — все действия записаны в hash-chained ledger, нельзя подделать
 - **Discoverability** — любой A2A-совместимый клиент может найти polymath-os агента
@@ -146,6 +150,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 **Зависимости:** aiortc (уже в `runtime/src/adapters/webrtc_adapter.py`)
 
 **Файлы:**
+
 - `runtime/src/agent_mesh.py` — добавить WebRTC transport
 - `runtime/tests/test_agent_mesh_webrtc.py` — P2P test
 
@@ -156,6 +161,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 **Зависимости:** cell65-host server (separate project)
 
 **Файлы:**
+
 - `runtime/src/adapters/llm_local_adapter.py` — integrate with cell65-llm endpoint
 - `runtime/tests/test_llm_local_adapter_integration.py` — real LLM smoke test
 
@@ -164,6 +170,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 **Цель:** показать в UI все зарегистрированные агенты + их decree_scope.
 
 **Файлы:**
+
 - `apps/browser/decree-portal.html` — new "Agents" section
 - `apps/browser/decree-bridge.js` — `getAgents()` API
 
@@ -172,6 +179,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 **Цель:** `.well-known/agent.json` валиден по JSON Schema.
 
 **Файлы:**
+
 - `runtime/schemas/agent-card.schema.json` — JSON Schema
 - `scripts/check.py` — `check_agent_card()` claim #24
 
@@ -180,6 +188,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 **Цель:** polymath-os может не только быть endpoint, но и client к другим A2A-агентам.
 
 **Файлы:**
+
 - `runtime/src/a2a_client.py` — A2A client with decree gate
 - `runtime/tests/test_a2a_client.py`
 - `docs/adr/0025-decree-driven-a2a-client.md`
@@ -219,6 +228,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 ### 6.1. Polymath OS как OS layer
 
 Полимат как layer over Linux/BSD, который:
+
 - Бутстрапит из source (LFS-style)
 - Управляет decrees как kernel parameters
 - Координирует agents как процессы (PID=1 = человек)
@@ -248,6 +258,7 @@ Web-поиск трендов 2026 (выполнен 2026-10-17):
 ### 6.5. AI-агент创业 — agent startup ecosystem
 
 Polymath-OS как платформа для sovereign AI agent startups:
+
 - Каждый startup = набор агентов с своим decree_scope
 - A2A-совместимое взаимодействие между startups
 - Все на local-first, zero cloud lock-in
@@ -265,18 +276,21 @@ Polymath-OS как платформа для sovereign AI agent startups:
 ### 7.2. Decree scope conflict resolution
 
 Если decree_scope одного агента конфликтует с decree_scope другого — кто выигрывает?
+
 - Текущая реализация: caller может передать `decree_scope` override
 - Возможное расширение: иерархия scope'ов (например, `all` > `singulyar` > `polymath-os`)
 
 ### 7.3. Inter-agent evidence ledger
 
 Если Agent A → Agent B → Agent C → DECREE_BLOCK, где записать evidence?
+
 - Текущая реализация: каждый mesh сохраняет свой event log
 - Возможное расширение: federated evidence ledger (shared ledger для multi-mesh scenarios)
 
 ### 7.4. Agent Card revocation
 
 Как отозвать Agent Card (если агент скомпрометирован)?
+
 - Текущая реализация: `mesh.unregister(agent_id)` удаляет из локального mesh
 - Возможное расширение: revocation list в DecreeLog (через `category: "revocation"` decree)
 
@@ -302,6 +316,7 @@ Polymath-OS как платформа для sovereign AI agent startups:
 ## 9. Принципы принятия решений (для будущих ADR)
 
 Когда сталкиваешься с новым трендом/обстоятельством, задавай вопросы:
+
 1. **Decree compatibility** — как этот тренд совместим с human's decrees? Если несовместим — reject.
 2. **Sovereignty** — добавляет ли это dependence на Tier 3 бенефициара? Если да — reject или заменить на Tier 2.
 3. **Local-first** — работает ли это без сети/аккаунтов? Если нет — Tier 2 (rented, contract-switchable).
@@ -317,6 +332,7 @@ Polymath-OS как платформа для sovereign AI agent startups:
 ## 10. Финал
 
 **v3.10.0 доставил СИНГУЛЯР — synthesis, который делает Polymath-OS единственной в мире decree-enforced multi-agent системой.**
+
 - 2 новых ADRs (0023, 0024)
 - 2 новых source files (agent_card.py, agent_mesh.py)
 - 33 новых теста (12 + 21)

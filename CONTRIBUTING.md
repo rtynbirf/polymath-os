@@ -43,6 +43,7 @@
 ## Architecture changes
 
 Если PR меняет архитектуру:
+
 1. Создай ADR `docs/adr/NNNN-<slug>.md` (используй `docs/adr/template.md`)
 2. ADR должен быть Approved до merge
 3. После merge — обнови `ARCHITECTURE.md` если нужно
@@ -65,7 +66,6 @@
 - Unit: обязательны для `packages/*`
 - Integration: Testcontainers для `apps/*` (Postgres/Redis в CI)
 - Eval: promptfoo golden datasets для AI-агентов
-
 
 ## Подпись коммитов
 
