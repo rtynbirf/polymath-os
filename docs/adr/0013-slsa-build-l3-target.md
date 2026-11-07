@@ -15,7 +15,9 @@ the `release.yml` workflow generates:
 - `sbom.pem` (cosign keyless cert)
 - `sbom.sig` (cosign keyless signature)
 - `sbom.attestation.json` (cosign attest-blob output — in-toto statement)
-- `sbom.slsa-provenance.json` (SLSA L2 provenance predicate)
+- `sbom.slsa-provenance.intoto.jsonl` (SLSA L2 provenance predicate; канон SLSA
+  `.intoto.jsonl` — волна 8; в релизах до волны 8 файл публиковался как
+  `sbom.slsa-provenance.json`)
 
 But SLSA L2 has a known limitation: the build platform itself (GitHub Actions)
 can forge provenance — there is no hermetic isolation. An attacker who

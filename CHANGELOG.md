@@ -2,7 +2,20 @@
 
 ## [Unreleased]
 
-- Nothing yet — следующая партия стартует отсюда.
+### Security (волна 8, 2026-11-08)
+
+- **release(sec)**: Signed-Releases → канон SLSA — точная формула чека снята из
+  исходников scorecard v5.6.0 (только `*.intoto.jsonl`, releaseLookBack = 5,
+  provenance = 10 очков, подпись = 8, итог = floor(сумма/5)). 36 релизам готовый
+  in-toto Statement добавлен ассетом `sbom.slsa-provenance.intoto.jsonl`
+  (байт-в-байт, без фабрикации: 10 релизам без provenance пост-хоц файл не
+  создавался); `release.yml` пишет канон сразу. Ожидаемый эффект замера:
+  Signed-Releases 8/10 → 10/10 (суммарно 7.3 → 7.5).
+- **docs(sec)**: SECURITY_SCORECARD.md — волна 8: CII-разведка фактами
+  (agent-browser): аккаунт создан, барьер — email-активация (noreply-адрес не
+  принимает почту) / OAuth-пароль github.com; единственный человеческий шаг
+  ≤10 мин, анкета готова (`.bestpractices.json`). Code-Review: соло-потолок
+  подтверждён исходником v5.6 (бот-PR inconclusive, self-approval невозможен).
 
 ### Added (post-v3.25.0 hardening, 2026-11-07)
 

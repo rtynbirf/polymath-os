@@ -124,8 +124,9 @@ python3 examples/browser_llm_via_webrtc.py
 gh release download v1.6.0 --repo rtynbirf/polymath-os --pattern "sbom.*"
 # Verify cosign signature
 cosign verify-blob sbom.cyclonedx.json --certificate sbom.pem --signature sbom.sig
-# Verify SLSA L2 provenance
-cat sbom.slsa-provenance.json
+# Verify SLSA L2 provenance (с волны 8 — канон .intoto.jsonl;
+# релизы до волны 8: sbom.slsa-provenance.json)
+cat sbom.slsa-provenance.intoto.jsonl
 ```
 
 ## What this proves

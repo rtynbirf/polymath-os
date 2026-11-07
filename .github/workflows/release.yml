@@ -106,6 +106,9 @@ jobs:
         # Per ADR-0004: target SLSA Build L2 (signed provenance from hosted build platform).
         # Keyless OIDC: no long-lived signing key in secrets (per ADR-0006 falsifiable self-*).
         # Cosign attest-blob — in-toto Statement v0.1 with SLSA provenance predicate v0.2.
+        # Файл публикуется под каноническим SLSA-расширением .intoto.jsonl — именно его
+        # признаёт чек Signed-Releases OpenSSF Scorecard (probes/releasesHaveProvenance,
+        # provenanceExtensions = [".intoto.jsonl"], волна 8).
         run: |
           # Generate SLSA provenance predicate from GHA build context
           python3 - <<'PYEOF'
@@ -158,14 +161,14 @@ jobs:
               }]
             }
           }
-          with open("sbom.slsa-provenance.json", "w") as f:
+          with open("sbom.slsa-provenance.intoto.jsonl", "w") as f:
               json.dump(provenance, f, indent=2)
-          print(f"Wrote SLSA L2 provenance: sbom.slsa-provenance.json (sbom sha256: {sbom_sha[:16]}...)")
+          print(f"Wrote SLSA L2 provenance: sbom.slsa-provenance.intoto.jsonl (sbom sha256: {sbom_sha[:16]}...)")
           PYEOF
 
           # Cosign attest the SBOM (keyless OIDC, sigstore)
           cosign attest-blob --yes "$SBOM_FILE" \
-            --predicate sbom.slsa-provenance.json \
+            --predicate sbom.slsa-provenance.intoto.jsonl \
             --output-attestation sbom.attestation.json || \
             echo "SLSA attest skipped (cosign version may not support attest-blob or no OIDC available)"
 
@@ -211,5 +214,5 @@ jobs:
             sbom.pem
             sbom.sig
             sbom.attestation.json
-            sbom.slsa-provenance.json
+            sbom.slsa-provenance.intoto.jsonl
           make_latest: ${{ steps.meta.outputs.prerelease == 'true' && 'false' || 'true' }}
