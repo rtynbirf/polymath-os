@@ -1,0 +1,197 @@
+/* ============================================================
+   SVET-CORE v2.1 — Sistema Vnimaniya, Ergonomiki i Tishiny
+   (System of Attention, Ergonomics and Silence)
+
+   Drop-in design core. Zero dependencies, ~7 KB.
+
+   QUICK START
+     <link rel="stylesheet" href="svet-core.css">
+     <script src="svet.js" defer></script>        (optional: clock-auto theme)
+     <html lang="ru" style="--hue: 150">           (seed hue 0..360)
+
+   LAWS
+     I   The interface obeys the user (prefers-* media queries)
+     II  Color is computed from one seed, not hand-picked (OKLCH)
+     III Typography breathes (clamp / 68ch / line-height 1.6)
+     IV  Motion only where it carries meaning (reduced-motion safe)
+     V   Warm continuum day-evening-night, never #FFF / #000
+   ============================================================ */
+
+/* ---------- Fallbacks for engines without oklch() ---------- */
+:root{
+  --bg:#f4f4ec; --surf:#fbfbf5; --ink:#3a3f33; --mut:#6b7264;
+  --line:#d9dccd; --acc:#4e7a35; --acc-soft:#e7ecd9;
+}
+
+/* ---------- Law II: computed palette (overrides fallback) ---------- */
+@supports (color: oklch(50% 0.1 85)){
+  :root{
+    --hue: 85;                                  /* THE SEED */
+    --bg:   oklch(.965 .018 var(--hue));
+    --surf: oklch(1    .012 var(--hue));
+    --ink:  oklch(.30  .025 var(--hue));
+    --mut:  oklch(.48  .020 var(--hue));
+    --line: oklch(.87  .015 var(--hue));
+    --acc:  oklch(.52  .105 var(--hue));
+    --acc-soft: color-mix(in oklch, var(--acc) 14%, var(--bg));
+  }
+}
+
+/* ---------- Law V: warm continuum ---------- */
+:root[data-theme="evening"]{
+  color-scheme: light;
+  --bg:#f1e7d8; --surf:#f7efe2; --ink:#4a4234; --mut:#6e6350;
+  --line:#d9cbb2; --acc:#8a6b3a; --acc-soft:#ecdfc6;
+}
+@supports (color: oklch(50% 0.1 85)){
+  :root[data-theme="evening"]{
+    --bg:oklch(.93 .045 75); --surf:oklch(.96 .035 75); --ink:oklch(.34 .045 55);
+    --mut:oklch(.50 .040 55); --line:oklch(.82 .040 75); --acc:oklch(.50 .090 55);
+    --acc-soft: color-mix(in oklch, var(--acc) 16%, var(--bg));
+  }
+}
+
+:root[data-theme="night"]{
+  color-scheme: dark;
+  --bg:#21241f; --surf:#262a24; --ink:#e3e2da; --mut:#a8ab9f;
+  --line:#3a3e35; --acc:#9dc27f; --acc-soft:#31382c;
+}
+@supports (color: oklch(50% 0.1 85)){
+  :root[data-theme="night"]{
+    --bg:oklch(.23 .018 var(--hue)); --surf:oklch(.27 .020 var(--hue));
+    --ink:oklch(.90 .012 var(--hue)); --mut:oklch(.70 .015 var(--hue));
+    --line:oklch(.34 .018 var(--hue)); --acc:oklch(.80 .095 var(--hue));
+    --acc-soft: color-mix(in oklch, var(--acc) 20%, var(--bg));
+  }
+}
+
+/* ---------- Law I: obey system preferences (no-JS auto mode) ---------- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --bg:#21241f; --surf:#262a24; --ink:#e3e2da; --mut:#a8ab9f;
+    --line:#3a3e35; --acc:#9dc27f; --acc-soft:#31382c;
+  }
+  @supports (color: oklch(50% 0.1 85)){
+    :root:not([data-theme]){
+      --bg:oklch(.23 .018 var(--hue)); --surf:oklch(.27 .020 var(--hue));
+      --ink:oklch(.90 .012 var(--hue)); --mut:oklch(.70 .015 var(--hue));
+      --line:oklch(.34 .018 var(--hue)); --acc:oklch(.80 .095 var(--hue));
+      --acc-soft: color-mix(in oklch, var(--acc) 20%, var(--bg));
+    }
+  }
+}
+@media (prefers-contrast: more){
+  :root{ --mut: var(--ink); }
+}
+
+/* ---------- Law III: fluid typography ---------- */
+:root{
+  --step--1: clamp(.875rem, .84rem + .18vw, .9375rem);
+  --step-0:  clamp(1rem,     .95rem + .25vw, 1.125rem);
+  --step-1:  clamp(1.25rem,  1.1rem  + .6vw,  1.5rem);
+  --step-2:  clamp(1.55rem,  1.3rem  + 1.2vw, 2.25rem);
+  --step-3:  clamp(2rem,     1.55rem + 2.2vw, 3.4rem);
+  --measure: 68ch;                              /* 50-75 CPL optimum */
+  --space:   clamp(1.25rem, 3vw, 2.5rem);
+  color-scheme: light dark;
+}
+
+/* ---------- Base ---------- */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  font-size:var(--step-0); line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3{ line-height:1.2; text-wrap:balance; margin:0 0 .6em; }
+h1{ font-size:var(--step-3); letter-spacing:-.02em; }
+h2{ font-size:var(--step-2); margin-top:2em; }
+h3{ font-size:var(--step-1); }
+p{ text-wrap:pretty; margin:0 0 1.5em; max-width:var(--measure); }
+li{ margin-block:.3em; }
+a{ color:var(--acc); text-decoration-thickness:1px; text-underline-offset:.18em; }
+img,video{ max-width:100%; height:auto; }
+::selection{ background:color-mix(in oklch, var(--acc) 25%, transparent); }
+:focus-visible{ outline:2px solid var(--acc); outline-offset:3px; border-radius:4px; }
+button,input,select,textarea{ accent-color:var(--acc); font:inherit; color:inherit; }
+input,select,textarea{
+  background:var(--surf); border:1px solid var(--line);
+  border-radius:8px; padding:.4rem .65rem;
+}
+code,kbd{
+  background:var(--acc-soft); padding:.08em .35em; border-radius:5px;
+  font-family:ui-monospace,"Cascadia Code",Consolas,monospace; font-size:.9em;
+}
+kbd{ border:1px solid var(--line); border-bottom-width:2px; }
+
+/* ---------- Components ---------- */
+.svet-container{ max-width:60rem; margin-inline:auto; padding-inline:var(--space); }
+.svet-card{
+  background:var(--surf); border:1px solid var(--line);
+  border-radius:14px; padding:1.1rem 1.25rem;
+  transition:translate .45s linear(0,.32 18%,.86 55%,1);
+}
+.svet-card:hover{ translate:0 -3px; }
+.svet-btn{
+  cursor:pointer; background:var(--acc); color:var(--bg);
+  border:0; border-radius:9px; padding:.45rem .9rem;
+  transition:transform .45s linear(0,.32 18%,.86 55%,1);
+}
+.svet-btn:hover{ transform:translateY(-2px); }
+.svet-btn.ghost{ background:var(--acc-soft); color:var(--acc); }
+.svet-tag{
+  display:inline-block; font-size:.72rem; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--acc); background:var(--acc-soft);
+  padding:.15rem .55rem; border-radius:999px;
+}
+.svet-grid{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr)); }
+
+/* Reading progress bar (scroll-driven, zero JS) */
+.svet-progress{
+  position:fixed; top:0; left:0; height:3px; width:100%;
+  background:var(--acc); transform-origin:0 50%; transform:scaleX(0);
+  animation:svet-grow linear both;
+  animation-timeline:scroll(root block);
+  z-index:60;
+}
+@keyframes svet-grow{ from{ transform:scaleX(0);} to{ transform:scaleX(1);} }
+
+/* Section reveal on scroll */
+.svet-reveal{
+  animation:svet-fade-up linear both;
+  animation-timeline:view();
+  animation-range:entry 0% entry 45%;
+}
+@keyframes svet-fade-up{ from{ opacity:0; transform:translateY(18px);} to{ opacity:1; transform:none; } }
+
+/* ---------- Law IV: master motion switch ---------- */
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+  .svet-progress{ animation:none; transform:none; opacity:.2; }
+  .svet-reveal{ animation:none; }
+}
+body[data-motion="off"] *, body[data-motion="off"] *::before, body[data-motion="off"] *::after{
+  animation-duration:.01ms !important;
+  transition-duration:.01ms !important;
+}
+
+/* ---------- Wellness utilities ---------- */
+html[data-grayscale]{ filter:grayscale(1); }          /* e-ink imitation  */
+body[data-spotlight] .svet-prose p,
+body[data-spotlight] .svet-prose li{ opacity:.30; transition:opacity .4s ease; }
+body[data-spotlight] .svet-prose p:hover,
+body[data-spotlight] .svet-prose li:hover{ opacity:1; }
+
+/* ---------- Print: paper is the original calm technology ---------- */
+@media print{
+  body{ background:#fff; color:#111; }
+  .svet-progress{ display:none; }
+  .svet-reveal{ animation:none; }
+}
