@@ -6,6 +6,13 @@
 
 ### Added (post-v3.25.0 hardening, 2026-11-07)
 
+- **runtime(fuzz)**: `test_fuzz_parsers.py` — детерминированный mutation-fuzzing
+  (stdlib-only, SEED 20261107, канон нулевых зависимостей) поверхностей
+  `schema_validate.validate`, `AgentCard.from_dict`,
+  `ConversationalDecreeInterface.translate` (включая сломанный LLM-адаптер —
+  fallback обязан спасать). Фаззинг сразу нашёл и закрыл реальную дыру:
+  `validate(schema="")` падал `AttributeError` — теперь `SchemaError`.
+  Тестов: 290 → 295.
 - **docs(security)**: `docs/SECURITY_SCORECARD.md` — baseline первой оценки Scorecard,
   разбор чеков и план; `docs/COMMIT_SIGNING.md` + `scripts/commit_signing_setup.sh` —
   механизм подписи коммитов (SSH/Sigstore), `required_signatures` сознательно не включён.

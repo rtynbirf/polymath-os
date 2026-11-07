@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Verify](https://img.shields.io/badge/make%20verify-33%2F33%20PASS-brightgreen)](./scripts/check.py)
 [![SINGULYAR EIR v0.6](https://img.shields.io/badge/runtime-SINGULYAR%20EIR%20v0.6-blue)](./runtime/)
-[![Tests](https://img.shields.io/badge/tests-290%2F290%20PASS-brightgreen)](./runtime/tests/)
+[![Tests](https://img.shields.io/badge/tests-295%2F295%20PASS-brightgreen)](./runtime/tests/)
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
 [![CI](https://img.shields.io/badge/CI-5%2F5%20green-brightgreen)](https://github.com/rtynbirf/polymath-os/actions)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rtynbirf/polymath-os/badge)](https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os)
@@ -68,7 +68,7 @@ cd apps/browser/electron && npm install && npm start
 
 # 7. If you want to develop:
 make bootstrap   # pnpm install + nix develop (optional)
-make test        # runs all tests (290 runtime + MCP coverage)
+make test        # runs all tests (295 runtime + MCP coverage)
 make ci-local    # reproduces CI locally via `act`
 ```
 
@@ -80,7 +80,7 @@ Every claim in this repo is backed by a test or command. `make verify` runs all 
 
 | #   | Claim                                                                                                                         | How to verify                           | Status |
 | --- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
-| 01  | SINGULYAR EIR passes all 290 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓      |
+| 01  | SINGULYAR EIR passes all 295 tests (including real `os._exit` between effect and recording, +12 new for v0.6 phrase matching) | `cd runtime && python scripts/check.py` | ✓      |
 | 02  | JSON Schemas (Intent / Capability / Evidence) parse and validate                                                              | `python scripts/check.py` (check 02)    | ✓      |
 | 03  | 35 ADRs (0001-0029, 0031-0036) all present                                                                                    | `ls docs/adr/`                          | ✓      |
 | 04  | Every ADR follows template (Date/Status/Context/Decision/Consequences)                                                        | `python scripts/check.py` (check 04)    | ✓      |

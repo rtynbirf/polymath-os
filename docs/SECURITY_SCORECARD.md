@@ -17,7 +17,7 @@ Binary-Artifacts, Security-Policy, License, Vulnerabilities, Dependency-Update-T
 | Maintained | 0/10 | репо моложе 90 дней (создано 2026-10-16) | время; автоматически 10 после 2027-01-14 |
 | Code-Review | 0/10 | 0/30 approved changesets — канон прямых коммитов владельца | стратегический выбор: переход content-волн на PR с ревью (ПУЛЬС PID1 остаётся прямым); иначе осознанный 0 |
 | CII-Best-Practices | 0/10 | нет регистрации на bestpractices.dev | анкета (~10 мин) на <https://www.bestpractices.dev> — нужен аккаунт владельца; после прохождения добавить badge в README |
-| Fuzzing | 0/10 | нет fuzz-инфраструктуры | кандидат волны 7: atheris для `runtime/` (pure Python 3.10+) или OSS-Fuzz |
+| Fuzzing | 0/10 | чек закрывается только OSS-Fuzz-интеграцией | сделан внутренний mutation-fuzzing `runtime/tests/test_fuzz_parsers.py` (stdlib, детерминированный) — нашёл и закрыл дыру в `schema_validate`; OSS-Fuzz — отдельная заявка |
 | Contributors | 0/10 | 0 компаний-контрибьюторов | комьюнити и время |
 | Packaging | N/A | нет публикации в реестры пакетов | кандидат: npm-публикация пакетов из `packages/` при появлении NPM_TOKEN |
 

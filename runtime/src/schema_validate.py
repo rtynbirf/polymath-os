@@ -35,6 +35,10 @@ def _type_ok(value, t):
 def validate(value: Any, schema: Dict[str, Any], path: str = "$") -> List[str]:
     """Return list of error strings (empty list = valid)."""
     errors: List[str] = []
+    if not isinstance(schema, dict):
+        # Найдено фаззингом (test_fuzz_parsers, SEED 20261107): schema="" и schema=[]
+        # проходили keyword-цикл и падали AttributeError на schema.get ниже.
+        raise SchemaError(f"schema must be a dict, got: {type(schema).__name__}")
     for key in schema:
         if key not in _SUPPORTED and key not in _IGNORED:
             raise SchemaError(f"unsupported schema keyword: {key}")
