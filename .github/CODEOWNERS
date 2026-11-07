@@ -1,8 +1,9 @@
 # CODEOWNERS — Polymath OS
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
-# Это соло-проект: @USER владеет всем репозиторием (звезда `* @USER` ниже —
-# единый requisite-approval на каждый PR). Когда появится команда — раскомментируй
+# Это соло-проект: @rtynbirf владеет всем репозиторием (звезда `* @rtynbirf` ниже —
+# единый requisite-approval на каждый PR; ruleset main-scorecard-protection
+# требует ≥2 approvals + code-owner review, волна 7.6). Когда появится команда — раскомментируй
 # секции ниже и замени `@team-*` на реальные GitHub team-slug'и.
 # Каждая секция закрепляет owner за одним из 5 слоёв + cross-cutting.
 #
@@ -48,4 +49,4 @@
 # /.github/workflows/codeql.yml    @USER @team-security-eng
 
 # ── Default: solo owner covers every path not listed above ──────────────────
-*                         @USER
+*                         @rtynbirf
