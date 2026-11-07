@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Security (волна 8.1, 2026-11-08)
+
+- **docs(sec)**: замер 9 зафиксирован — Scorecard **7.4/10**, Signed-Releases
+  **10/10** (канон `*.intoto.jsonl` работает). Факт: SSH-подпись `ec86aec`
+  invalid (шим-баг формата), волна 8.1 подписана по канону sshsig.c v1.42.
+
 ### Security (волна 8, 2026-11-08)
 
 - **release(sec)**: Signed-Releases → канон SLSA — точная формула чека снята из

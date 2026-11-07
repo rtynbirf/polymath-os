@@ -61,6 +61,16 @@
 > (dependabot) — inconclusive, self-approval невозможен — соло-потолок 0
 > подтверждён исходником, не догадкой; решение волны 7.2 (PR-флоу + 2
 > approvals для контрибьюторов) — верное.
+>
+> Замер 9 (`ec86aec`, волна 8) — **7.4/10** (реестр scorecard.dev, 17:29 UTC):
+> **Signed-Releases 10/10** — «5 out of the last 5 releases have provenance:
+> sbom.slsa-provenance.intoto.jsonl». Гигиена без потерь: Pinned 10, SAST 10,
+> Token-Permissions 10, CI-Tests 10, Branch-Protection 9 (осознанный потолок).
+> Побочный факт волны 8: SSH-подпись коммита `ec86aec` — invalid (собственный
+> ssh-keygen-шим включал в подписанный блоб version+pubkey; канон sshsig.c
+> v1.42: блоб = PREAMBLE ‖ namespace ‖ reserved ‖ hashalg ‖ H(msg)) —
+> подпись волны 8.1 сделана по канону и верифицируется GitHub'ом; коммит
+> ec86aec остаётся в истории как есть (журнал-из-фактов, историю не переписываем).
 
 ## На 10/10 уже сейчас
 
@@ -75,7 +85,7 @@ Branch-Protection (linear history + conversation resolution + required_signature
 
 | Чек | Очки (замер 8) | Природа | Что делать |
 | --- | --- | --- | --- |
-| Signed-Releases | 8/10 → 10 | 5/5 последних релизов получили канон `*.intoto.jsonl` (волна 8, тот же provenance байт-в-байт); release.yml пишет канон сразу | фиксируется после ближайшего замера Scorecard |
+| Signed-Releases | 10/10 ✓ | 5/5 последних релизов с каноном `*.intoto.jsonl` (волна 8); подтверждено замером 9: «5 out of the last 5 releases have provenance» | поддерживается автоматически: каждый релиз публикует provenance (release.yml, волна 8) |
 | Branch-Protection | 9/10 | «apply to administrators» = false — bypass владельца (канон прямых волн) | осознанный потолок 9/10; 10/10 = ломка канона, не торгуем |
 | Maintained | 0/10 | репо моложе 90 дней (создано 2026-10-16) | время; автоматически 10 после 2027-01-14 |
 | Code-Review | 0/10 | 0/29 approved changesets; по исходнику v5.6: бот-PR (dependabot) — inconclusive, self-approval невозможен | соло-потолок подтверждён исходником; решение волны 7.2 неизменно: PR-флоу обязателен для внешних контрибьюторов (branch protection + ruleset: 2 approvals + code-owner, волны 7.6–7.7); владелец — bypass (прямые волны, ПУЛЬС PID1 не ломается); рост через комьюнити |
