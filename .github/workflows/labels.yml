@@ -9,6 +9,7 @@
 name: Triage labels
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened, edited]
   push:
@@ -81,3 +82,12 @@ jobs:
               else:
                   print(f"  ⚠ {name}: {r.stderr.strip()}", file=sys.stderr)
           PY
+
+  heartbeat:
+    name: Зелёный пульс (диспатч — штатное ожидание PR/push)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Пульс
+        run: echo "labels ждёт pull_request/push — graceful-skip; ожидание = зелёный пульс"
