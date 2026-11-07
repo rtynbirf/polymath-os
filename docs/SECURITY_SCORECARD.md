@@ -35,6 +35,14 @@
 > review + last-push approval + up-to-date (ruleset + branch protection) →
 > Branch-Protection **9/10**: единственный Warn — «apply to administrators»:
 > сознательный bypass владельца (канон прямых волн), 10/10 потребовал бы его ломки.
+>
+> Замер 8 (`6cd4688`, финал волны 7) — **7.3/10**. Branch-Protection 9/10
+> подтверждён публичным реестром scorecard.dev. PR-флоу отработал end-to-end:
+> #28 (svet) + #30-32 (hash-pinned pip, dependabot обновляет хеши сам) + #29
+> (biome 2.6.5: dependabot → формат-фикс 16 файлов → @dependabot rebase →
+> CI green → rebase-merge). Траектория волны 7: 6.5 → 7.0 → 7.3.
+> Остаток: CII (OAuth-вход владельца), Maintained (время), Code-Review
+> (второй ревьюер), Fuzzing (OSS-Fuzz заявка), Contributors (комьюнити).
 
 ## На 10/10 уже сейчас
 
@@ -47,7 +55,7 @@ Branch-Protection (linear history + conversation resolution + required_signature
 
 ## Чеки ниже максимума — разбор
 
-| Чек | Очки (замер 5) | Природа | Что делать |
+| Чек | Очки (замер 8) | Природа | Что делать |
 | --- | --- | --- | --- |
 | Signed-Releases | 8/10 | 5/5 релизов подписаны cosign, счётчик не максимален | растёт автоматически с каждым подписанным релизом |
 | Branch-Protection | 9/10 | «apply to administrators» = false — bypass владельца (канон прямых волн) | осознанный потолок 9/10; 10/10 = ломка канона, не торгуем |
