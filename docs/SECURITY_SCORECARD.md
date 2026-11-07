@@ -28,6 +28,13 @@
 > в GITHUB_TOKEN невалиден (скоуп App/PAT) — чтение защиты ветки переведено на
 > repository ruleset `main-scorecard-protection` (6 правил, bypass владельца,
 > волна 7.5): rulesets читаются Scorecard'ом без админ-токена.
+>
+> Замер 5 (`e1b9a2e`) — Pinned-Dependencies 10 (hash-pinned requirements);
+> Branch-Protection стал читаемым через ruleset — 4/10. Волны 7.6–7.7:
+> CODEOWNERS `@rtynbirf` вместо плейсхолдера `@USER`, 2 approvals + code-owner
+> review + last-push approval + up-to-date (ruleset + branch protection) →
+> Branch-Protection **9/10**: единственный Warn — «apply to administrators»:
+> сознательный bypass владельца (канон прямых волн), 10/10 потребовал бы его ломки.
 
 ## На 10/10 уже сейчас
 
@@ -40,11 +47,12 @@ Branch-Protection (linear history + conversation resolution + required_signature
 
 ## Чеки ниже максимума — разбор
 
-| Чек | Очки (замер 4) | Природа | Что делать |
+| Чек | Очки (замер 5) | Природа | Что делать |
 | --- | --- | --- | --- |
 | Signed-Releases | 8/10 | 5/5 релизов подписаны cosign, счётчик не максимален | растёт автоматически с каждым подписанным релизом |
+| Branch-Protection | 9/10 | «apply to administrators» = false — bypass владельца (канон прямых волн) | осознанный потолок 9/10; 10/10 = ломка канона, не торгуем |
 | Maintained | 0/10 | репо моложе 90 дней (создано 2026-10-16) | время; автоматически 10 после 2027-01-14 |
-| Code-Review | 0/10 | 0/29 approved changesets — канон прямых коммитов владельца | решение зафиксировано (волна 7.2): PR-флоу обязателен для внешних контрибьюторов — branch protection требует ≥1 approval + CI-чеки; владелец — bypass allowance (прямые волны, ПУЛЬС PID1 не ломается). Соло-владелец сам себе approved не выдаёт — осознанный 0 до второго ревьюера; рост через комьюнити |
+| Code-Review | 0/10 | 0/29 approved changesets — канон прямых коммитов владельца | решение зафиксировано (волна 7.2): PR-флоу обязателен для внешних контрибьюторов — branch protection + ruleset требуют 2 approvals + code-owner (волны 7.6-7.7); владелец — bypass (прямые волны, ПУЛЬС PID1 не ломается). Соло-владелец сам себе approved не выдаёт — осознанный 0 до второго ревьюера; рост через комьюнити |
 | CII-Best-Practices | 0/10 | нет регистрации на bestpractices.dev | подготовка закрыта (волна 7.2): автоанкета `.bestpractices.json` в корне — Chief бейдж-приложения предложит ответы при регистрации; остался единственный ручной шаг: OAuth-вход владельца на <https://www.bestpractices.dev> → New project → Save (in_progress = 2 балла сразу, passing = 5 после анкеты); после — badge в README |
 | Fuzzing | 0/10 | чек закрывается только OSS-Fuzz-интеграцией | сделан внутренний mutation-fuzzing `runtime/tests/test_fuzz_parsers.py` (stdlib, детерминированный) — нашёл и закрыл дыру в `schema_validate`; OSS-Fuzz — отдельная заявка |
 | Contributors | 0/10 | 0 компаний-контрибьюторов | комьюнити и время |
