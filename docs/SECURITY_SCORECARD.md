@@ -8,23 +8,33 @@
 > пульсовые коммиты подписаны в CI, `required_signatures` = true.
 > Воркфлоу: `.github/workflows/scorecard.yml` (action v2.5.0, пин по SHA, ритм вт 05:33 UTC).
 > Публичный реестр: <https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os>.
+>
+> Волна 7.2: CII-автоанкета `.bestpractices.json` (50 критериев: 44 Met / 2 Unmet /
+> 4 N/A — Chief бейдж-приложения авто-заполнит), чистка плейсхолдеров (SECURITY.md:
+> реальный URL advisories вместо USER; dependabot: USER → rtynbirf) и Branch-Protection
+> Tier 2/3: required reviews (≥1 approval) + required status checks (CI), bypass
+> allowance владельца — канон прямых волн сохранён.
+>
+> Замер 3: коммит `56a056a` — **6.5/10** (scorecard.dev): SAST 8 → 10 (CodeQL на
+> всех коммитах), CI-Tests 10 (4/4 merged PRs). Token-Permissions /
+> Dangerous-Workflow / Branch-Protection — N/A: сбой чтения воркфлоу/защиты у
+> раннера Scorecard (транзиентно, не дефекты репо — переоценивается каждым пушем).
 
 ## На 10/10 уже сейчас
 
 Binary-Artifacts, Security-Policy, License, Vulnerabilities, Dependency-Update-Tool,
-CI-Tests — плюс закрытые в волне 4: Pinned-Dependencies (42 SHA-пина actions,
+CI-Tests, SAST (CodeQL на всех коммитах — замер 3) — плюс закрытые в волне 4: Pinned-Dependencies (42 SHA-пина actions,
 волна 7: 0 непинненных команд в shell-скриптах), Token-Permissions,
 Branch-Protection (linear history + conversation resolution + required_signatures).
 
 ## Чеки ниже максимума — разбор
 
-| Чек | Очки (замер 2) | Природа | Что делать |
+| Чек | Очки (замер 3) | Природа | Что делать |
 | --- | --- | --- | --- |
 | Signed-Releases | 8/10 | 5/5 релизов подписаны cosign, счётчик не максимален | растёт автоматически с каждым подписанным релизом |
-| SAST | 8/10 | CodeQL не на всех исторических коммитах | самозатягивается с новыми коммитами; PR-триггер — при переходе на PR |
 | Maintained | 0/10 | репо моложе 90 дней (создано 2026-10-16) | время; автоматически 10 после 2027-01-14 |
-| Code-Review | 0/10 | 0/29 approved changesets — канон прямых коммитов владельца | стратегический выбор: переход content-волн на PR с ревью (ПУЛЬС PID1 остаётся прямым); иначе осознанный 0 |
-| CII-Best-Practices | 0/10 | нет регистрации на bestpractices.dev | анкета (~10 мин) на <https://www.bestpractices.dev> — нужен аккаунт владельца; после прохождения добавить badge в README |
+| Code-Review | 0/10 | 0/29 approved changesets — канон прямых коммитов владельца | решение зафиксировано (волна 7.2): PR-флоу обязателен для внешних контрибьюторов — branch protection требует ≥1 approval + CI-чеки; владелец — bypass allowance (прямые волны, ПУЛЬС PID1 не ломается). Соло-владелец сам себе approved не выдаёт — осознанный 0 до второго ревьюера; рост через комьюнити |
+| CII-Best-Practices | 0/10 | нет регистрации на bestpractices.dev | подготовка закрыта (волна 7.2): автоанкета `.bestpractices.json` в корне — Chief бейдж-приложения предложит ответы при регистрации; остался единственный ручной шаг: OAuth-вход владельца на <https://www.bestpractices.dev> → New project → Save (in_progress = 2 балла сразу, passing = 5 после анкеты); после — badge в README |
 | Fuzzing | 0/10 | чек закрывается только OSS-Fuzz-интеграцией | сделан внутренний mutation-fuzzing `runtime/tests/test_fuzz_parsers.py` (stdlib, детерминированный) — нашёл и закрыл дыру в `schema_validate`; OSS-Fuzz — отдельная заявка |
 | Contributors | 0/10 | 0 компаний-контрибьюторов | комьюнити и время |
 | Packaging | N/A | нет публикации в реестры пакетов | кандидат: npm-публикация пакетов из `packages/` при появлении NPM_TOKEN |

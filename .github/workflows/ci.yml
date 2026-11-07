@@ -63,7 +63,7 @@ jobs:
       - name: Typecheck
         run: pnpm turbo run typecheck
 
-      - name: Test (SINGULYAR EIR 40 + MCP 62)
+      - name: Test (SINGULYAR EIR + MCP suites)
         run: |
           cd runtime && python3 scripts/check.py
           cd ..

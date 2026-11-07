@@ -19,9 +19,9 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 5
     assignees:
-      - USER
+      - rtynbirf
     reviewers:
-      - USER
+      - rtynbirf
     commit-message:
       prefix: "chore(deps)"
       include: scope
@@ -52,9 +52,9 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 5
     assignees:
-      - USER
+      - rtynbirf
     reviewers:
-      - USER
+      - rtynbirf
     commit-message:
       prefix: "chore(ci-deps)"
       include: scope

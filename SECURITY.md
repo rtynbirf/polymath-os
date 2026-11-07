@@ -12,8 +12,11 @@
 **НЕ открывай public issue для security vulnerability.**
 
 Репорт через:
-1. GitHub Security Advisories (Private): `https://github.com/USER/polymath-os/security/advisories/new`
-2. Или email на `<security@example.com>` с PGP-encrypted payload
+1. GitHub Security Advisories (Private): <https://github.com/rtynbirf/polymath-os/security/advisories/new>
+
+Это единственный канал: приватный, привязан к репозиторию, даёт CVE при
+координированном раскрытии. Email/PGP-канал сознательно не используется —
+одна аудируемая точка входа вместо двух (см. Contacts).
 
 **Response time:** ≤72 часа на подтверждение получения. ≤7 дней — первоначальная оценка.
 
@@ -131,5 +134,4 @@ For polymath-os specifically:
 
 ## Contacts
 
-- Security advisories: GitHub (private)
-- PGP fingerprint: `<fill-in-on-init>`
+- Security advisories: GitHub (private) — https://github.com/rtynbirf/polymath-os/security/advisories/new
