@@ -43,6 +43,7 @@ jobs:
       - name: Checkout (full history for changelog parsing)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up Python 3.10
@@ -59,7 +60,7 @@ jobs:
           node-version: "20"
 
       - name: Set up pnpm (version from package.json)
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
         # version is read from package.json packageManager field
 
       - name: Install + build (pnpm + turborepo)
@@ -89,7 +90,7 @@ jobs:
           ls -la "$SBOM_FILE" sbom.python.cyclonedx.json
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
       - name: Sign SBOM (keyless OIDC, Sigstore)
         run: |
@@ -195,7 +196,7 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ github.event_name == 'push' || inputs.skip-publish == 'false' }}
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
           name: ${{ github.ref_name }}
           body_path: release_notes.md
