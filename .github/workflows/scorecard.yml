@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       security-events: write # SARIF -> Security → Code Scanning
-      administration: read # Branch-Protection check: читать защиту ветки
       id-token: write # publish_results — keyless OIDC (Sigstore)
       contents: read
     steps:
