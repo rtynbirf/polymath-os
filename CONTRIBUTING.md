@@ -72,4 +72,3 @@
 Криптографическая подпись коммитов (SSH-ключ или Sigstore gitsign) — рекомендуемая
 практика; GitHub покажет `Verified`. Пошаговая настройка: [docs/COMMIT_SIGNING.md](./docs/COMMIT_SIGNING.md),
 помощник: `scripts/commit_signing_setup.sh`. DCO `Signed-off-by` остаётся обязательным.
-
