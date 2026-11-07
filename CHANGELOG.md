@@ -6,6 +6,9 @@
 
 ### Added (post-v3.25.0 hardening, 2026-11-07)
 
+- **docs(security)**: `docs/SECURITY_SCORECARD.md` — baseline первой оценки Scorecard,
+  разбор чеков и план; `docs/COMMIT_SIGNING.md` + `scripts/commit_signing_setup.sh` —
+  механизм подписи коммитов (SSH/Sigstore), `required_signatures` сознательно не включён.
 - **ci(scorecard)**: воркфлоу OpenSSF Scorecard (action v2.5.0, пин по SHA) —
   еженедельная детерминированная оценка 0-100 публикуется в публичный реестр
   scorecard.dev и SARIF в Code Scanning; ритм смещён от ПУЛЬСа (вт 05:33 UTC).

@@ -65,3 +65,11 @@
 - Unit: обязательны для `packages/*`
 - Integration: Testcontainers для `apps/*` (Postgres/Redis в CI)
 - Eval: promptfoo golden datasets для AI-агентов
+
+
+## Подпись коммитов
+
+Криптографическая подпись коммитов (SSH-ключ или Sigstore gitsign) — рекомендуемая
+практика; GitHub покажет `Verified`. Пошаговая настройка: [docs/COMMIT_SIGNING.md](./docs/COMMIT_SIGNING.md),
+помощник: `scripts/commit_signing_setup.sh`. DCO `Signed-off-by` остаётся обязательным.
+
