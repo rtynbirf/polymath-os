@@ -15,9 +15,7 @@ on:
     - cron: "0 3 * * 2" # every Tuesday 03:00 UTC
   workflow_dispatch:
 
-permissions:
-  issues: write # open issue in singulyar if governance check fails
-  contents: read
+permissions: read-all
 
 concurrency:
   group: cross-repo-governance
@@ -25,6 +23,9 @@ concurrency:
 
 jobs:
   governance:
+    permissions:
+      issues: write # open issue in singulyar if governance check fails
+      contents: read
     name: Check singulyar follows its own rules
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -36,10 +36,7 @@ on:
           - betterstack
           - all_tier2
 
-permissions:
-  contents: read # only need to read repo for drill
-  actions: read # to query workflow status if needed
-  issues: write # to open issue if drill fails (sovereignty regression)
+permissions: read-all
 
 concurrency:
   group: sovereignty-drill
@@ -47,6 +44,10 @@ concurrency:
 
 jobs:
   drill:
+    permissions:
+      contents: read # only need to read repo for drill
+      actions: read # to query workflow status if needed
+      issues: write # to open issue if drill fails (sovereignty regression)
     name: Sovereignty drill — disable one Tier 2 service
     runs-on: ubuntu-latest
     timeout-minutes: 10

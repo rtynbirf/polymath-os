@@ -17,11 +17,12 @@ concurrency:
   group: pulse
   cancel-in-progress: false
 
-permissions:
-  contents: write
+permissions: read-all
 
 jobs:
   pulse:
+    permissions:
+      contents: write
     name: Замер и запись пульса
     runs-on: ubuntu-latest
     timeout-minutes: 15

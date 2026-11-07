@@ -22,10 +22,7 @@ on:
           - "true"
           - "false"
 
-permissions:
-  contents: write # create GitHub Release + upload assets
-  id-token: write # cosign keyless (OIDC) — no long-lived signing key in secrets
-  packages: write # GHCR push (reserved; no images currently published)
+permissions: read-all
 
 # Never cancel an in-flight release — partial published Release is worse than full retry.
 concurrency:
@@ -34,6 +31,10 @@ concurrency:
 
 jobs:
   release:
+    permissions:
+      contents: write # create GitHub Release + upload assets
+      id-token: write # cosign keyless (OIDC) — no long-lived signing key in secrets
+      packages: write # GHCR push (reserved; no images currently published)
     name: Build + SBOM + cosign-sign + GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 20

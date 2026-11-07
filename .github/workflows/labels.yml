@@ -17,10 +17,7 @@ on:
     paths:
       - ".github/labels.yml"
 
-permissions:
-  pull-requests: write # actions/labeler добавляет/убирает labels на PR
-  issues: write # gh label create/update на catalog-sync
-  contents: read
+permissions: read-all
 
 # Labeler идемпотентен — race-condition между push и PR безопасна.
 concurrency:
@@ -29,6 +26,10 @@ concurrency:
 
 jobs:
   label-pr:
+    permissions:
+      pull-requests: write # actions/labeler добавляет/убирает labels на PR
+      issues: write # gh label create/update на catalog-sync
+      contents: read
     name: Apply layer/* and type/* labels to PR
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -41,6 +42,10 @@ jobs:
           sync-labels: true # убирает label, когда паттерн перестал match
 
   sync-catalog:
+    permissions:
+      pull-requests: write # actions/labeler добавляет/убирает labels на PR
+      issues: write # gh label create/update на catalog-sync
+      contents: read
     name: Sync .github/labels.yml catalog → GitHub
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -84,6 +89,10 @@ jobs:
           PY
 
   heartbeat:
+    permissions:
+      pull-requests: write # actions/labeler добавляет/убирает labels на PR
+      issues: write # gh label create/update на catalog-sync
+      contents: read
     name: Зелёный пульс (диспатч — штатное ожидание PR/push)
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

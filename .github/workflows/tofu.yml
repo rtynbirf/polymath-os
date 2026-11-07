@@ -40,10 +40,7 @@ on:
         options: [plan, apply, destroy]
 
 # OIDC trust — required for AssumeRoleWithWebIdentity
-permissions:
-  contents: read
-  id-token: write
-  pull-requests: write # to post plan output as PR comment
+permissions: read-all
 
 concurrency:
   group: tofu-${{ github.event.inputs.environment || 'pr' }}-${{ github.ref }}
@@ -52,6 +49,10 @@ concurrency:
 jobs:
   # ── fmt-check + validate — on every PR (no creds needed for validate) ──
   fmt-validate:
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write # to post plan output as PR comment
     name: tofu fmt -check + tofu validate
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -93,6 +94,10 @@ jobs:
 
   # ── plan — on PR (with OIDC trust, no static creds) ─────────────────────
   plan:
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write # to post plan output as PR comment
     name: tofu plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -169,6 +174,10 @@ jobs:
 
   # ── apply — ONLY on manual dispatch with approval ───────────────────────
   apply:
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write # to post plan output as PR comment
     name: tofu ${{ github.event.inputs.action }} (${{ github.event.inputs.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 30

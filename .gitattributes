@@ -77,7 +77,12 @@ runtime/src/                        linguist-language=Python
 # ── 5. export-ignore — exclude from `git archive` release tarball ─────────
 # Affects `gh release create` zipballs and `git archive` output.
 # Users who `git clone` still get these — only tarballs/zipballs skip them.
-.github/                   export-ignore
+#
+# ВАЖНО (волна 7.3): `.github/` НЕ export-ignore — OpenSSF Scorecard читает
+# файлы из source-архива (codeload tarball), и export-ignore ослеплял чеки
+# Token-Permissions / Dangerous-Workflow («no workflows found» → N/A).
+# CI-конфиги в архиве — норма: так делает дефолтный zipball GitHub,
+# а аудиторы/инструменты читают их именно из архива.
 .gitignore                 export-ignore
 .gitattributes             export-ignore
 .editorconfig              export-ignore

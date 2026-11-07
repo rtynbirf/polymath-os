@@ -9,9 +9,7 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-  id-token: write # required for OIDC + cosign keyless
+permissions: read-all
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -19,6 +17,8 @@ concurrency:
 
 jobs:
   verify:
+    permissions:
+      contents: read
     name: make verify (open-source contract)
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -36,6 +36,9 @@ jobs:
         run: make verify
 
   ci:
+    permissions:
+      contents: read
+      id-token: write
     name: lint + typecheck + test + build + security
     runs-on: ubuntu-latest
     timeout-minutes: 15
