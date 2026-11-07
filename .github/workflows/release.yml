@@ -96,11 +96,13 @@ jobs:
       - name: Sign SBOM (keyless OIDC, Sigstore)
         run: |
           cosign sign-blob --yes \
+            --bundle sbom.bundle \
             --output-certificate sbom.pem \
             --output-signature sbom.sig \
             "$SBOM_FILE"
           echo "::notice::SBOM signed with keyless OIDC. Verify locally with:"
-          echo "::notice::  cosign verify-blob $SBOM_FILE --certificate sbom.pem --signature sbom.sig"
+          echo "::notice::  cosign verify-blob $SBOM_FILE --bundle sbom.bundle"
+          echo "::notice::  (классика: --certificate sbom.pem --signature sbom.sig)"
 
       - name: Generate SLSA L2 provenance
         # Per ADR-0004: target SLSA Build L2 (signed provenance from hosted build platform).
@@ -169,6 +171,7 @@ jobs:
           # Cosign attest the SBOM (keyless OIDC, sigstore)
           cosign attest-blob --yes "$SBOM_FILE" \
             --predicate sbom.slsa-provenance.intoto.jsonl \
+            --bundle sbom.attestation.bundle \
             --output-attestation sbom.attestation.json || \
             echo "SLSA attest skipped (cosign version may not support attest-blob or no OIDC available)"
 
@@ -213,6 +216,8 @@ jobs:
             sbom.python.cyclonedx.json
             sbom.pem
             sbom.sig
+            sbom.bundle
             sbom.attestation.json
+            sbom.attestation.bundle
             sbom.slsa-provenance.intoto.jsonl
           make_latest: ${{ steps.meta.outputs.prerelease == 'true' && 'false' || 'true' }}

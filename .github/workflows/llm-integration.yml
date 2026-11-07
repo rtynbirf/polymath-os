@@ -61,9 +61,9 @@ jobs:
 
       - name: Run real-LLM integration tests
         if: steps.download-model.outcome == 'success'
-        env:
-          LLM_MODEL_PATH: ~/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf
         run: |
+          # Тильда в env не раскрывается — путь собирается в шелле через $HOME
+          export LLM_MODEL_PATH="$HOME/.cache/polymath-os/qwen2.5-0.5b-instruct-q5_k_m.gguf"
           cd runtime
           python3 -m unittest tests.test_llm_local_adapter_integration -v
 

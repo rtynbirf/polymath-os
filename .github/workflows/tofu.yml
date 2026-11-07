@@ -102,7 +102,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: fmt-validate
-    if: github.event_name == 'pull_request'
+    # Честные ворота: без облачного контракта (vars.AWS_ACCOUNT_ID пуст) —
+    # план спит; джоба просыпается сама, когда владелец добавит переменную.
+    if: github.event_name == 'pull_request' && vars.AWS_ACCOUNT_ID != ''
     strategy:
       fail-fast: false
       matrix:
@@ -120,7 +122,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_PLACEHOLDER }}:role/polymath-gha-deploy
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/polymath-gha-deploy
           aws-region: eu-central-1
           # Short-lived session — no static access key in repo.
 
@@ -181,7 +183,7 @@ jobs:
     name: tofu ${{ github.event.inputs.action }} (${{ github.event.inputs.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && vars.AWS_ACCOUNT_ID != ''
     environment:
       # require approval via GitHub Environments protection rule
       # prod env: 2 approvers (CODEOWNERS + extra)
@@ -200,7 +202,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID_PLACEHOLDER }}:role/polymath-gha-deploy
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/polymath-gha-deploy
           aws-region: eu-central-1
 
       - name: tofu init
