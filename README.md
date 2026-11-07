@@ -8,6 +8,7 @@
 [![Tests](https://img.shields.io/badge/tests-290%2F290%20PASS-brightgreen)](./runtime/tests/)
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
 [![CI](https://img.shields.io/badge/CI-5%2F5%20green-brightgreen)](https://github.com/rtynbirf/polymath-os/actions)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rtynbirf/polymath-os/badge)](https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os)
 
 **Current version: v3.25.0** (2026-11-07) — see [CHANGELOG.md](./CHANGELOG.md).
 

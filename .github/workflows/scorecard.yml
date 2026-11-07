@@ -1,0 +1,43 @@
+name: OpenSSF Scorecard
+
+# Учитель OpenSSF Scorecard канонизирован репо (пины deps по SHA, детерминированная
+# пульс-оценка) — теперь сам Scorecard гонит непрерывно и публикует оценку в
+# публичный реестр scorecard.dev (Badge + Code Scanning SARIF).
+# Ритм смещён от ПУЛЬСа (пн 04:17 UTC): вт 05:33 UTC — гомеостаз без столкновений.
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "33 5 * * 2"
+  push:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write # SARIF -> Security → Code Scanning
+      id-token: write # publish_results — keyless OIDC (Sigstore)
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard analysis
+        uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          sarif_file: results.sarif
+          wait-for-processing: true

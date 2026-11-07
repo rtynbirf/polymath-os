@@ -4,6 +4,28 @@
 
 - Nothing yet — следующая партия стартует отсюда.
 
+### Added (post-v3.25.0 hardening, 2026-11-07)
+
+- **ci(scorecard)**: воркфлоу OpenSSF Scorecard (action v2.5.0, пин по SHA) —
+  еженедельная детерминированная оценка 0-100 публикуется в публичный реестр
+  scorecard.dev и SARIF в Code Scanning; ритм смещён от ПУЛЬСа (вт 05:33 UTC).
+
+### Changed
+
+- **ci(pins) — волна 4**: 12 тег-пинов actions заменены полными SHA с комментарием
+  версии (`ci`: pnpm/semgrep/trivy/gitleaks; `release`: pnpm/cosign/gh-release;
+  `tofu`: opentofu ×3/aws ×2) — 0 тег-пинов, 42 SHA-пина; trivy@master больше не движется.
+- **ci(semgrep)**: мёртвый экшен returntocorp/semgrep-action@v1 (пин 2023-11) заменён
+  актуальным CLI (`semgrep scan --config auto --metrics=off`).
+- **ci(persist-credentials)**: `persist-credentials: false` во все checkout, кроме
+  ПУЛЬСа (протокол PID1 пушит в main) — креды не остаются в runner.
+- **dependabot**: вычищен мёртвый паттерн группы `returntocorp/*`.
+
+### Security
+
+- **branch protection**: включены `required_linear_history` + `required_conversation_resolution`;
+  force-push/удаления уже запрещены; прямые пуши владельца и ПУЛЬС-протокол не затронуты.
+
 ## [v3.25.0] — 2026-11-07 (CRYSTALLIZE — 39 коммитов после v3.21.1)
 
 39 коммитов после v3.21.1 выпущены одной версией (метки v3.22.0–v3.24.1 в текстах клейм — внутренние маркеры фич, релизных тегов для них не создавалось): 3 агентные линии, holon-агент, канон-пайплайн, 2 evidence-пака, самоаудит ПУЛЬС, Windows-green фиксы. `make verify` 33/33, 290 runtime-тестов, CI зелёный.
