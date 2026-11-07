@@ -1,0 +1,27 @@
+# Кровь: пульс клетки polymath-os (конец цепи пульса). Запуск — ТОЛЬКО событие
+# (repository_dispatch от предыдущей клетки), не таймер. Клетка сверяет конверт
+# со своим живым github.sha и дописывает эхо в летопись роя
+# (cell-swarm/blood/LEDGER.jsonl). Ядро крови продано из runtime-protocol@2337fc2
+# (tooling/blood/kernel/, провенанс и sha256 — рядом).
+name: blood
+
+permissions:
+  contents: read
+
+on:
+  repository_dispatch:
+    types: [blood-pulse]
+  workflow_dispatch:
+
+jobs:
+  beat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: кровь — сверка конверта и эхо в летопись роя
+        env:
+          BLOOD_ENVELOPE: ${{ toJson(github.event.client_payload.envelope) }}
+          CELL_NAME: polymath-os
+          CELL_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
+        run: python3 tooling/blood/kernel/blood_cell.py
