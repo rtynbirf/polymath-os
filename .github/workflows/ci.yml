@@ -83,10 +83,12 @@ jobs:
           pnpm run build
 
       # Security scans
-      - name: Run Semgrep
-        uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
-        with:
-          config: auto
+      - name: Run Semgrep (community CLI)
+        # Экшен returntocorp/semgrep-action устарел (последний релиз 2024-01, v1 пин 2023-11),
+        # semgrep/semgrep-action архивирован — актуальный путь: официальный CLI.
+        run: |
+          python3 -m pip install --quiet semgrep
+          semgrep scan --config auto --metrics=off
         continue-on-error: true
 
       - name: Run Trivy (filesystem)
