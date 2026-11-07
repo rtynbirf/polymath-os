@@ -6,6 +6,13 @@
 
 ### Added (post-v3.25.0 hardening, 2026-11-07)
 
+- **docs(svet)**: `docs/SVET_CANON.md` — досье канона СВЕТ (перцептивная эргономика
+  интерфейсов): 10 claims → 4 статуса, 20 источников с URL, 10-минутная проверка;
+  самодостаточные артефакты `docs/svet/` (HTML-шоурум-доказательства, PDF,
+  drop-in ядро `svet-core.css` + `svet.js`, SHA-256 манифест). Опровергнутые
+  маркетинговые «улучшатели чтения» (bionic reading, dyslexia fonts, чистые
+  #000/#FFF, параллакс без opt-out) зафиксированы отдельными клеймами.
+  Docs-only: runtime не затронут.
 - **runtime(fuzz)**: `test_fuzz_parsers.py` — детерминированный mutation-fuzzing
   (stdlib-only, SEED 20261107, канон нулевых зависимостей) поверхностей
   `schema_validate.validate`, `AgentCard.from_dict`,
