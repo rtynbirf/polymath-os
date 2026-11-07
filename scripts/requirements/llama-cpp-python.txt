@@ -1,0 +1,11 @@
+# Хеш-пиннинг для OpenSSF Scorecard (Pinned-Dependencies).
+# llama-cpp-python 0.3.36 публикует ТОЛЬКО sdist (сборка CMAKE в CI — как и раньше),
+# пинтим исходник + wheel'ы зависимостей (cp311).
+# Регенерация: pip download <pkg> --python-version 3.11 --platform manylinux2014_x86_64 --implementation cp --abi cp311 --abi abi3 --abi none-any --only-binary=:all:
+
+llama-cpp-python==0.3.36 --hash=sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e
+diskcache==5.6.3 --hash=sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19
+jinja2==3.1.6 --hash=sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+markupsafe==3.0.4 --hash=sha256:6da83a088f8ef93b2d483a8232a4dbf4d69d3d8496b568a03c56becac43e1808
+numpy==2.4.6 --hash=sha256:89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93
+typing-extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8

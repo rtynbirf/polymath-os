@@ -90,7 +90,7 @@ jobs:
         # Экшен returntocorp/semgrep-action устарел (последний релиз 2024-01, v1 пин 2023-11),
         # semgrep/semgrep-action архивирован — актуальный путь: официальный CLI.
         run: |
-          python3 -m pip install --quiet semgrep
+          python3 -m pip install --quiet --require-hashes -r scripts/requirements/semgrep.txt
           semgrep scan --config auto --metrics=off
         continue-on-error: true
 

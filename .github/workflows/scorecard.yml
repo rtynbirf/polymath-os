@@ -11,6 +11,7 @@ on:
     - cron: "33 5 * * 2"
   push:
     branches: [main]
+  workflow_dispatch: # ручной замер: gh workflow run scorecard.yml
 
 permissions: read-all
 

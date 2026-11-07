@@ -44,9 +44,8 @@ jobs:
 
       - name: Install llama-cpp-python (CPU)
         run: |
-          python3 -m pip install --upgrade pip
           CMAKE_ARGS="-DGGML_NATIVE=off" \
-            python3 -m pip install llama-cpp-python
+            python3 -m pip install --require-hashes -r scripts/requirements/llama-cpp-python.txt
 
       - name: Download Qwen2.5-0.5B-Instruct GGUF (q5_k_m)
         id: download-model

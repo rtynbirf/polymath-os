@@ -15,21 +15,32 @@
 > Tier 2/3: required reviews (≥1 approval) + required status checks (CI), bypass
 > allowance владельца — канон прямых волн сохранён.
 >
-> Замер 3: коммит `56a056a` — **6.5/10** (scorecard.dev): SAST 8 → 10 (CodeQL на
-> всех коммитах), CI-Tests 10 (4/4 merged PRs). Token-Permissions /
-> Dangerous-Workflow / Branch-Protection — N/A: сбой чтения воркфлоу/защиты у
-> раннера Scorecard (транзиентно, не дефекты репо — переоценивается каждым пушем).
+> Замер 3: коммит `56a056a` — **6.5/10**: Token-Permissions / Dangerous-Workflow /
+> Branch-Protection — N/A.
+>
+> Замер 4: коммит `985f6ee` — **7.0/10**. Корень N/A-троицы найден: `.github/
+> export-ignore` в `.gitattributes` вырезал воркфлоу из source-тарбола, а
+> Scorecard читает файлы именно из архива (`tarball.listFiles`) — «no workflows
+> found». После снятия export-ignore: Token-Permissions N/A→10 (job-level
+> нормализация волны 7.3), Dangerous-Workflow N/A→10. Обратная сторона прозрения:
+> Pinned-Dependencies 10→8 (видны unpinned pip-команды) — закрыто hash-pinned
+> requirements (`scripts/requirements/*.txt`, волна 7.5). `administration: read`
+> в GITHUB_TOKEN невалиден (скоуп App/PAT) — чтение защиты ветки переведено на
+> repository ruleset `main-scorecard-protection` (6 правил, bypass владельца,
+> волна 7.5): rulesets читаются Scorecard'ом без админ-токена.
 
 ## На 10/10 уже сейчас
 
 Binary-Artifacts, Security-Policy, License, Vulnerabilities, Dependency-Update-Tool,
-CI-Tests, SAST (CodeQL на всех коммитах — замер 3) — плюс закрытые в волне 4: Pinned-Dependencies (42 SHA-пина actions,
-волна 7: 0 непинненных команд в shell-скриптах), Token-Permissions,
-Branch-Protection (linear history + conversation resolution + required_signatures).
+CI-Tests, SAST, Dangerous-Workflow, Token-Permissions — плюс закрытые в волне 4:
+Pinned-Dependencies (42 SHA-пина actions, 0 непинненных команд в shell-скриптах,
+pip — hash-pinned requirements, волна 7.5),
+Branch-Protection (linear history + conversation resolution + required_signatures
++ ruleset `main-scorecard-protection`).
 
 ## Чеки ниже максимума — разбор
 
-| Чек | Очки (замер 3) | Природа | Что делать |
+| Чек | Очки (замер 4) | Природа | Что делать |
 | --- | --- | --- | --- |
 | Signed-Releases | 8/10 | 5/5 релизов подписаны cosign, счётчик не максимален | растёт автоматически с каждым подписанным релизом |
 | Maintained | 0/10 | репо моложе 90 дней (создано 2026-10-16) | время; автоматически 10 после 2027-01-14 |
