@@ -13,9 +13,9 @@ name: wave3-skill-contract
 on:
   workflow_dispatch:
   push:
-    paths: ['skills/**']
+    paths: ["skills/**"]
   pull_request:
-    paths: ['skills/**']
+    paths: ["skills/**"]
 
 permissions:
   contents: read

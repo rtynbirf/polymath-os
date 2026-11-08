@@ -16,13 +16,17 @@ jobs:
 
       - name: DORA-дайджест роя (16 чисел — 4 метрики x 4 флагмана, из GitHub API)
         run: python3 wave3/two_numbers.py dora
+        env:
+          # Живые числа вместо HTTPError: без токена api.github.com из runner'а
+          # ловит вторичный rate-limit (403) — все 16 ячеек становятся «нет данных».
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Свобода-счёт — колонка freedom в описи == выводу check_freedom.py (репорт-режим)
         run: |
           python3 wave3/two_numbers.py freedom || echo "🟡 находка: вывод check_freedom.py не распознан — расхождение зафиксировано в логе (issue polymath-os#34); шаг в репорт-режиме"
 
       - name: Закрепить живые числа волны
-        if: ${{ always() }}   # отчёты закрепляются и красными — расхождение свободы это факт
+        if: ${{ always() }} # отчёты закрепляются и красными — расхождение свободы это факт
         run: |
           if [ -n "$(git status --porcelain wave3)" ]; then
             git config user.name "github-actions[bot]"
