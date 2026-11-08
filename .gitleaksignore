@@ -1,3 +1,4 @@
 # Честное подавление ложного срабатывания gitleaks (Волна ×5, 2026-11-09):
-# строка 40 llm-integration.yml — это ключ кэша actions/cache (не секрет).
-3ace7c5cc07f735b89959276768681de78fa1a10:.github/workflows/llm-integration.yml:40:generic-api-key
+# строка 40 llm-integration.yml — ключ кэша actions/cache (не секрет).
+# Fingerprint в формате gitleaks v8: commit:file:rule:line.
+3ace7c5cc07f735b89959276768681de78fa1a10:.github/workflows/llm-integration.yml:generic-api-key:40
