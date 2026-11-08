@@ -2,7 +2,6 @@
 
 <p align="center"><img src=".github/social-preview.png" alt="polymath-os" width="100%"></p>
 
-
 > **Open-source ideal repository.** Clone it. Run `make verify`. Every claim in this repo is reproducible by that one command. If it exits 0 — every claim holds. If non-zero — the claim that failed is shown.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
