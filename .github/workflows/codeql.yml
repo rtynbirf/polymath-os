@@ -14,6 +14,9 @@ on:
     # Every Monday 06:00 UTC — после Dependabot/Renovate (которые тоже в понедельник 06:00 UTC).
     # Если упадёт на schedule, увидим в Security tab и проинвестируем на следующей неделе.
     - cron: "0 6 * * 1"
+  # Дверь §2 доктрины (repo-doctrine#30): каждый schedule несёт ручной
+  # workflow_dispatch — точечный перезапуск после инцидента, без ожидания крона.
+  workflow_dispatch:
 
 # Allow push (not PR) to override: cancel-in-progress on PR, finish on push.
 concurrency:
