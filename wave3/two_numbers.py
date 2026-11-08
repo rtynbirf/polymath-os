@@ -91,6 +91,18 @@ def repo_numbers(name):
             "прогонов": total}
 
 
+def _pad_table(header, rows):
+    """Markdown-таблица с выравниванием колонок по ширине (канон biome-формата)."""
+    cols = len(header)
+    grid = [header] + [[c for c in r] for r in rows]
+    widths = [max(len(g[i]) for g in grid) for i in range(cols)]
+    def line(cells, filler="-"):
+        body = "| " + " | ".join(c.ljust(widths[i]) for i, c in enumerate(cells)) + " |"
+        return body
+    sep = "|" + "|".join(widths[i] * "-" for i in range(cols)) + "|"
+    return [line(header)] + [sep] + [line(r) for r in rows]
+
+
 def dora():
     names = flagships()
     rows, nums = [], 0
@@ -98,24 +110,24 @@ def dora():
         try:
             n = repo_numbers(name)
         except Exception as e:
-            rows.append("| %s | нет данных | нет данных | нет данных | нет данных | (%s) |" % (name, type(e).__name__))
+            rows.append([name, "нет данных", "нет данных", "нет данных", "нет данных", "(%s)" % type(e).__name__])
             continue
         nums += sum(1 for k in ("lead", "freq", "mttr", "red") if n[k] is not None)
-        rows.append("| %s | %s | %s | %s | %s | %d прогонов в окне |" % (
+        rows.append([
             name,
             "нет данных" if n["lead"] is None else "%s ч" % n["lead"],
             "нет данных" if n["freq"] is None else "%s/нед" % n["freq"],
             "нет данных" if n["mttr"] is None else "%s ч" % n["mttr"],
             "нет данных" if n["red"] is None else "%s%%" % n["red"],
-            n["прогонов"]))
+            "%d прогонов в окне" % n["прогонов"]])
     now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     md = "\n".join([
         "# DORA-дайджест роя (волна ×3, ПРЕДЛОЖЕНИЕ-17)", "",
         "Дата: %s. Источник: GitHub API (действия репо, дефолтная ветка, окно 100 прогонов)." % now,
         "Флагманы — сид по цепи ADR; переопределяется wave3/flagships.json живым ходом.", "",
-        "| флагман | lead time | частота развёртываний (прокси) | MTTR | доля красных | окно |",
-        "|---|---|---|---|---|---|",
-    ] + rows + [
+    ] + _pad_table(
+        ["флагман", "lead time", "частота развёртываний (прокси)", "MTTR", "доля красных", "окно"],
+        rows) + [
         "", "Метрики по канону DORA; «частота» — прокси (успешные прогоны CI в неделю),",
         "потому что деплой роя = зелёный конвейер. (заполняется скриптом wave3/two_numbers.py",
         "при каждом прогоне; источниковая база — api.github.com/repos/rtynbirf/<репо>/actions/runs)",
