@@ -1,0 +1,33 @@
+# Волна ×3 · добивание (W3-C2) · polymath-os#33 — «Скилл = договор»
+# (ПРЕДЛОЖЕНИЕ-16 · волна Э-2 · индекс П-50).
+# Аддитивно: существующие workflows (ci, blood, tofu, scorecard, …) не тронуты.
+#
+# Гейт: каждый SKILL.md обязан нести инвариант + команду проверки; досье
+# «7 claims → 4 статуса» (FACT/CALCULATED/MODEL/UNKNOWN) валидируется; «сделано»
+# без досье не существует. Ноль скиллов — зелёный no-op (плавный храповик:
+# гейт строжеет с первым SKILL.md); --strict-empty включит пустоту красным.
+# Канон и шаблоны: `python3 skills/wave3/lint_skill_contracts.py --template skill`.
+
+name: wave3-skill-contract
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ['skills/**']
+  pull_request:
+    paths: ['skills/**']
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Самопроверка гейта (фикстуры, без сети)
+        run: python3 skills/wave3/lint_skill_contracts.py --selftest
+
+      - name: Гейт «скилл = договор» по всему репо
+        run: python3 skills/wave3/lint_skill_contracts.py --root .

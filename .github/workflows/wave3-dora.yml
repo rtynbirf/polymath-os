@@ -1,0 +1,34 @@
+name: wave3-dora
+on:
+  schedule:
+    # Квартальный дайджест (ПРЕДЛОЖЕНИЕ-17): 1-е числа января, апреля, июля, октября
+    - cron: "0 3 1 1,4,7,10 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  two-numbers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: DORA-дайджест роя (16 чисел — 4 метрики x 4 флагмана, из GitHub API)
+        run: python3 wave3/two_numbers.py dora
+
+      - name: Свобода-счёт — колонка freedom в описи == выводу check_freedom.py
+        run: python3 wave3/two_numbers.py freedom
+
+      - name: Закрепить живые числа волны
+        if: ${{ always() }}   # отчёты закрепляются и красными — расхождение свободы это факт
+        run: |
+          if [ -n "$(git status --porcelain wave3)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add wave3
+            git commit -m "wave3: живые числа — DORA-дайджест и свобода-отчёт"
+            git push
+          else
+            echo "числа без изменений"
+          fi
