@@ -25,7 +25,19 @@
       "!**/tooling/agents/polymath-agent-v3101",
       "!**/tooling/agents/polymath-agent-v128",
       "!PULSE.md",
-      "!README.md"
+      "!README.md",
+      "!AGENTS.md",
+      "!ARCHITECTURE.md",
+      "!CHANGELOG.md",
+      "!CODE_OF_CONDUCT.md",
+      "!CONTRIBUTING.md",
+      "!PUSH.md",
+      "!ROADMAP.md",
+      "!ROADMAP_v3.7.0.md",
+      "!ROADMAP_v4.0.0.md",
+      "!SECURITY.md",
+      "!TZ.md",
+      "!ТЗ_Polymath_OS_v3.7.0.md"
     ]
   },
   "formatter": {

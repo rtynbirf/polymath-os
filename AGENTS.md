@@ -69,6 +69,7 @@ make clean       # rm node_modules/dist/.next/.turbo/target/__pycache__
   `*.age` private keys, `age-identity.txt`; `vault/.obsidian/workspace*`;
   `__pycache__/`, `*.pyc`; `node_modules/`, `dist/`, `.turbo/`, `.next/`
 - **Markdown**: русский prose в комментариях, английский для identifiers/URL/commands
+- **Biome-исключения (T16, маркер «documentation-only»)**: блок корневых `!*.md`-строк в конце `files.includes` (biome.json) — исключение ДОКУМЕНТАЦИИ (README, AGENTS, ARCHITECTURE, CHANGELOG, CODE_OF_CONDUCT, CONTRIBUTING, PUSH, ROADMAP*, SECURITY, TZ, ТЗ), а не сгенерённых путей; сгенерённые/машинные пути (node_modules, dist, build, .turbo, .next, target, runtime, docs, vault, garden-артефакты, pnpm-lock.yaml, agent-дампы v128/v3100/v3101, PULSE.md) исключаются отдельным блоком выше и сохраняют свой маркер генерации. Проза и таблицы документации не подлежат biome-канону.
 - **Conventional Commits**: trunk-based, ≤24h feature branch, squash-merge
 
 ### Добавление новой зависимости
