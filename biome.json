@@ -24,7 +24,8 @@
       "!**/tooling/agents/polymath-agent-v3100",
       "!**/tooling/agents/polymath-agent-v3101",
       "!**/tooling/agents/polymath-agent-v128",
-      "!PULSE.md"
+      "!PULSE.md",
+      "!README.md"
     ]
   },
   "formatter": {
