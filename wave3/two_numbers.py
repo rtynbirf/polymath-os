@@ -99,7 +99,7 @@ def _pad_table(header, rows):
     def line(cells, filler="-"):
         body = "| " + " | ".join(c.ljust(widths[i]) for i, c in enumerate(cells)) + " |"
         return body
-    sep = "|" + "|".join(widths[i] * "-" for i in range(cols)) + "|"
+    sep = "| " + " | ".join(widths[i] * "-" for i in range(cols)) + " |"
     return [line(header)] + [sep] + [line(r) for r in rows]
 
 
