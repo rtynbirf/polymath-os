@@ -1,7 +1,7 @@
 # ADR-0013 — SLSA Build L3 Target (hermetic builder isolation)
 
 **Date:** 2026-10-16 (Gate-6 candidate ADR)
-**Status:** Proposed (awaiting implementation in v0.5/v2.0)
+**Status:** Partially implemented (Волна ×12, 2026-11-10: GitHub-native artifact attestation; hermetic build + reproducible build remain v2.0)
 **Deciders:** @USER
 **Supersedes**: None (extends ADR-0004 — SLSA Build L2 Target)
 
@@ -99,3 +99,17 @@ isolation. Implementation via:
 - ADR-0002 Tier 2 — `slsa-framework/slsa-github-generator` is a Tier 2
   dependency (replaceable by in-toto + cosign attestation on a self-hosted
   runner with firejail)
+
+## Implementation note (Волна ×12, 2026-11-10 — GitHub-native trusted builder)
+
+Пункт «trusted builder separation» исполнен **нативным механизмом GitHub** —
+`actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2`
+в `release.yml` (джобовые права `id-token: write` + `attestations: write`):
+аттестация генерируется и хранится **сервисом GitHub** (attestation store) по
+OIDC-личности воркфлоу — билд-джоба не может её подделать. Мировой тренд:
+GitHub changelog 2026-01-20 «code-to-cloud traceability + SLSA Build L3».
+Верификация: `gh attestation verify <файл> -R rtynbirf/polymath-os`.
+Альтернатива из исходного решения (`slsa-framework/slsa-github-generator`)
+остаётся запасной (ADR-0002 Tier 2). Герметичная сборка и воспроизводимость —
+неизменно v2.0. Аттестуются SBOM-артефакты (npm + Python) на каждый Release
+и dry-run прогон.
