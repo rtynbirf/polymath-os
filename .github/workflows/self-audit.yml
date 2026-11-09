@@ -31,6 +31,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          # Волна ×9.2: persist-credentials по умолчанию пишет extraheader с
+          # GITHUB_TOKEN — он перекрывает креды из remote-URL, и пуш уходил от
+          # github-actions[bot] (не bypass-actor → GH013). Отключаем: авторизация
+          # только через админ-PAT из шага записи пульса.
+          persist-credentials: false
 
       - name: Замер — журнал-из-фактов
         run: |
@@ -193,6 +198,9 @@ jobs:
           PULSE_PAT: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
         run: |
           set -euo pipefail
+          # Защита от persist-credentials: остаточный extraheader перекрыл бы
+          # креды URL токеном github-actions[bot] — снимаем, если вдруг появился.
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
           if [ -n "$PULSE_PAT" ]; then
             git remote set-url origin "https://x-access-token:${PULSE_PAT}@github.com/${GITHUB_REPOSITORY}.git"
           fi
