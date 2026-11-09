@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
+</div>
+
 # Polymath OS
 
 <p align="center"><img src=".github/social-preview.png" alt="polymath-os" width="100%"></p>
