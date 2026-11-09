@@ -2,6 +2,18 @@
   "version": "3.25.0",
   "released": "2026-11-07",
   "commit": "6d6f816",
+  "generated": [
+    {
+      "path": "README.md",
+      "generator": "такт ПУЛЬС v2",
+      "refresh_cycle": "каждый ПУЛЬС-прогон"
+    },
+    {
+      "path": "PULSE.md",
+      "generator": "агент v3100",
+      "refresh_cycle": "каждый такт"
+    }
+  ],
   "adapters": [
     {
       "id": "rule.local",
