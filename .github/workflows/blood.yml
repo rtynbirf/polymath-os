@@ -1,7 +1,7 @@
 # Кровь: пульс клетки polymath-os (конец цепи пульса). Запуск — ТОЛЬКО событие
 # (repository_dispatch от предыдущей клетки), не таймер. Клетка сверяет конверт
 # со своим живым github.sha и дописывает эхо в летопись роя
-# (cell-swarm/blood/LEDGER.jsonl). Ядро крови продано из runtime-protocol@2337fc2
+# (cell-swarm/blood/CELLS-LEDGER.jsonl — клеточная летопись цепи). Ядро крови продано из runtime-protocol@0d98019
 # (tooling/blood/kernel/, провенанс и sha256 — рядом).
 name: blood
 
