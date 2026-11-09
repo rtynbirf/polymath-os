@@ -183,17 +183,27 @@ jobs:
 
       - name: Запись пульса — ритм без шума
         env:
-          # Волна ×9 (2026-11-09): классическая защита main (PR + 2 approvals,
-          # required_signatures) отклоняла пуш github-actions[bot] (GH013).
-          # enforce_admins=false → админ-PAT (rtynbirf) пушит напрямую, bypass
-          # канонен: баннер-волна легла тем же путём живьём. Подпись коммита —
-          # SSH-ключ из PULSE_SIGNING_KEY (шаг выше) сохраняется.
+          # Пуш от имени владельца: ruleset main-scorecard-protection требует PR,
+          # bypass admin (владелец) — легальный обход для бота-хранителя ритма.
+          # Волна ×9 (2026-11-09): ruleset 26757855 на main (PR + 2 approvals + 2
+          # status checks) отклонял пуш github-actions[bot] (GH013). bypass_mode=always
+          # для Repository admin → админ-PAT владельца (секрет CELL_SWARM_DISPATCH_TOKEN,
+          # волна ×9.2) пушит напрямую; подпись коммита — SSH-ключ из PULSE_SIGNING_KEY
+          # (шаг выше) сохраняется.
           PULSE_PAT: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
         run: |
           set -euo pipefail
           if [ -n "$PULSE_PAT" ]; then
             git remote set-url origin "https://x-access-token:${PULSE_PAT}@github.com/${GITHUB_REPOSITORY}.git"
           fi
+          # Санитизация вывода push: stderr перехватывается, креды из remote-URL
+          # маскируются — токен не попадает в лог шага; код возврата сохраняется.
+          push_pulse() {
+            local out rc=0
+            out="$(git push "$@" 2>&1)" || rc=$?
+            printf '%s\n' "$out" | sed -E 's#(https?://)[^/@[:space:]]+:[^@[:space:]]+@#\1***@#g'
+            return "$rc"
+          }
           # Существенность: сравнение с HEAD без учёта строки даты замера и бакета свежести
           # (raw fresh_days растёт +7 еженедельно даже на покойном репо — нормализуем до бакета,
           # иначе «ритм без шума» течёт и keepalive недостижим)
@@ -211,7 +221,7 @@ jobs:
               git config user.name "rtynbirf"
               git config user.email "rtynbirf@users.noreply.github.com"
               git commit --allow-empty -s -m "pulse: keepalive — репо живо, показания без изменений [skip ci]"
-              git push
+              push_pulse
               echo "Keepalive: репо dormant ${AGE_DAYS} дн. — удар сердца для расписания"
             else
               echo "Показания без изменений (возраст ${AGE_DAYS} дн.) — коммит не требуется"
@@ -228,4 +238,4 @@ jobs:
           git add PULSE.md
           git commit -s -m "pulse: замер v2 — показания изменились [skip ci]"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" 2>/dev/null || true
-          git push
+          push_pulse
