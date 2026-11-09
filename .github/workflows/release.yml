@@ -85,7 +85,10 @@ jobs:
             echo '{"bomFormat":"CycloneDX","specVersion":"1.5","components":[]}' > "$SBOM_FILE"
 
           # Python SBOM (covers SINGULYAR EIR runtime + MCP adapters — zero external deps)
-          python3 -m pip install --quiet --require-hashes -r scripts/requirements/cyclonedx-py.txt 2>/dev/null || true
+          # Волна ×13: stderr больше не глотается 2>/dev/null — падение инсталла
+          # видно в логе (::warning::), шаг остаётся неблокирующим (fallback-канон).
+          python3 -m pip install --require-hashes -r scripts/requirements/cyclonedx-py.txt || \
+            echo "::warning::cyclonedx-py install failed — Python SBOM will use empty fallback"
           cyclonedx-py environment --output-file sbom.python.cyclonedx.json || \
             echo '{"bomFormat":"CycloneDX","specVersion":"1.5","components":[]}' > sbom.python.cyclonedx.json
 
