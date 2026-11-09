@@ -15,6 +15,7 @@
 [![Decrees](https://img.shields.io/badge/decree%20log-7%20foundational%20laws-orange)](./runtime/src/decree_log.py)
 [![CI](https://img.shields.io/badge/CI-5%2F5%20green-brightgreen)](https://github.com/rtynbirf/polymath-os/actions)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rtynbirf/polymath-os/badge)](https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os)
+[![CII Best Practices](https://bestpractices.dev/projects/16428/badge)](https://www.bestpractices.dev/projects/16428)
 
 **Current version: v3.25.0** (2026-11-07) — see [CHANGELOG.md](./CHANGELOG.md).
 
