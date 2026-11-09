@@ -5,8 +5,10 @@ on:
     - cron: "0 3 1 1,4,7,10 *"
   workflow_dispatch:
 
-permissions:
-  contents: write
+# Минимум привилегий (Волна ×11): пуш живых чисел под rulesets всё равно отклоняется
+# (GH013) — числа закрепляются в GITHUB_STEP_SUMMARY (fallback в шаге ниже); write
+# здесь никогда не нужен. GITHUB_TOKEN ниже используется только на чтение API.
+permissions: read-all
 
 jobs:
   two-numbers:

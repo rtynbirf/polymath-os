@@ -34,7 +34,8 @@ jobs:
     permissions:
       contents: write # create GitHub Release + upload assets
       id-token: write # cosign keyless (OIDC) — no long-lived signing key in secrets
-      packages: write # GHCR push (reserved; no images currently published)
+      # packages: write убран (Волна ×11, минимум привилегий): GHCR-пуш был
+      # «reserved; no images currently published» — вернём при реальной публикации.
     name: Build + SBOM + cosign-sign + GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 20

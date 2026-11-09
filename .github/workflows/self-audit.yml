@@ -21,8 +21,9 @@ permissions: read-all
 
 jobs:
   pulse:
-    permissions:
-      contents: write
+    # Минимум привилегий (Волна ×11): GITHUB_TOKEN здесь только читает
+    # (checkout с persist-credentials: false); пуш пульса идёт через админ-PAT
+    # CELL_SWARM_DISPATCH_TOKEN из шага записи — write этому джобу не нужен.
     name: Замер и запись пульса
     runs-on: ubuntu-latest
     timeout-minutes: 15
