@@ -36,3 +36,4 @@
 - [docs/ECOSYSTEM.md](docs/ECOSYSTEM.md): экосистема вокруг ОС.
 - [vault/](vault/): Second Brain (PKM) — приватный слой, default-deny публикация.
 - [TZ.md](TZ.md), [ROADMAP.md](ROADMAP.md): задание и дорога.
+- [PULSE.md](PULSE.md): живой пульс репозитория — прогоны, пломбы, здоровье.
