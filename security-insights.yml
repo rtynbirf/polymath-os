@@ -1,0 +1,101 @@
+# OpenSSF Security Insights (https://security-insights.openssf.org)
+# Машиночитаемый отчёт о безопасности проекта — заполняет разрыв между
+# текстовым SECURITY.md и SBOM. Волна ×13, 2026-11-10. Заполняется честно,
+# по живым фактам репозитория (без украшений).
+header:
+  schema-version: 2.0.0
+  last-updated: "2026-11-10"
+  project-name: polymath-os
+  project-release: v3.25.0
+  project-website: "https://github.com/rtynbirf/polymath-os"
+  project-repository: "https://github.com/rtynbirf/polymath-os"
+  distribution-artifact: "https://github.com/rtynbirf/polymath-os/releases"
+  license: "https://github.com/rtynbirf/polymath-os/blob/main/LICENSE"
+  changelog: "https://github.com/rtynbirf/polymath-os/blob/main/CHANGELOG.md"
+  commit-hash: "cf1fa90"
+project-lifecycle:
+  status: active
+  roadmap: "https://github.com/rtynbirf/polymath-os/blob/main/ROADMAP.md"
+contribution-policy:
+  accepts-pull-requests: true
+  accepting-automated-pull-requests: true
+  contributing-guide: "https://github.com/rtynbirf/polymath-os/blob/main/CONTRIBUTING.md"
+  dco-signing: true
+  signed-commits: true
+  code-of-conduct: "https://github.com/rtynbirf/polymath-os/blob/main/CODE_OF_CONDUCT.md"
+security-policy:
+  security-policy-file: "https://github.com/rtynbirf/polymath-os/blob/main/SECURITY.md"
+  security-team: "https://github.com/rtynbirf/polymath-os/security/advisories"
+  contact:
+    name: "Private vulnerability reporting (GitHub)"
+    method: "Security tab → Report a vulnerability (PVR включён через API)"
+    frequency: "Проверка отчётов — при каждой волне (мультиагентный ритм, ежедневно)"
+  vulnerability-reporting:
+    reports-vulnerabilities: true
+    private-vulnerability-reporting: true
+    bug-bounty-available: false
+    bug-bounty-url: ""
+security-testing:
+  sast:
+    - tool-name: CodeQL
+      tool-type: SAST
+      tool-url: "https://github.com/rtynbirf/polymath-os/security/code-scanning"
+      tool-rulesets: ["security-extended"]
+      integration:
+        ad-hoc: false
+        ci: true
+        before-release: true
+    - tool-name: gitleaks
+      tool-type: SAST
+      integration:
+        ad-hoc: false
+        ci: true
+  fuzzing: []
+  security-features:
+    - tool-name: OpenSSF Scorecard
+      tool-type: "scorecard"
+      tool-url: "https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os"
+      integration:
+        ci: true
+        before-release: true
+    - tool-name: OpenSSF CII Best Practices
+      tool-type: "badge"
+      tool-url: "https://www.bestpractices.dev/projects/16428"
+      integration:
+        before-release: true
+    - tool-name: GitHub Artifact Attestations (SLSA Build L3)
+      tool-type: "attestation"
+      integration:
+        ci: true
+        before-release: true
+    - tool-name: cosign keyless (Sigstore)
+      tool-type: "signing"
+      integration:
+        before-release: true
+    - tool-name: Immutable releases + release attestations
+      tool-type: "release-integrity"
+      integration:
+        before-release: true
+security-artifacts:
+  sbom:
+    - sbom-file: "https://github.com/rtynbirf/polymath-os/releases (sbom.cyclonedx.json, sbom.python.cyclonedx.json)"
+      sbom-format: CycloneDX
+      sbom-creation: "release.yml: pnpm dlx @cyclonedx/cyclonedx-pnpm + cyclonedx-py environment"
+dependencies:
+  third-party: true
+  dependencies-listed: true
+  dependencies-file:
+    - "https://github.com/rtynbirf/polymath-os/blob/main/pnpm-lock.yaml"
+    - "https://github.com/rtynbirf/polymath-os/blob/main/scripts/requirements/cyclonedx-py.txt"
+  sbom-file: "https://github.com/rtynbirf/polymath-os/releases"
+  dependencies-ecosystem:
+    - name: npm/pnpm
+      auto-update: true
+      tool: Dependabot + RenovateBot
+    - name: GitHub Actions
+      auto-update: true
+      tool: "Dependabot (SHA-канон: пины полного SHA с верификацией)"
+environment:
+  build-system: "GitHub Actions (release.yml, ci.yml) — pin по полному SHA, persist-credentials: false"
+  restricted-network: false
+  secure-env: "immutable releases, ruleset + branch protection (PR + 2 approvals + required signatures, linear history), enforce_admins=false (легальный admin-bypass для бота-хранителя ритма)"

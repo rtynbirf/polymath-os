@@ -1,7 +1,6 @@
 # Хеш-пиннинг для OpenSSF Scorecard (Pinned-Dependencies).
-# Регенерация: python3 -m pip download <pkg> -d <dir> --python-version 3.10 --platform manylinux2014_x86_64 --implementation cp --abi cp310 --abi abi3 --abi none-any --only-binary=:all:
-# CI: python3 -m pip install --require-hashes -r <этот файл>
-
+# Регенерация (Волна ×13): python3 scripts/... — мультихеши cp310/abi3/none-any + manylinux 2014/2_17/2_28.
+# CI: python3 -m pip install --require-hashes -r <этот файл> (python 3.10, ubuntu-latest).
 arrow==1.4.0 --hash=sha256:749f0769958ebdc79c173ff0b0670d59051a535fa26e8eba02953dc19eb43205
 attrs==26.1.0 --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309
 boolean-py==5.0 --hash=sha256:ef28a70bd43115208441b53a045d1549e2f0ec6e3d08a9d142cbc41c1938e8d9
