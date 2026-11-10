@@ -1,0 +1,56 @@
+name: Agent task contract
+description: Create a bounded, verifiable task for an AI or human agent.
+title: "[AGENT] "
+labels: ["agent-task"]
+body:
+  - type: textarea
+    id: original_request
+    attributes:
+      label: Original human request
+      description: Preserve the request; add context without silently rewriting intent.
+    validations: { required: true }
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal and observable result
+    validations: { required: true }
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals / forbidden changes
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Number each criterion and state how it will be verified.
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes:
+      label: Repository, branch, allowed paths and tools
+    validations: { required: true }
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk tier
+      options:
+        [
+          "R0_READ",
+          "R1_ANALYZE",
+          "R2_WRITE_BRANCH",
+          "R3_EXTERNAL_WRITE",
+          "R4_DESTRUCTIVE_OR_RELEASE",
+        ]
+    validations: { required: true }
+  - type: textarea
+    id: approval
+    attributes:
+      label: Required human approvals
+      description: Merge, release, deploy, permission changes, deletion, external data sharing, etc.
+    validations: { required: true }
+  - type: textarea
+    id: stop
+    attributes:
+      label: Stop conditions and attempt budget
+    validations: { required: true }

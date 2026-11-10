@@ -1,0 +1,20 @@
+{
+  "agent_id": "researcher-primary",
+  "role": "researcher",
+  "provider": "UNKNOWN",
+  "model": "UNKNOWN",
+  "model_version": "UNKNOWN",
+  "identity_confidence": "UNKNOWN",
+  "capabilities": ["repository_read", "source_research", "evidence_capture"],
+  "permissions": {
+    "read_paths": ["**"],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_write": false
+  },
+  "budgets": {
+    "max_attempts": 3,
+    "max_tool_calls": 80,
+    "timeout_seconds": 1800
+  }
+}

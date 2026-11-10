@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rtynbirf:agent-execution:task.schema:1",
+  "title": "Agent Task Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "task_type",
+    "title",
+    "original_request",
+    "goal",
+    "non_goals",
+    "repositories",
+    "acceptance_criteria",
+    "budget",
+    "permissions",
+    "status"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent_task_id": {
+      "type": ["string", "null"]
+    },
+    "task_type": {
+      "enum": ["research", "design", "implementation", "verification", "security", "release"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "original_request": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["owner", "repo", "base_ref", "base_commit", "allowed_paths"],
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "base_ref": {
+            "type": "string"
+          },
+          "base_commit": {
+            "type": "string"
+          },
+          "allowed_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "status"],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "status": {
+            "enum": ["UNVERIFIED", "VERIFIED", "REJECTED"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "statement", "verification", "required"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "verification": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "command", "expected"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["max_repair_iterations", "max_agent_attempts"],
+      "properties": {
+        "max_repair_iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "max_agent_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time_limit_minutes": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "permissions": {
+      "type": "object",
+      "required": [
+        "read_paths",
+        "write_paths",
+        "network",
+        "external_writes",
+        "requires_human_approval"
+      ],
+      "properties": {
+        "read_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "network": {
+          "enum": ["deny_by_default", "allowlist", "approved"]
+        },
+        "external_writes": {
+          "type": "boolean"
+        },
+        "requires_human_approval": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "enum": ["DRAFT", "APPROVED", "IN_PROGRESS", "BLOCKED", "ACCEPTED", "REJECTED", "CANCELLED"]
+    }
+  }
+}

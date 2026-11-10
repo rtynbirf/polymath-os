@@ -1,0 +1,74 @@
+{
+  "task_id": "A1",
+  "parent_task_id": "PORTFOLIO-BASELINE-001",
+  "task_type": "research",
+  "title": "Repository identity and snapshot",
+  "original_request": "Execute the matching task in docs/agent-execution/13_TASK_GRAPH.md; preserve scope and report evidence.",
+  "goal": [
+    "Confirm repository identity, visibility, default branch, active/archive/fork status, latest commit, branches/tags as accessible.",
+    "Inventory root tree and instruction files."
+  ],
+  "non_goals": [
+    "Do not infer private repository coverage from public profile pages.",
+    "Do not edit files or repository settings."
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "UNKNOWN",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": []
+    }
+  ],
+  "constraints": [
+    "Read-only discovery. Do not mutate repository source or GitHub settings.",
+    "Do not expose or reuse credentials previously disclosed in chat.",
+    "Record source, timestamp, commit, and method for every material claim."
+  ],
+  "assumptions": [
+    {
+      "text": "polymath-os is the intended target repository",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "A1-AC-01",
+      "statement": "Repository and base commit are directly recorded",
+      "verification": "Compare metadata with GitHub UI/API and local git state.",
+      "required": true
+    },
+    {
+      "id": "A1-AC-02",
+      "statement": "Root tree and existing agent instructions are inventoried",
+      "verification": "Independent auditor samples paths and checks tree output.",
+      "required": true
+    }
+  ],
+  "tests": [],
+  "budget": {
+    "max_repair_iterations": 0,
+    "max_agent_attempts": 3,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": ["**"],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": [
+      "any write",
+      "any GitHub settings change",
+      "any external data sharing"
+    ]
+  },
+  "outputs": ["markdown report", "machine-readable JSON", "evidence IDs", "known gaps"],
+  "stop_conditions": [
+    "Repository cannot be identified",
+    "Safe read access unavailable",
+    "Credential value encountered",
+    "Scope requires mutation"
+  ],
+  "status": "DRAFT"
+}

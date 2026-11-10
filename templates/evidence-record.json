@@ -1,0 +1,30 @@
+{
+  "evidence_id": "EVD-YYYYMMDD-001",
+  "evidence_type": "source_inspection",
+  "level": "E2_OBSERVED",
+  "claim_ids": ["CLM-001"],
+  "origin": {
+    "uri": "repo://owner/name/path",
+    "commit": "<sha>",
+    "line_range": "L1-L20",
+    "producer": "<author-or-system>",
+    "retrieved_at": "<ISO-8601>"
+  },
+  "acquisition": {
+    "method": "direct_source_inspection",
+    "agent_id": "<agent-id>",
+    "run_id": "<run-id>"
+  },
+  "lineage": {
+    "derived_from": [],
+    "copied_from": [],
+    "independent_of": []
+  },
+  "integrity": {
+    "sha256": "<optional-content-hash>",
+    "signature": "UNKNOWN"
+  },
+  "supports_or_refutes": "supports",
+  "limitations": ["A hash does not establish truth or original authorship"],
+  "status": "RECORDED"
+}

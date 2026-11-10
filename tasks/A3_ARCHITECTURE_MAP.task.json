@@ -1,0 +1,74 @@
+{
+  "task_id": "A3",
+  "parent_task_id": "PORTFOLIO-BASELINE-001",
+  "task_type": "research",
+  "title": "Observed module and architecture map",
+  "original_request": "Execute the matching task in docs/agent-execution/13_TASK_GRAPH.md; preserve scope and report evidence.",
+  "goal": [
+    "Map entrypoints, modules, public interfaces, data/control flow, storage, and runtime boundaries from source.",
+    "Label every relationship OBSERVED, DECLARED, HYPOTHESIS, or UNKNOWN."
+  ],
+  "non_goals": [
+    "Do not propose monorepo or large refactor.",
+    "Do not infer runtime dependencies from repository names alone."
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "UNKNOWN",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": []
+    }
+  ],
+  "constraints": [
+    "Read-only discovery. Do not mutate repository source or GitHub settings.",
+    "Do not expose or reuse credentials previously disclosed in chat.",
+    "Record source, timestamp, commit, and method for every material claim."
+  ],
+  "assumptions": [
+    {
+      "text": "polymath-os is the intended target repository",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "A3-AC-01",
+      "statement": "Every observed edge has code/config evidence",
+      "verification": "Sample each graph edge against import, call, manifest or workflow.",
+      "required": true
+    },
+    {
+      "id": "A3-AC-02",
+      "statement": "Unknown edges are explicitly marked",
+      "verification": "Independent review of map.",
+      "required": true
+    }
+  ],
+  "tests": [],
+  "budget": {
+    "max_repair_iterations": 0,
+    "max_agent_attempts": 3,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": ["**"],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": [
+      "any write",
+      "any GitHub settings change",
+      "any external data sharing"
+    ]
+  },
+  "outputs": ["markdown report", "machine-readable JSON", "evidence IDs", "known gaps"],
+  "stop_conditions": [
+    "Repository cannot be identified",
+    "Safe read access unavailable",
+    "Credential value encountered",
+    "Scope requires mutation"
+  ],
+  "status": "DRAFT"
+}

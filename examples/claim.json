@@ -1,0 +1,9 @@
+{
+  "claim_id": "CLM-EXAMPLE-001",
+  "claim_text": "The observed repository commit contains a file named AGENTS.md.",
+  "scope": "repository snapshot at a specified commit",
+  "status": "OPEN",
+  "evidence_ids": [],
+  "limitations": ["No repository has been inspected yet; this is only a schema example."],
+  "origin_lineage": []
+}

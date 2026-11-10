@@ -170,3 +170,17 @@ Per ADR-0006: каждый пробел DOCUMENTED в `runtime/docs/LIMITATIONS.
 - Never force-push в основную ветку: история роя append-only.
 - Never трогать мембранные файлы (README.md, AGENTS.md, llms.txt) без пломбы в polimat-hub.
 - Never коммитить секреты и токены: токен, попавший в чат, считается скомпрометированным и подлежит отзыву.
+
+---
+
+## Agent Execution Pack (docs/agent-execution/)
+
+Optional operating layer for agent-assisted work, installed as a non-destructive
+overlay (branch `pack/agent-execution-2026-11-10`). The instructions above keep precedence; where the
+pack conflicts with repository reality, reality wins and the conflict becomes an ADR.
+
+- Maturity labels and reading paths: `docs/README.md`, `docs/agent-execution/README.md`
+- Machine-readable contracts (JSON Schema draft 2020-12): `schemas/agent-execution/`
+- Governance crosswalk to 2026 world frameworks (CSA Agentic Trust, Microsoft agent
+  governance, SLSA/attestations, AgentLens): `docs/agent-execution/15_GOVERNANCE_CROSSWALK_2026.md`
+- Package validator (documentation-only, never executes repository code): `python3 tools/validate_pack.py`

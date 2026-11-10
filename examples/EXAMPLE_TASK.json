@@ -1,0 +1,78 @@
+{
+  "task_id": "TASK-20261110-001",
+  "parent_task_id": null,
+  "task_type": "research",
+  "title": "Establish repository truth for polymath-os",
+  "original_request": "Inspect the actual polymath-os repository and produce an evidence-backed baseline before proposing implementation changes.",
+  "goal": [
+    "Record default branch and base commit",
+    "Inventory actual modules, docs, tests and CI",
+    "Identify build/test commands only from repository evidence",
+    "Produce observed/declaration/unknown map"
+  ],
+  "non_goals": [
+    "Do not edit source code",
+    "Do not change branch protection or secrets",
+    "Do not merge or deploy"
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "UNKNOWN",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": []
+    }
+  ],
+  "constraints": [
+    "Read-only task",
+    "No exposed PAT",
+    "No repository source sent to third-party services"
+  ],
+  "assumptions": [
+    {
+      "text": "polymath-os is the root runtime repository",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "statement": "Repository inventory records each discovered path and commit context",
+      "verification": "Independent review of generated inventory against git tree",
+      "required": true
+    },
+    {
+      "id": "AC-02",
+      "statement": "Every test/build command is linked to a source location or existing CI config",
+      "verification": "Review command provenance",
+      "required": true
+    },
+    {
+      "id": "AC-03",
+      "statement": "No source files or remote settings are changed",
+      "verification": "Compare git status and remote state before/after",
+      "required": true
+    }
+  ],
+  "tests": [],
+  "budget": {
+    "max_repair_iterations": 0,
+    "max_agent_attempts": 3,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": ["**"],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": ["any write", "any credential access"]
+  },
+  "outputs": ["repo-map.md", "baseline.json", "unknowns.md", "run-record.json"],
+  "stop_conditions": [
+    "No secure read access",
+    "Credential appears in output",
+    "Repo identity cannot be confirmed"
+  ],
+  "status": "DRAFT"
+}

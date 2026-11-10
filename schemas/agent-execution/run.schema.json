@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rtynbirf:agent-execution:run.schema:1",
+  "title": "Agent Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "task_id",
+    "agent_id",
+    "role",
+    "repository",
+    "base_commit",
+    "commands",
+    "result"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "base_commit": {
+      "type": "string"
+    },
+    "head_commit": {
+      "type": ["string", "null"]
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exit_code"],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": ["integer", "null"]
+          },
+          "stdout_artifact": {
+            "type": "string"
+          },
+          "stderr_artifact": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "result": {
+      "enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "UNKNOWN"]
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "known_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "os": {
+          "type": "string"
+        },
+        "runtime": {
+          "type": "string"
+        },
+        "working_directory": {
+          "type": "string"
+        },
+        "network_policy": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "changes": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diff_stat": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "repair_iteration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    }
+  }
+}

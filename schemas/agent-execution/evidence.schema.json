@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rtynbirf:agent-execution:evidence.schema:1",
+  "title": "Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "evidence_type",
+    "level",
+    "claim_ids",
+    "acquisition",
+    "lineage",
+    "limitations"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_type": {
+      "enum": [
+        "source_inspection",
+        "measurement",
+        "experiment",
+        "test_run",
+        "build_run",
+        "log",
+        "document",
+        "artifact",
+        "independent_reproduction",
+        "other"
+      ]
+    },
+    "level": {
+      "enum": [
+        "E0_UNKNOWN",
+        "E1_DECLARED",
+        "E2_OBSERVED",
+        "E3_EXECUTED",
+        "E4_INDEPENDENTLY_REPRODUCED"
+      ]
+    },
+    "claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "origin": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "line_range": {
+          "type": "string"
+        },
+        "producer": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    "acquisition": {
+      "type": "object",
+      "required": ["method", "agent_id", "run_id"],
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "agent_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "derived_from": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "copied_from": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "independent_of": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string"
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "sha256": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "supports_or_refutes": {
+      "enum": ["supports", "refutes", "contextualizes", "unrelated", "unknown"]
+    }
+  }
+}

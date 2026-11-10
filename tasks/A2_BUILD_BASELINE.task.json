@@ -1,0 +1,80 @@
+{
+  "task_id": "A2",
+  "parent_task_id": "PORTFOLIO-BASELINE-001",
+  "task_type": "research",
+  "title": "Build and test baseline discovery",
+  "original_request": "Execute the matching task in docs/agent-execution/13_TASK_GRAPH.md; preserve scope and report evidence.",
+  "goal": [
+    "Discover build/test/lint/typecheck commands from actual CI, manifests, scripts, and docs.",
+    "Run only safe, project-documented checks after reviewing scripts and dependencies."
+  ],
+  "non_goals": [
+    "Do not install opaque dependencies or run unknown postinstall scripts without review.",
+    "Do not modify source or test oracles."
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "UNKNOWN",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": []
+    }
+  ],
+  "constraints": [
+    "Read-only discovery. Do not mutate repository source or GitHub settings.",
+    "Do not expose or reuse credentials previously disclosed in chat.",
+    "Record source, timestamp, commit, and method for every material claim."
+  ],
+  "assumptions": [
+    {
+      "text": "polymath-os is the intended target repository",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "A2-AC-01",
+      "statement": "Each command is traceable to a repository source",
+      "verification": "Review workflow/manifest/script path and line.",
+      "required": true
+    },
+    {
+      "id": "A2-AC-02",
+      "statement": "Every executed check has environment, command and exit code",
+      "verification": "Inspect run records and logs.",
+      "required": true
+    },
+    {
+      "id": "A2-AC-03",
+      "statement": "Unrun checks remain NOT_RUN",
+      "verification": "Compare discovered commands against execution record.",
+      "required": true
+    }
+  ],
+  "tests": [],
+  "budget": {
+    "max_repair_iterations": 0,
+    "max_agent_attempts": 3,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": ["**"],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": [
+      "any write",
+      "any GitHub settings change",
+      "any external data sharing"
+    ]
+  },
+  "outputs": ["markdown report", "machine-readable JSON", "evidence IDs", "known gaps"],
+  "stop_conditions": [
+    "Repository cannot be identified",
+    "Safe read access unavailable",
+    "Credential value encountered",
+    "Scope requires mutation"
+  ],
+  "status": "DRAFT"
+}

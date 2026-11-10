@@ -1,0 +1,39 @@
+{
+  "run_id": "RUN-YYYYMMDD-001",
+  "task_id": "TASK-YYYYMMDD-001",
+  "agent_id": "agent-implementer-01",
+  "role": "implementer",
+  "model": {
+    "provider": "UNKNOWN",
+    "name": "UNKNOWN",
+    "version": "UNKNOWN"
+  },
+  "repository": "rtynbirf/polymath-os",
+  "base_commit": "<sha>",
+  "head_commit": "<sha-or-null>",
+  "environment": {
+    "os": "<os/version>",
+    "runtime": "<runtime/version>",
+    "working_directory": "<path>",
+    "network_policy": "deny_by_default"
+  },
+  "commands": [
+    {
+      "command": "<exact command>",
+      "exit_code": 0,
+      "started_at": "<ISO-8601>",
+      "ended_at": "<ISO-8601>",
+      "stdout_artifact": "<path>",
+      "stderr_artifact": "<path>"
+    }
+  ],
+  "changes": {
+    "paths": [],
+    "diff_stat": "UNKNOWN"
+  },
+  "attempt": 1,
+  "repair_iteration": 0,
+  "result": "NOT_RUN",
+  "evidence_ids": [],
+  "known_gaps": []
+}
