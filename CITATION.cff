@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "Если используете этот проект, процитируйте его так."
+title: "polymath-os"
+abstract: "Personal sovereign media-OS. 5-layer LFS-style self-bootstrapping repo. SINGULYAR Emergent Intent Runtime v0.6. 35 ADRs. make verify 33/33. 290 tests green."
+authors:
+  - name: "Полимат-Универсум (rtynbirf)"
+repository-code: "https://github.com/rtynbirf/polymath-os"
+license: "MIT"
