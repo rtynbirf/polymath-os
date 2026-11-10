@@ -1,0 +1,23 @@
+name: dependency-review
+
+# Мировой стандарт 2026 (GitHub: dependency review на каждый PR) — хвост §17
+# закрыт Волной ×18. PR-поток соло-флота нулевой, но канон completeness требует,
+# чтобы механизм стоял до первого настоящего PR: блокируем внедрение зависимостей
+# с уязвимостями высокой тяжести и запрещённых лицензий.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dependency Review
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: true

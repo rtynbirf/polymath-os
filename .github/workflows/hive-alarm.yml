@@ -1,0 +1,90 @@
+name: hive-alarm
+
+# ⏰ РОЙ-БУДИЛЬНИК · Волна ×18 (2026-11-10) — созрев в §27-3 реестра рунбука:
+# schedule приватного github-runbook недостоверны (планировщик GitHub молчит:
+# 7 прогонов за всю историю при живом биллинге-диспетче), а минуты приватного
+# Actions исчерпаны (§27.1 — мгновенная смерть до логов). Публичный polymath-os
+# расписан надёжно (16 живых schedule-прогонов) — отсюда ежедневно дёргаем
+# ЖИВОЙ ПУЛЬТ рунбука (hive-control) и честно фиксируем вердикт пробуждения.
+# Закон живой пробы №60 учтён: 204 = приёмка запроса, вердикт = conclusion прогона.
+
+on:
+  schedule:
+    - cron: "40 5 * * *" # через 10 минут после плановых 05:30 UTC рунбука
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hive-alarm
+  cancel-in-progress: false
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Разбудить пульт рунбука (dispatch hive-control)
+        id: dispatch
+        env:
+          HIVE_ALARM_TOKEN: ${{ secrets.HIVE_ALARM_TOKEN }}
+        run: |
+          code=$(curl -s -o /tmp/hive-dispatch.json -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $HIVE_ALARM_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/rtynbirf/github-runbook/actions/workflows/hive-control.yml/dispatches \
+            -d '{"ref":"main"}')
+          echo "http=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" != "204" ]; then
+            echo "::error::dispatch отклонён: HTTP $code"
+            cat /tmp/hive-dispatch.json
+            exit 1
+          fi
+
+      - name: Дождаться прогона и снять честный вердикт (до 6 минут)
+        env:
+          HIVE_ALARM_TOKEN: ${{ secrets.HIVE_ALARM_TOKEN }}
+        run: |
+          run_id=""
+          for i in $(seq 1 12); do
+            sleep 15
+            resp=$(curl -s -H "Authorization: Bearer $HIVE_ALARM_TOKEN" \
+              "https://api.github.com/repos/rtynbirf/github-runbook/actions/workflows/hive-control.yml/runs?event=workflow_dispatch&per_page=1")
+            run_id=$(echo "$resp" | python3 -c "import json,sys; d=json.load(sys.stdin); r=d.get('workflow_runs') or []; print(r[0]['id'] if r else '')")
+            [ -n "$run_id" ] && break
+          done
+
+          verdict="🔴 ДИСПАТЧ ПРИНЯТ, ПРОГОН НЕ ЗАВЁЛСЯ (планировщик/квота)"
+          if [ -n "$run_id" ]; then
+            echo "прогон: $run_id — жду завершения"
+            for i in $(seq 1 12); do
+              sleep 15
+              st=$(curl -s -H "Authorization: Bearer $HIVE_ALARM_TOKEN" \
+                "https://api.github.com/repos/rtynbirf/github-runbook/actions/runs/$run_id")
+              status=$(echo "$st" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',''))")
+              [ "$status" = "completed" ] && break
+            done
+            concl=$(echo "$st" | python3 -c "import json,sys; print(json.load(sys.stdin).get('conclusion',''))")
+            if [ "$concl" = "success" ]; then
+              verdict="🟢 ПУЛЬТ ЖИВ — hive-control завершён успехом"
+            elif [ "$status" = "completed" ]; then
+              verdict="🟡 ПРОГОН УМЕР (${concl}) — известное состояние §27.1: минуты приватного Actions исчерпаны; до решения Хозяина или сброса квоты"
+            else
+              verdict="🟡 СТАРТОВАЛ, НЕ ДОЖДАЛИСЬ ЗА 3 МИН (${status})"
+            fi
+          fi
+
+          {
+            echo "### ⏰ Рой-будильник · вердикт"
+            echo ""
+            echo "- dispatch: HTTP 204 (принят — иначе шаг dispatch уже упал бы)"
+            echo "- run: ${run_id:-—}"
+            echo "- вердикт: $verdict"
+            echo ""
+            echo "_Честный жёлтый — не поломка будильника: будильник свою работу сделал._"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$verdict"
+          case "$verdict" in
+            🔴*) exit 1 ;;
+            *) exit 0 ;;
+          esac
