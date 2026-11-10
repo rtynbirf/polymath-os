@@ -34,7 +34,14 @@ body:
     id: risk
     attributes:
       label: Risk tier
-      options: ["R0_READ", "R1_ANALYZE", "R2_WRITE_BRANCH", "R3_EXTERNAL_WRITE", "R4_DESTRUCTIVE_OR_RELEASE"]
+      options:
+        [
+          "R0_READ",
+          "R1_ANALYZE",
+          "R2_WRITE_BRANCH",
+          "R3_EXTERNAL_WRITE",
+          "R4_DESTRUCTIVE_OR_RELEASE",
+        ]
     validations: { required: true }
   - type: textarea
     id: approval

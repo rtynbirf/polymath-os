@@ -53,9 +53,7 @@
     "time_limit_minutes": null
   },
   "permissions": {
-    "read_paths": [
-      "**"
-    ],
+    "read_paths": ["**"],
     "write_paths": [],
     "network": "deny_by_default",
     "external_writes": false,
@@ -65,12 +63,7 @@
       "any external data sharing"
     ]
   },
-  "outputs": [
-    "markdown report",
-    "machine-readable JSON",
-    "evidence IDs",
-    "known gaps"
-  ],
+  "outputs": ["markdown report", "machine-readable JSON", "evidence IDs", "known gaps"],
   "stop_conditions": [
     "Repository cannot be identified",
     "Safe read access unavailable",

@@ -34,28 +34,19 @@
       "type": "string"
     },
     "head_commit": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "commands": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "command",
-          "exit_code"
-        ],
+        "required": ["command", "exit_code"],
         "properties": {
           "command": {
             "type": "string"
           },
           "exit_code": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": ["integer", "null"]
           },
           "stdout_artifact": {
             "type": "string"
@@ -68,13 +59,7 @@
       }
     },
     "result": {
-      "enum": [
-        "PASS",
-        "FAIL",
-        "BLOCKED",
-        "NOT_RUN",
-        "UNKNOWN"
-      ]
+      "enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "UNKNOWN"]
     },
     "evidence_ids": {
       "type": "array",

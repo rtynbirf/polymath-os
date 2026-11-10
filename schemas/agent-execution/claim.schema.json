@@ -4,13 +4,7 @@
   "title": "Claim",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "claim_id",
-    "claim_text",
-    "scope",
-    "status",
-    "evidence_ids"
-  ],
+  "required": ["claim_id", "claim_text", "scope", "status", "evidence_ids"],
   "properties": {
     "claim_id": {
       "type": "string"
@@ -22,14 +16,7 @@
       "type": "string"
     },
     "status": {
-      "enum": [
-        "OPEN",
-        "SUPPORTED",
-        "REFUTED",
-        "QUALIFIED",
-        "CONFLICTED",
-        "UNKNOWN"
-      ]
+      "enum": ["OPEN", "SUPPORTED", "REFUTED", "QUALIFIED", "CONFLICTED", "UNKNOWN"]
     },
     "evidence_ids": {
       "type": "array",

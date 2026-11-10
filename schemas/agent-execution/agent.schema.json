@@ -4,12 +4,7 @@
   "title": "Agent Manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "agent_id",
-    "role",
-    "capabilities",
-    "permissions"
-  ],
+  "required": ["agent_id", "role", "capabilities", "permissions"],
   "properties": {
     "agent_id": {
       "type": "string",
@@ -38,11 +33,7 @@
       "type": "string"
     },
     "identity_confidence": {
-      "enum": [
-        "VERIFIED",
-        "DECLARED",
-        "UNKNOWN"
-      ]
+      "enum": ["VERIFIED", "DECLARED", "UNKNOWN"]
     },
     "capabilities": {
       "type": "array",
@@ -53,11 +44,7 @@
     },
     "permissions": {
       "type": "object",
-      "required": [
-        "read_paths",
-        "write_paths",
-        "network"
-      ],
+      "required": ["read_paths", "write_paths", "network"],
       "properties": {
         "read_paths": {
           "type": "array",
@@ -72,11 +59,7 @@
           }
         },
         "network": {
-          "enum": [
-            "deny_by_default",
-            "allowlist",
-            "unrestricted_with_approval"
-          ]
+          "enum": ["deny_by_default", "allowlist", "unrestricted_with_approval"]
         },
         "external_write": {
           "type": "boolean",

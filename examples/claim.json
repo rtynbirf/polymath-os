@@ -4,8 +4,6 @@
   "scope": "repository snapshot at a specified commit",
   "status": "OPEN",
   "evidence_ids": [],
-  "limitations": [
-    "No repository has been inspected yet; this is only a schema example."
-  ],
+  "limitations": ["No repository has been inspected yet; this is only a schema example."],
   "origin_lineage": []
 }

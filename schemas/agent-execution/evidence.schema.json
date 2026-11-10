@@ -71,11 +71,7 @@
     },
     "acquisition": {
       "type": "object",
-      "required": [
-        "method",
-        "agent_id",
-        "run_id"
-      ],
+      "required": ["method", "agent_id", "run_id"],
       "properties": {
         "method": {
           "type": "string"
@@ -135,13 +131,7 @@
       "additionalProperties": false
     },
     "supports_or_refutes": {
-      "enum": [
-        "supports",
-        "refutes",
-        "contextualizes",
-        "unrelated",
-        "unknown"
-      ]
+      "enum": ["supports", "refutes", "contextualizes", "unrelated", "unknown"]
     }
   }
 }

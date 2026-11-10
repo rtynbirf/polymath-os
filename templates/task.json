@@ -4,26 +4,18 @@
   "task_type": "implementation",
   "title": "Replace with concise task title",
   "original_request": "Paste or link the original human request without semantic rewriting.",
-  "goal": [
-    "Observable result"
-  ],
-  "non_goals": [
-    "Explicitly excluded work"
-  ],
+  "goal": ["Observable result"],
+  "non_goals": ["Explicitly excluded work"],
   "repositories": [
     {
       "owner": "rtynbirf",
       "repo": "polymath-os",
       "base_ref": "main",
       "base_commit": "UNKNOWN",
-      "allowed_paths": [
-        "docs/agent-execution/**"
-      ]
+      "allowed_paths": ["docs/agent-execution/**"]
     }
   ],
-  "constraints": [
-    "Preserve existing project rules"
-  ],
+  "constraints": ["Preserve existing project rules"],
   "assumptions": [
     {
       "text": "Target repository is polymath-os",
@@ -52,28 +44,13 @@
     "time_limit_minutes": null
   },
   "permissions": {
-    "read_paths": [
-      "**"
-    ],
-    "write_paths": [
-      "docs/agent-execution/**"
-    ],
+    "read_paths": ["**"],
+    "write_paths": ["docs/agent-execution/**"],
     "network": "deny_by_default",
     "external_writes": false,
-    "requires_human_approval": [
-      "merge",
-      "release",
-      "deploy",
-      "delete",
-      "permission_change"
-    ]
+    "requires_human_approval": ["merge", "release", "deploy", "delete", "permission_change"]
   },
-  "outputs": [
-    "diff",
-    "run-record",
-    "evidence-register",
-    "review-report"
-  ],
+  "outputs": ["diff", "run-record", "evidence-register", "review-report"],
   "stop_conditions": [
     "Credential exposure",
     "Acceptance oracle change",

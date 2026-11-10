@@ -62,23 +62,13 @@
     "time_limit_minutes": null
   },
   "permissions": {
-    "read_paths": [
-      "**"
-    ],
+    "read_paths": ["**"],
     "write_paths": [],
     "network": "deny_by_default",
     "external_writes": false,
-    "requires_human_approval": [
-      "any write",
-      "any credential access"
-    ]
+    "requires_human_approval": ["any write", "any credential access"]
   },
-  "outputs": [
-    "repo-map.md",
-    "baseline.json",
-    "unknowns.md",
-    "run-record.json"
-  ],
+  "outputs": ["repo-map.md", "baseline.json", "unknowns.md", "run-record.json"],
   "stop_conditions": [
     "No secure read access",
     "Credential appears in output",

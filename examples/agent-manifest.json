@@ -5,15 +5,9 @@
   "model": "UNKNOWN",
   "model_version": "UNKNOWN",
   "identity_confidence": "UNKNOWN",
-  "capabilities": [
-    "repository_read",
-    "source_research",
-    "evidence_capture"
-  ],
+  "capabilities": ["repository_read", "source_research", "evidence_capture"],
   "permissions": {
-    "read_paths": [
-      "**"
-    ],
+    "read_paths": ["**"],
     "write_paths": [],
     "network": "deny_by_default",
     "external_write": false

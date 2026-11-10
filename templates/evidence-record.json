@@ -2,9 +2,7 @@
   "evidence_id": "EVD-YYYYMMDD-001",
   "evidence_type": "source_inspection",
   "level": "E2_OBSERVED",
-  "claim_ids": [
-    "CLM-001"
-  ],
+  "claim_ids": ["CLM-001"],
   "origin": {
     "uri": "repo://owner/name/path",
     "commit": "<sha>",
@@ -27,8 +25,6 @@
     "signature": "UNKNOWN"
   },
   "supports_or_refutes": "supports",
-  "limitations": [
-    "A hash does not establish truth or original authorship"
-  ],
+  "limitations": ["A hash does not establish truth or original authorship"],
   "status": "RECORDED"
 }
