@@ -24,6 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: no-CDN gate (П-60: benefactors banned from shipped code)
+        run: |
+          # Канон П-60: CDN-благодетели (jsdelivr/unpkg/cdnjs) запрещены в отгружаемом коде (HTML/JS/CSS/MJS).
+          # Задокументированные инструменты/манифесты роя (scripts/, docs/, .github/) — вне запрета.
+          hits=$(grep -rInE 'https://(cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com)'                 --include='*.html' --include='*.js' --include='*.mjs' --include='*.css'                 apps/ examples/ garden/ 2>/dev/null | grep -v 'vendored' || true)
+          if [ -n "$hits" ]; then
+            echo "::error::CDN-ссылки в отгружаемом коде (П-60):"; echo "$hits"; exit 1
+          else
+            echo "no-CDN gate: 0 нарушений"
+          fi
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
