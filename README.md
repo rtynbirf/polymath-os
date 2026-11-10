@@ -24,7 +24,7 @@
 
 ## 🛡 Living Shield — живой щит самоверификации
 
-Этот блок пересчитывается workflow [ЖИВОЙ ЩИТ](https://github.com/rtynbirf/polymath-os/actions/runs/42780182926) — не статичный бейдж.
+Этот блок пересчитывается workflow [ЖИВОЙ ЩИТ](https://github.com/rtynbirf/polymath-os/actions/workflows/living-shield.yml) — не статичный бейдж.
 
 | Источник | Живое значение |
 | --- | --- |
@@ -34,7 +34,7 @@
 | OSPS Baseline v2026.08.28 (self-assessed) | L1 22✅/2⚠️/0❌ · L2 19✅/0⚠️/0❌ · L3 9✅/9⚠️/1❌ — [матрица](./OSPS-BASELINE-MATRIX.md) |
 | TTL мандатов (П-74) | 🟡 29 дн. до 2026-12-09 — реестр П-74 (приватный) |
 
-_Замер: 2026-11-10 08:07 UTC · ручная правка между маркерами перезаписывается._
+_Замер: 2026-11-10 08:11 UTC · [прогон](https://github.com/rtynbirf/polymath-os/actions/workflows/living-shield.yml) · ручная правка между маркерами перезаписывается._
 <!-- LIVING-SHIELD:END -->
 
 ---

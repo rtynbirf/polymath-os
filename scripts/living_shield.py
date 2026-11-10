@@ -166,12 +166,16 @@ def fetch_ttl(token):
         return None
 
 
-def render(repo, shield, rel, osps, ttl, run_url, ts):
-    """Собирает блок щита; недоступные источники = честное n/a."""
+def render(repo, shield, rel, osps, ttl, workflow_url, run_url, ts):
+    """Собирает блок щита; недоступные источники = честное n/a.
+
+    Шапка — СТАТИЧНАЯ (ссылка на workflow, не на прогон), ссылка на
+    конкретный прогон живёт в подвале-замере — иначе каждый прогон рождает
+    холостую ревизию (косяк ×17 первого включения, починен в ту же волну).
+    """
     lines = [START, "", "## 🛡 Living Shield — живой щит самоверификации", ""]
     lines.append(
-        "Этот блок пересчитывается workflow [ЖИВОЙ ЩИТ](%s) — не статичный бейдж."
-        % run_url
+        "Этот блок пересчитывается workflow [ЖИВОЙ ЩИТ](%s) — не статичный бейдж." % workflow_url
     )
     lines.append("")
     lines.append("| Источник | Живое значение |")
@@ -217,7 +221,10 @@ def render(repo, shield, rel, osps, ttl, run_url, ts):
     else:
         lines.append("| TTL мандатов (П-74) | реестр приватен · n/a |")
     lines.append("")
-    lines.append("_Замер: %s · ручная правка между маркерами перезаписывается._" % ts)
+    lines.append(
+        "_Замер: %s · [прогон](%s) · ручная правка между маркерами перезаписывается._"
+        % (ts, run_url)
+    )
     lines.append(END)
     return "\n".join(lines)
 
@@ -245,10 +252,11 @@ def main():
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
     )
 
-    run_url = "%s/%s/actions/workflows/living-shield.yml" % (
+    workflow_url = "%s/%s/actions/workflows/living-shield.yml" % (
         os.environ.get("GITHUB_SERVER_URL", "https://github.com"),
         repo,
     )
+    run_url = workflow_url
     if os.environ.get("GITHUB_RUN_ID"):
         run_url = "%s/%s/actions/runs/%s" % (
             os.environ.get("GITHUB_SERVER_URL", "https://github.com"),
@@ -266,7 +274,7 @@ def main():
         % (rel["tag"] if rel else "n/a", rel["assets"] if rel else "-", rel.get("sbom") if rel else "-")
     )
     osps = fetch_osps(root)
-    print("  · OSPS: %s" % ("v" + osps["ver"] if osps else "n/a"))
+    print("  · OSPS: %s" % (osps["ver"] if osps else "n/a"))
     ttl = fetch_ttl(shield_token)
     print("  · TTL мандатов: %s" % ("%s дн." % ttl["days"] if ttl else "реестр приватен"))
 
@@ -274,7 +282,7 @@ def main():
         print("!! Ни один источник не ответил — щит не выдаёт ложь, падает честно")
         return 1
 
-    block = render(repo, shield, rel, osps, ttl, run_url, ts)
+    block = render(repo, shield, rel, osps, ttl, workflow_url, run_url, ts)
 
     readme_path = os.path.join(root, "README.md")
     with open(readme_path, encoding="utf-8") as fh:
