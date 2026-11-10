@@ -1,0 +1,77 @@
+name: "🛡 ЖИВОЙ ЩИТ — README самоверифицируется"
+
+# Волна ×17: мир вешает статичные бейджи — polymath-os пересчитывает свой щит.
+# scripts/living_shield.py собирает живые показания из независимых источников
+# (api.scorecard.dev, релиз + SBOM-парсинг, OSPS-матрица, TTL мандатов П-74)
+# и переписывает блок LIVING-SHIELD в README.md между маркерами.
+# Коммит — только при реальном изменении показаний (метка замера не течёт:
+# ритм без шума, как у пульса). Канон пуша — как у пульса: админ-PAT
+# (bypass ruleset main-scorecard-protection, bypass_mode=always для admin),
+# SSH-подпись PULSE_SIGNING_KEY (ruleset требует required_signatures),
+# persist-credentials: false, [skip ci] на авто-коммитах щита.
+
+on:
+  schedule:
+    - cron: "17 3 * * 0" # воскресенье 03:17 UTC — свободный слот: пульс 04:17, рой 05:30+
+  workflow_dispatch: # ручной пересчёт: gh workflow run living-shield.yml
+
+permissions: read-all
+
+concurrency:
+  group: living-shield
+  cancel-in-progress: false
+
+jobs:
+  shield:
+    permissions:
+      contents: write # коммит обновлённого щита (сам пуш — через админ-PAT)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Щит пересчитан живьём (любой источник может упасть — щит честен)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIVING_SHIELD_TOKEN: ${{ secrets.LIVING_SHIELD_TOKEN }} # необязателен: без него TTL = «реестр приватен»
+        run: python3 scripts/living_shield.py
+
+      - name: Коммит щита — только при изменении показаний
+        env:
+          PULSE_PAT: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
+          PULSE_SIGNING_KEY: ${{ secrets.PULSE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet README.md; then
+            echo "Показания щита без изменений — коммита нет (ритм без шума)"
+            exit 0
+          fi
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+          git config user.name "rtynbirf"
+          git config user.email "rtynbirf@users.noreply.github.com"
+          # SSH-подпись: ruleset main-scorecard-protection требует required_signatures;
+          # ключ пульса зарегистрирован на аккаунте владельца → коммит Verified
+          if [ -n "$PULSE_SIGNING_KEY" ]; then
+            KEY_FILE="$(mktemp)"
+            install -m 600 /dev/null "$KEY_FILE"
+            printf '%s\n' "$PULSE_SIGNING_KEY" > "$KEY_FILE"
+            ssh-keygen -y -f "$KEY_FILE" > "$KEY_FILE.pub"
+            git config gpg.format ssh
+            git config user.signingkey "$KEY_FILE.pub"
+            git config commit.gpgsign true
+          fi
+          if [ -n "$PULSE_PAT" ]; then
+            git remote set-url origin "https://x-access-token:${PULSE_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+          fi
+          git add README.md
+          git commit -s -m "щит: живой пересчёт показаний (scorecard/релиз/SBOM/OSPS/TTL) [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" 2>/dev/null || true
+          out="$(git push origin HEAD 2>&1)" || rc=$?
+          printf '%s\n' "$out" | sed -E 's#(https?://)[^/@[:space:]]+:[^@[:space:]]+@#\1***@#g'
+          exit "${rc:-0}"
