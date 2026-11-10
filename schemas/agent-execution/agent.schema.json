@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rtynbirf:agent-execution:agent.schema:1",
+  "title": "Agent Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "role",
+    "capabilities",
+    "permissions"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "enum": [
+        "orchestrator",
+        "researcher",
+        "architect",
+        "implementer",
+        "test_engineer",
+        "red_team",
+        "independent_auditor",
+        "integrator",
+        "release_steward"
+      ]
+    },
+    "provider": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "identity_confidence": {
+      "enum": [
+        "VERIFIED",
+        "DECLARED",
+        "UNKNOWN"
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "permissions": {
+      "type": "object",
+      "required": [
+        "read_paths",
+        "write_paths",
+        "network"
+      ],
+      "properties": {
+        "read_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "network": {
+          "enum": [
+            "deny_by_default",
+            "allowlist",
+            "unrestricted_with_approval"
+          ]
+        },
+        "external_write": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_tool_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

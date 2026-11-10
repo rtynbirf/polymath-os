@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added (agent execution pack, 2026-11-10)
+
+- **docs(agent-execution)**: пакет управления исполнением агентов v0.1.0 —
+  operating contract (`docs/agent-execution` 00–15, включая
+  `15_GOVERNANCE_CROSSWALK_2026.md` — маппинг на рамки 2026: CSA Agentic Trust,
+  Microsoft agent governance, SLSA/attestations, AgentLens), машинные контракты
+  JSON Schema draft 2020-12 (`schemas/agent-execution`: task/agent/run/claim/
+  evidence), шаблоны, задачи первой волны A1–A4, валидатор пакета
+  `tools/validate_pack.py`, `MANIFEST.sha256` (42 файла), форма задачи для
+  GitHub Issues. Неразрушающий оверлей: `AGENTS.md` дополнен секцией-указателем,
+  существующие правила не тронуты; PR-шаблон репо не перезаписывался
+  (остаётся верхнерегистровый вариант). Docs-only: runtime не затронут.
+
+
 ### Security (волна 8.1, 2026-11-08)
 
 - **docs(sec)**: замер 9 зафиксирован — Scorecard **7.4/10**, Signed-Releases

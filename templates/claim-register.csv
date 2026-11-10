@@ -1,0 +1,2 @@
+claim_id,claim_text,scope,source_artifact,origin_agent_or_system,acquisition_method,origin_lineage,evidence_ids,status,confidence_or_uncertainty,limitations
+CLM-001,"Example claim",repository@commit,path/to/file,git repository,source inspection,original source,EVD-001,OPEN,unknown,Replace with verified details
