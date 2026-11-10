@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rtynbirf:agent-execution:claim.schema:1",
+  "title": "Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "claim_text",
+    "scope",
+    "status",
+    "evidence_ids"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string"
+    },
+    "claim_text": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "OPEN",
+        "SUPPORTED",
+        "REFUTED",
+        "QUALIFIED",
+        "CONFLICTED",
+        "UNKNOWN"
+      ]
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "origin_lineage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

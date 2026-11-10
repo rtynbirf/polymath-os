@@ -1,0 +1,88 @@
+{
+  "task_id": "A4",
+  "parent_task_id": "PORTFOLIO-BASELINE-001",
+  "task_type": "security",
+  "title": "Security and supply-chain posture snapshot",
+  "original_request": "Execute the matching task in docs/agent-execution/13_TASK_GRAPH.md; preserve scope and report evidence.",
+  "goal": [
+    "Inspect permissions, CI workflows, dependency manifests, lockfiles, secret-scanning configuration, release process and network exposure.",
+    "Report secret exposure indicators without printing values."
+  ],
+  "non_goals": [
+    "Do not attempt unauthorized exploitation.",
+    "Do not rotate, delete, or edit credentials/settings.",
+    "Do not print secret values or credential fragments."
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "UNKNOWN",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": []
+    }
+  ],
+  "constraints": [
+    "Read-only discovery. Do not mutate repository source or GitHub settings.",
+    "Do not expose or reuse credentials previously disclosed in chat.",
+    "Record source, timestamp, commit, and method for every material claim."
+  ],
+  "assumptions": [
+    {
+      "text": "polymath-os is the intended target repository",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "A4-AC-01",
+      "statement": "Security findings include path/line/evidence and severity rationale",
+      "verification": "Independent reviewer reproduces safely.",
+      "required": true
+    },
+    {
+      "id": "A4-AC-02",
+      "statement": "Potential secrets are redacted and never copied into report",
+      "verification": "Scan output review.",
+      "required": true
+    },
+    {
+      "id": "A4-AC-03",
+      "statement": "Workflow permissions and mutable dependencies are inventoried",
+      "verification": "Review workflow files and lock state.",
+      "required": true
+    }
+  ],
+  "tests": [],
+  "budget": {
+    "max_repair_iterations": 0,
+    "max_agent_attempts": 3,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": [
+      "**"
+    ],
+    "write_paths": [],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": [
+      "any write",
+      "any GitHub settings change",
+      "any external data sharing"
+    ]
+  },
+  "outputs": [
+    "markdown report",
+    "machine-readable JSON",
+    "evidence IDs",
+    "known gaps"
+  ],
+  "stop_conditions": [
+    "Repository cannot be identified",
+    "Safe read access unavailable",
+    "Credential value encountered",
+    "Scope requires mutation"
+  ],
+  "status": "DRAFT"
+}

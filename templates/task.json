@@ -1,0 +1,83 @@
+{
+  "task_id": "TASK-YYYYMMDD-001",
+  "parent_task_id": null,
+  "task_type": "implementation",
+  "title": "Replace with concise task title",
+  "original_request": "Paste or link the original human request without semantic rewriting.",
+  "goal": [
+    "Observable result"
+  ],
+  "non_goals": [
+    "Explicitly excluded work"
+  ],
+  "repositories": [
+    {
+      "owner": "rtynbirf",
+      "repo": "polymath-os",
+      "base_ref": "main",
+      "base_commit": "UNKNOWN",
+      "allowed_paths": [
+        "docs/agent-execution/**"
+      ]
+    }
+  ],
+  "constraints": [
+    "Preserve existing project rules"
+  ],
+  "assumptions": [
+    {
+      "text": "Target repository is polymath-os",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "statement": "A measurable criterion",
+      "verification": "Named test or inspection procedure",
+      "required": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "T-01",
+      "kind": "schema",
+      "command": "python tools/validate_pack.py",
+      "expected": "exit 0"
+    }
+  ],
+  "budget": {
+    "max_repair_iterations": 2,
+    "max_agent_attempts": 6,
+    "time_limit_minutes": null
+  },
+  "permissions": {
+    "read_paths": [
+      "**"
+    ],
+    "write_paths": [
+      "docs/agent-execution/**"
+    ],
+    "network": "deny_by_default",
+    "external_writes": false,
+    "requires_human_approval": [
+      "merge",
+      "release",
+      "deploy",
+      "delete",
+      "permission_change"
+    ]
+  },
+  "outputs": [
+    "diff",
+    "run-record",
+    "evidence-register",
+    "review-report"
+  ],
+  "stop_conditions": [
+    "Credential exposure",
+    "Acceptance oracle change",
+    "Two failed repair iterations"
+  ],
+  "status": "DRAFT"
+}
