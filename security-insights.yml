@@ -1,101 +1,146 @@
-# OpenSSF Security Insights (https://security-insights.openssf.org)
-# Машиночитаемый отчёт о безопасности проекта — заполняет разрыв между
-# текстовым SECURITY.md и SBOM. Волна ×13, 2026-11-10. Заполняется честно,
-# по живым фактам репозитория (без украшений).
+# OpenSSF Security Insights — https://security-insights.openssf.org
+# Машиночитаемый отчёт о безопасности проекта. Волна ×13 (2026-11-10) создала
+# файл по v1-структуре с заявкой schema 2.0.0; Волна ×18 (2026-11-10) переписала
+# его по живой схеме v2.2.0 (текущий стандарт от 31.01.2026) с ревизией фактов
+# живой пробой. Каждое утверждение = файл репо или живой API-факт. Проверка
+# схемы — CI: .github/workflows/security-insights.yml (CUE v0.17.1).
 header:
-  schema-version: 2.0.0
+  schema-version: 2.2.0
+  last-reviewed: "2026-11-10"
   last-updated: "2026-11-10"
-  project-name: polymath-os
-  project-release: v3.25.0
-  project-website: "https://github.com/rtynbirf/polymath-os"
-  project-repository: "https://github.com/rtynbirf/polymath-os"
-  distribution-artifact: "https://github.com/rtynbirf/polymath-os/releases"
-  license: "https://github.com/rtynbirf/polymath-os/blob/main/LICENSE"
-  changelog: "https://github.com/rtynbirf/polymath-os/blob/main/CHANGELOG.md"
-  commit-hash: "cf1fa90"
-project-lifecycle:
+  url: https://raw.githubusercontent.com/rtynbirf/polymath-os/main/security-insights.yml
+  comment: |
+    Ревизия ×18: утверждение файла ×13 «Immutable releases + release attestations»
+    живой пробой НЕ подтвердилось (releases/latest → immutable: false). Волна ×18
+    включила неизменяемость релизов живым PATCH (документированного REST-поля
+    у репозитория нет — включено на каждый релиз) и переписала файл по правде.
+repository:
+  url: https://github.com/rtynbirf/polymath-os
   status: active
-  roadmap: "https://github.com/rtynbirf/polymath-os/blob/main/ROADMAP.md"
-contribution-policy:
-  accepts-pull-requests: true
-  accepting-automated-pull-requests: true
-  contributing-guide: "https://github.com/rtynbirf/polymath-os/blob/main/CONTRIBUTING.md"
-  dco-signing: true
-  signed-commits: true
-  code-of-conduct: "https://github.com/rtynbirf/polymath-os/blob/main/CODE_OF_CONDUCT.md"
-security-policy:
-  security-policy-file: "https://github.com/rtynbirf/polymath-os/blob/main/SECURITY.md"
-  security-team: "https://github.com/rtynbirf/polymath-os/security/advisories"
-  contact:
-    name: "Private vulnerability reporting (GitHub)"
-    method: "Security tab → Report a vulnerability (PVR включён через API)"
-    frequency: "Проверка отчётов — при каждой волне (мультиагентный ритм, ежедневно)"
-  vulnerability-reporting:
-    reports-vulnerabilities: true
-    private-vulnerability-reporting: true
-    bug-bounty-available: false
-    bug-bounty-url: ""
-security-testing:
-  sast:
-    - tool-name: CodeQL
-      tool-type: SAST
-      tool-url: "https://github.com/rtynbirf/polymath-os/security/code-scanning"
-      tool-rulesets: ["security-extended"]
-      integration:
-        ad-hoc: false
-        ci: true
-        before-release: true
-    - tool-name: gitleaks
-      tool-type: SAST
-      integration:
-        ad-hoc: false
-        ci: true
-  fuzzing: []
-  security-features:
-    - tool-name: OpenSSF Scorecard
-      tool-type: "scorecard"
-      tool-url: "https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os"
-      integration:
-        ci: true
-        before-release: true
-    - tool-name: OpenSSF CII Best Practices
-      tool-type: "badge"
-      tool-url: "https://www.bestpractices.dev/projects/16428"
-      integration:
-        before-release: true
-    - tool-name: GitHub Artifact Attestations (SLSA Build L3)
-      tool-type: "attestation"
-      integration:
-        ci: true
-        before-release: true
-    - tool-name: cosign keyless (Sigstore)
-      tool-type: "signing"
-      integration:
-        before-release: true
-    - tool-name: Immutable releases + release attestations
-      tool-type: "release-integrity"
-      integration:
-        before-release: true
-security-artifacts:
-  sbom:
-    - sbom-file: "https://github.com/rtynbirf/polymath-os/releases (sbom.cyclonedx.json, sbom.python.cyclonedx.json)"
-      sbom-format: CycloneDX
-      sbom-creation: "release.yml: pnpm dlx @cyclonedx/cyclonedx-pnpm + cyclonedx-py environment"
-dependencies:
-  third-party: true
-  dependencies-listed: true
-  dependencies-file:
-    - "https://github.com/rtynbirf/polymath-os/blob/main/pnpm-lock.yaml"
-    - "https://github.com/rtynbirf/polymath-os/blob/main/scripts/requirements/cyclonedx-py.txt"
-  sbom-file: "https://github.com/rtynbirf/polymath-os/releases"
-  dependencies-ecosystem:
-    - name: npm/pnpm
-      auto-update: true
-      tool: Dependabot + RenovateBot
-    - name: GitHub Actions
-      auto-update: true
-      tool: "Dependabot (SHA-канон: пины полного SHA с верификацией)"
-environment:
-  build-system: "GitHub Actions (release.yml, ci.yml) — pin по полному SHA, persist-credentials: false"
-  restricted-network: false
-  secure-env: "immutable releases, ruleset + branch protection (PR + 2 approvals + required signatures, linear history), enforce_admins=false (легальный admin-bypass для бота-хранителя ритма)"
+  bug-fixes-only: false
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  core-team:
+    - name: Полимат-Универсум (rtynbirf)
+      affiliation: соло-флот с мультиагентным роем
+      primary: true
+  documentation:
+    contributing-guide: https://github.com/rtynbirf/polymath-os/blob/main/CONTRIBUTING.md
+    security-policy: https://github.com/rtynbirf/polymath-os/blob/main/SECURITY.md
+    governance: https://github.com/rtynbirf/polymath-os/blob/main/GOVERNANCE.md
+  license:
+    url: https://github.com/rtynbirf/polymath-os/blob/main/LICENSE
+    expression: MIT
+  release:
+    automated-pipeline: true
+    changelog: https://github.com/rtynbirf/polymath-os/blob/main/CHANGELOG.md
+    distribution-points:
+      - uri: https://github.com/rtynbirf/polymath-os/releases
+        comment: GitHub Releases; релизы v3.25.0+ переведены в immutable живым PATCH (×18)
+    attestations:
+      - name: Release SBOM (CycloneDX 1.6)
+        predicate-uri: https://cyclonedx.org/bom
+        location: https://github.com/rtynbirf/polymath-os/releases/download/v{version}/sbom.cyclonedx.json
+        comment: release.yml публикует SBOM каждого релиза; {version} заменить на тег
+      - name: Build provenance (SLSA v1)
+        predicate-uri: https://slsa.dev/provenance/v1
+        location: https://github.com/rtynbirf/polymath-os/attestations
+        comment: GitHub Artifact Attestations; проверка gh attestation verify
+  security:
+    assessments:
+      self:
+        comment: |
+          Самооценка по OSPS Baseline v2026.08.28 — 64 контроля, каждый с доказательством
+          (файл репо / живой API-ответ / зелёный прогон): L1 22✅/2⚠️ · L2 19✅ · L3 9✅/9⚠️/1❌.
+          ❌ = QA-07.01 апрув второго человека — честный соло-потолок, не код.
+        evidence: https://github.com/rtynbirf/polymath-os/blob/main/OSPS-BASELINE-MATRIX.md
+        date: "2026-11-10"
+      third-party:
+        - comment: OpenSSF Scorecard — живой замер api.scorecard.dev 7.5/10 (Волна ×17)
+          evidence: https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os
+          date: "2026-11-10"
+    tools:
+      - name: CodeQL
+        type: SAST
+        rulesets: ["security-extended"]
+        integration:
+          adhoc: false
+          ci: true
+          release: true
+        results:
+          ci:
+            name: CodeQL code scanning
+            predicate-uri: https://intoto.SAST
+            location: https://github.com/rtynbirf/polymath-os/security/code-scanning
+      - name: gitleaks
+        type: secret
+        rulesets: ["default"]
+        integration:
+          adhoc: false
+          ci: true
+          release: false
+        results:
+          ci:
+            name: gitleaks CI-джоба
+            predicate-uri: https://intoto.SECRET
+            location: https://github.com/rtynbirf/polymath-os/blob/main/.gitleaks.toml
+      - name: Dependabot
+        type: SCA
+        rulesets: ["default"]
+        integration:
+          adhoc: true
+          ci: true
+          release: false
+        results:
+          adhoc:
+            name: Dependabot alerts
+            predicate-uri: https://intoto.SCA
+            location: https://github.com/rtynbirf/polymath-os/security/dependabot
+      - name: OpenSSF Scorecard
+        type: other
+        rulesets: ["default"]
+        integration:
+          adhoc: false
+          ci: true
+          release: true
+        results:
+          ci:
+            name: scorecard.yml — прогон на каждый push
+            predicate-uri: https://intoto.SCORECARD
+            location: https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os
+      - name: GitHub Artifact Attestations (SLSA Build L3)
+        type: other
+        rulesets: ["default"]
+        integration:
+          adhoc: false
+          ci: false
+          release: true
+        results:
+          release:
+            name: attestations артефактов релиза
+            predicate-uri: https://slsa.dev/provenance/v1
+            location: https://github.com/rtynbirf/polymath-os/attestations
+      - name: cosign keyless (Sigstore)
+        type: other
+        rulesets: ["default"]
+        integration:
+          adhoc: false
+          ci: false
+          release: true
+        results:
+          release:
+            name: подписи релиза
+            predicate-uri: https://slsa.dev/provenance/v1
+            location: https://github.com/rtynbirf/polymath-os/releases
+      - name: Immutable releases (GitHub)
+        type: other
+        rulesets: ["default"]
+        integration:
+          adhoc: false
+          ci: false
+          release: true
+        results:
+          release:
+            name: "releases/latest → immutable true (вскрытие ×18, PATCH API)"
+            predicate-uri: https://slsa.dev/provenance/v1
+            location: https://api.github.com/repos/rtynbirf/polymath-os/releases/latest

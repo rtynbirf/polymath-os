@@ -1,0 +1,36 @@
+name: security-insights
+
+# CUE-валидация OpenSSF Security Insights (мировой стандарт, схема v2.2.0 от
+# 31.01.2026) + freshness-страж: ревизия last-reviewed не старше 180 дней
+# (домашнее правило ревизии). Волна ×18, 2026-11-10.
+
+on:
+  push:
+    paths: [security-insights.yml, .github/workflows/security-insights.yml]
+  schedule:
+    - cron: "23 4 17 * *" # месячная ревизия freshness
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "stable"
+      - name: CUE-валидация против схемы ossf/security-insights v2.2.0
+        run: |
+          curl -sSLO https://raw.githubusercontent.com/ossf/security-insights/v2.2.0/spec/schema.cue
+          go run cuelang.org/go/cmd/cue@v0.17.1 vet -d '#SecurityInsights' schema.cue security-insights.yml
+      - name: Freshness — ревизия не старше 180 дней
+        run: |
+          REVIEWED=$(grep -E '^\s*last-reviewed:' security-insights.yml | head -1 | tr -d "'\" " | cut -d: -f2)
+          AGE=$(( ( $(date +%s) - $(date -d "$REVIEWED" +%s) ) / 86400 ))
+          echo "last-reviewed=$REVIEWED · возраст=${AGE} дн."
+          [ "$AGE" -le 180 ]
