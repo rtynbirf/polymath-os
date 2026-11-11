@@ -2,6 +2,15 @@
   <img src="banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
 </div>
 
+<!--ФОРЖ:МУЗА:НАЧАЛО-->
+<div align="center">
+  <img src="repo-muse.svg" width="100%" alt="Муза polymath-os: картина кузни ПОЛИМАТ, раунд 9" />
+  <br/>
+  <img src="forge-divider.svg" width="62%" alt="разделитель кузни ПОЛИМАТ" />
+</div>
+<!--ФОРЖ:МУЗА:КОНЕЦ-->
+
+
 # Polymath OS
 
 <p align="center"><img src=".github/social-preview.png" alt="polymath-os" width="100%"></p>
@@ -285,3 +294,10 @@ This repo was built through an iterative dialogue:
 16. **v3.25.0 (CRYSTALLIZE, current)**: 39 commits since v3.21.1 released as one version — POLIMAT-ARCHIVARIUS v2.1 holon (387 content-addressed parts, Merkle DAG, Reed-Solomon k=8/n=12, gossip-CRDT, суд), POLIMAT_PIPELINE v1.1/1.2 canon tool (verify-gate, git am idempotency, D2 fix), agent lines v3.8.0/v3.10.0/v3.10.1/v128-Хронотоп, HOLOS v2.0, evidence packs (RLHF, RAZBOR-9, emergent protocol), self-audit ПУЛЬС v2, Windows-green fixes (selftest 130/130 и 135/135 на nt). make verify 33/33, 290 runtime tests, CI green.
 
 Worklog: `~/worklog.md` (10+ Task IDs across multiple release sessions — full audit trail of every change).
+
+<!--ФОРЖ:ПОДВАЛ-->
+---
+
+<div align="center">
+  <sub>◆ картина и штандарт — ручная ковка <a href="https://github.com/rtynbirf">КУЗНИ ПОЛИМАТ</a> · ЧЕЛОВЕК=АККАУНТ=PID1 ◆</sub>
+</div>
