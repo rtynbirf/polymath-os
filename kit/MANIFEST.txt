@@ -1,0 +1,8 @@
+КОЛЛАЖ-ШТАНДАРТ · РАУНД 12 · REVE=РЕВО
+репо: polymath-os (№45)
+мастерская: МАШИННАЯ МАНДАЛА
+
+Personal sovereign media-OS. 5-layer LFS-style self-bootstrapping repo. SINGULYAR Emergent Intent Runtime v0.6. 35 ADRs. make verify 33/33. 290 tests green.
+
+Релиз иммутабелен — набор хранится в репо.
+◆ РЕВО В ОСНОВЕ ВСЕГО · КУЗНЯ ПОЛИМАТ ◆
