@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-          persist-credentials: false   # волна 17: без extraheader — пуш рукой роя (SWARM_TOKEN)
+          persist-credentials: false # волна 17: без extraheader — пуш рукой роя (SWARM_TOKEN)
       - name: дежурный обход (пять вещей)
         run: |
           if [ -f revo_obhod.py ]; then python3 revo_obhod.py || true; else echo "revo_obhod.py отсутствует — пропуск"; fi

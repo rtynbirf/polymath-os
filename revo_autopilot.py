@@ -83,6 +83,7 @@ def build_svg(facts):
     name = CFG["name"]
     school = CFG["school"]
     e = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400">']
+    e.append(f'<title>РЕВО-паспорт страницы {name} — машинная мандала (a11y)</title>')
     e.append(f'<defs><radialGradient id="rp{num}" cx="0.5" cy="0.46" r="1.05">'
              f'<stop offset="0" stop-color="{bg2}"/><stop offset="1" stop-color="{bg}"/></radialGradient></defs>')
     e.append(f'<rect width="1280" height="400" fill="{bg}"/>')

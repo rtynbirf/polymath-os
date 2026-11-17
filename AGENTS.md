@@ -14,12 +14,12 @@
 
 ## 1. ЛИМИТЫ — конституция веса
 
-| Что | GitHub | Наш потолок |
-|---|---|---|
-| Файл в git | 50MB warn · 100MB блок | **1MB** — больше → наружу |
-| Репо `.git` | <1GB ок · >5GB strongly discouraged | **250KB норма · 1MB потолок** |
-| README | рендер-обрезка >500KiB | **5KB** |
-| Роли | 🥇 ≤10KB · 🥈 ≤250KB · 🥉 ≤1MB | **ЖИР >1MB = клининг немедленно** |
+| Что         | GitHub                              | Наш потолок                       |
+| ----------- | ----------------------------------- | --------------------------------- |
+| Файл в git  | 50MB warn · 100MB блок              | **1MB** — больше → наружу         |
+| Репо `.git` | <1GB ок · >5GB strongly discouraged | **250KB норма · 1MB потолок**     |
+| README      | рендер-обрезка >500KiB              | **5KB**                           |
+| Роли        | 🥇 ≤10KB · 🥈 ≤250KB · 🥉 ≤1MB      | **ЖИР >1MB = клининг немедленно** |
 
 ## 2. КЛИНИНГ — гигиена веса (порядок фаз обязателен)
 
@@ -92,7 +92,6 @@
    из её кода.
 5. **РЕВО В ОСНОВЕ ВСЕГО · REVE=РЕВО · ЧЕЛОВЕК=АККАУНТ=PID1 · КУЗНЯ ПОЛИМАТ**
 
-
 ---
 
 ## ИНЖЕНЕРНОЕ ПРАВИЛО: BOM в JSON
@@ -112,16 +111,16 @@ text = Path(path).read_text(encoding="utf-8-sig")
 
 Референс: `singulyar-a0-audit/lex-naturae-v0.7-audit/AUDIT-REPORT.md`.
 
-
 ---
 
 ## ЗАДАНИЕ АГЕНТАМ: проверь claims через lex-naturae
 
-**Мандат Хозяина 2026-11-16.** Прежде чем объявлять результат («готово», «VALID», «PASS»), 
-запиши claim в [lex-naturae](https://github.com/rtynbirf/lex-naturae) с реальными evidence 
+**Мандат Хозяина 2026-11-16.** Прежде чем объявлять результат («готово», «VALID», «PASS»),
+запиши claim в [lex-naturae](https://github.com/rtynbirf/lex-naturae) с реальными evidence
 и прогони инструмент. Если отбивает — evidence недостаточен, «готово» рано.
 
 ### Процедура
+
 1. `self-test-audit/` в своём репо или в lex-naturae.
 2. Evidence: CSV с реальными результатами + лог-файлы с дословным выводом.
 3. Claims в `audit_claims.json` (формат lex-naturae collection).
@@ -129,7 +128,9 @@ text = Path(path).read_text(encoding="utf-8-sig")
 5. `valid=true` → подтверждено. `valid=false` → fix claims, перегоняй.
 
 ### Что ловит (проверено на себе, A-83..85)
+
 Z.ai пропустил собственные audit-claims. Инструмент отбил:
+
 - measurement_value не совпадал с CSV-ячейкой (суммировал в голове)
 - excerpt paraphrased, не verbatim
 - граф-линк неверного типа
@@ -137,7 +138,6 @@ Z.ai пропустил собственные audit-claims. Инструмен�
 После fix: 4/4 VALID. Референс: `lex-naturae/self-test-audit/`.
 
 **Правило: «готово» = lex-naturae valid=true. Не раньше.**
-
 
 ---
 
@@ -181,7 +181,6 @@ my-claim/
 
 **«Готово» = STRUCTURE PASS + lex-naturae valid=true. Не раньше. Не вместо.**
 
-
 ---
 
 ## STEP 0 GATE — исполимый, не декларативный
@@ -213,7 +212,6 @@ python /path/to/.github/scripts/step0_gate.py --check
 
 **Не «тесты прошли» — а «тесты поймали то, для чего не были написаны.»**
 
-
 ---
 
 ## RVL — RECURSIVE VERIFICATION LOOP
@@ -231,7 +229,6 @@ python .github/scripts/recursive_verify_loop.py
 
 Документация: [`docs/RVL-RECURSIVE-VERIFICATION-LOOP.md`](docs/RVL-RECURSIVE-VERIFICATION-LOOP.md)
 
-
 ---
 
 ## ATP — AGENT TRUST PASSPORT
@@ -239,6 +236,7 @@ python .github/scripts/recursive_verify_loop.py
 **Каждый агент в доме имеет ATP** — portable JSON с track record. Файл: `.github/docs/AGENT-TRUST-PASSPORT-<NAME>.json`.
 
 **Перед сотрудничеством с другим агентом — прочитай его ATP:**
+
 - `sessions`: сколько мандатов завершено, с каким результатом
 - `mistakes_recorded`: какие косяки записаны (класс Е)
 - `rvl_status`: PASS/FAIL — прошёл recursive verification
@@ -250,7 +248,6 @@ python .github/scripts/recursive_verify_loop.py
 
 Документация: [`docs/ATP-AGENT-TRUST-PASSPORT.md`](docs/ATP-AGENT-TRUST-PASSPORT.md)
 Реализация: [`docs/AGENT-TRUST-PASSPORT-Z-AI.json`](docs/AGENT-TRUST-PASSPORT-Z-AI.json) (первый ATP в доме)
-
 
 ---
 
