@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
 </div>
 
 <!--ФОРЖ:МУЗА:НАЧАЛО-->
 <div align="center">
-  <img src="repo-muse.svg" width="100%" alt="Муза polymath-os: мастерская МАШИННАЯ МАНДАЛА, кузня ПОЛИМАТ, раунд 12 · REVE=РЕВО" />
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/repo-muse.svg" width="100%" alt="Муза polymath-os: мастерская МАШИННАЯ МАНДАЛА, кузня ПОЛИМАТ, раунд 12 · REVE=РЕВО" />
   <br/>
-  <img src="forge-divider.svg" width="62%" alt="делитель мастерской МАШИННАЯ МАНДАЛА" />
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/forge-divider.svg" width="62%" alt="делитель мастерской МАШИННАЯ МАНДАЛА" />
 </div>
 <!--ФОРЖ:МУЗА:КОНЕЦ-->
 
@@ -24,7 +24,7 @@
 
 # Polymath OS
 
-<p align="center"><img src=".github/social-preview.png" alt="polymath-os" width="100%"></p>
+<p align="center"><img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/.github/social-preview.png" alt="polymath-os" width="100%"></p>
 
 > **Open-source ideal repository.** Clone it. Run `make verify`. Every claim in this repo is reproducible by that one command. If it exits 0 — every claim holds. If non-zero — the claim that failed is shown.
 
