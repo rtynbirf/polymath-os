@@ -11,7 +11,7 @@ version: 2
 updates:
   # ── npm (root package.json + workspaces) ─────────────────────────────────
   - package-ecosystem:
-    open-pull-requests-limit: 0  # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) npm
+    open-pull-requests-limit: 0 # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) npm
     directory: /
     schedule:
       interval: weekly
@@ -45,7 +45,7 @@ updates:
 
   # ── GitHub Actions (workflows in .github/workflows/) ─────────────────────
   - package-ecosystem:
-    open-pull-requests-limit: 0  # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) github-actions
+    open-pull-requests-limit: 0 # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) github-actions
     directory: /
     schedule:
       interval: weekly
