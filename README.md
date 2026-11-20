@@ -79,7 +79,7 @@ _Замер: 2026-11-10 08:11 UTC · [прогон](https://github.com/rtynbirf/
 | **Layer 1**              | Repository Structure — pnpm + Turborepo + Changesets + CODEOWNERS                                                                  | repo root                                                       |
 | **Cross-cutting**        | Security (cosign/SLSA/SBOM) + OTel + git + token hygiene                                                                           | everywhere                                                      |
 
-For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](./docs/adr) (**35 ADRs**: 0001-0029, 0031-0036).
+For the mental model, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For how every architectural decision was made, see [`docs/adr/`](https://github.com/rtynbirf/polymath-os/tree/main/docs/adr) (**35 ADRs**: 0001-0029, 0031-0036).
 
 ## Quick start
 
@@ -269,7 +269,7 @@ Emergence here is a **falsifiable hypothesis**, not a slogan. The ablation ladde
 | [`runtime/docs/AUDIT_POLYMATH.md`](./runtime/docs/AUDIT_POLYMATH.md)                 | The audit that drove the fixes                                                               |
 | [`apps/browser/decree-portal.html`](./apps/browser/decree-portal.html)               | Decree Portal UI (HTML/JS, browser + Electron)                                               |
 | [`apps/browser/decree-bridge.js`](./apps/browser/decree-bridge.js)                   | Node bridge: HTML UI ↔ Python DecreeLog ↔ SQLite                                             |
-| [`apps/browser/electron/`](./apps/browser/electron/)                                 | Electron desktop wrapper (v3.7.0+)                                                           |
+| [`apps/browser/electron/`](https://github.com/rtynbirf/polymath-os/tree/main/apps/browser/electron)                                 | Electron desktop wrapper (v3.7.0+)                                                           |
 | [`SECURITY.md`](./SECURITY.md)                                                       | Security policy + **Token hygiene best practices (v3.8.0)**                                  |
 
 ## Contributing
