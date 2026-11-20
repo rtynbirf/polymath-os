@@ -251,7 +251,7 @@ Emergence here is a **falsifiable hypothesis**, not a slogan. The ablation ladde
 | [`CHANGELOG.md`](./CHANGELOG.md)                                                     | Release history (v1.0.0 → v3.25.0, all changes logged)                                       |
 | [`MANIFEST.json`](./MANIFEST.json)                                                   | Root manifest (ADR-0020 — manifest-driven architecture)                                      |
 | [`docs/AUDIT_RESPONSE.md`](./docs/AUDIT_RESPONSE.md)                                 | Audit findings A1-A11 → ADR → action mapping                                                 |
-| [`docs/adr/`](./docs/adr)                                                            | **35 ADRs (0001-0029, 0031-0036)** — every architectural decision                            |
+| [`docs/adr/`](https://github.com/rtynbirf/polymath-os/tree/main/docs/adr)                                                            | **35 ADRs (0001-0029, 0031-0036)** — every architectural decision                            |
 | [`docs/MANIFESTO.md`](./docs/MANIFESTO.md)                                           | System manifesto (4 theses: PID=1, PAROLE>LANGUE, LFS, security context)                     |
 | [`docs/SOVEREIGNTY_CONTRACT.md`](./docs/SOVEREIGNTY_CONTRACT.md)                     | Sovereignty contract (Tier 1/2/3 dependency classification)                                  |
 | [`docs/01-principles.md`](./docs/01-principles.md)                                   | 18 principles (constitution)                                                                 |
