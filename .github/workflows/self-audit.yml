@@ -25,6 +25,10 @@ jobs:
     # (checkout с persist-credentials: false); пуш пульса идёт через админ-PAT
     # CELL_SWARM_DISPATCH_TOKEN из шага записи — write этому джобу не нужен.
     name: Замер и запись пульса
+    # Волна ИДЕАЛЬНЫЙ ДОМ: job-пермиссия на запись — пульсу больше не нужен
+    # админ-PAT, дышит рукой самого репо (см. env шага записи).
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -189,22 +193,22 @@ jobs:
 
       - name: Запись пульса — ритм без шума
         env:
-          # Пуш от имени владельца: ruleset main-scorecard-protection требует PR,
-          # bypass admin (владелец) — легальный обход для бота-хранителя ритма.
-          # Волна ×9 (2026-11-09): ruleset 26757855 на main (PR + 2 approvals + 2
-          # status checks) отклонял пуш github-actions[bot] (GH013). bypass_mode=always
-          # для Repository admin → админ-PAT владельца (секрет CELL_SWARM_DISPATCH_TOKEN,
-          # волна ×9.2) пушит напрямую; подпись коммита — SSH-ключ из PULSE_SIGNING_KEY
-          # (шаг выше) сохраняется.
-          PULSE_PAT: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
+          # Волна ИДЕАЛЬНЫЙ ДОМ (2026-11-24, сверка 11/11): пуш — рукой самого
+          # репозитория (GITHUB_TOKEN, job contents:write). Админ-PAT из секрета
+          # CELL_SWARM_DISPATCH_TOKEN мёртв — прогон #13 (45198115412) упал на нём:
+          # «Invalid username or token», exit 128, пуш ушёл анонимным. Ruleset на
+          # main сегодня мягче волны ×9: только deletion / non_fast_forward /
+          # required_linear_history (PR-требование снято) — bot-пуш проходит, как
+          # в swarm-sync (заход 6) и karta-nightly. Подпись коммита — SSH-ключ из
+          # PULSE_SIGNING_KEY (шаг выше): атрибуция rtynbirf и Verified остаются;
+          # меняется только рука, которая несёт коммит.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # Защита от persist-credentials: остаточный extraheader перекрыл бы
           # креды URL токеном github-actions[bot] — снимаем, если вдруг появился.
           git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
-          if [ -n "$PULSE_PAT" ]; then
-            git remote set-url origin "https://x-access-token:${PULSE_PAT}@github.com/${GITHUB_REPOSITORY}.git"
-          fi
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           # Санитизация вывода push: stderr перехватывается, креды из remote-URL
           # маскируются — токен не попадает в лог шага; код возврата сохраняется.
           push_pulse() {
