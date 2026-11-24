@@ -44,7 +44,13 @@ jobs:
 
       - name: Коммит щита — только при изменении показаний
         env:
-          PULSE_PAT: ${{ secrets.CELL_SWARM_DISPATCH_TOKEN }}
+          # Клетка A (2026-11-24, слияние 4 клеток): пуш — рукой самого репо.
+          # Админ-PAT CELL_SWARM_DISPATCH_TOKEN мёртв — рана ЖИВОГО ЩИТА #3
+          # (run 45017586430: «Invalid username or token», exit 128, анонимный
+          # пуш) — тот же корень, что у ПУЛЬСА #13, закрытый 3ac4e33d.
+          # GITHUB_TOKEN + job contents:write пушит ботом; SSH-подпись
+          # PULSE_SIGNING_KEY сохранена: атрибуция и Verified остаются.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULSE_SIGNING_KEY: ${{ secrets.PULSE_SIGNING_KEY }}
         run: |
           set -euo pipefail
@@ -66,9 +72,7 @@ jobs:
             git config user.signingkey "$KEY_FILE.pub"
             git config commit.gpgsign true
           fi
-          if [ -n "$PULSE_PAT" ]; then
-            git remote set-url origin "https://x-access-token:${PULSE_PAT}@github.com/${GITHUB_REPOSITORY}.git"
-          fi
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git add README.md
           git commit -s -m "щит: живой пересчёт показаний (scorecard/релиз/SBOM/OSPS/TTL) [skip ci]"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" 2>/dev/null || true

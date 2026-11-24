@@ -1,0 +1,61 @@
+name: "СТРАЖ КРАСНЫХ · 0 молчащих (клетка A)"
+
+# Исполняемая CI-политика (приказ 2026-11-24, слияние 4 клеток в khozyain).
+# Принцип invariant-manifest «порождение должно мочь быть опровергнутым»,
+# доведённый до принуждения: красный прогон — порождение; его опровержение —
+# запись run-id в ОПИСИ РАН (KNOWN_ISSUES.md). Красный без записи делает
+# ЭТОТ страж красным. Молчание невозможно: либо рана записана, либо страж
+# кричит. (Класс SilentGuard: сигнал в модели оставляет ~70% неверных —
+# решает принуждение в harness; приложение сверки 11/11, claim по исследованию,
+# машиной не перепроверен.)
+
+on:
+  schedule:
+    - cron: "31 5 * * *"   # ежедневно 05:31 UTC — смещённый ритм дома
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: red-sentinel
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Красный без записи в ОПИСИ РАН = молчание = красный
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Сверка красных прогонов с ОПИСЬЮ РАН
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SINCE=$(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          echo "## СТРАЖ КРАСНЫХ · $(date -u +%FT%TZ) · окно с $SINCE" >> "$GITHUB_STEP_SUMMARY"
+          FAIL=0
+          COUNT=0
+          for id in $(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs?per_page=100&status=failure&created=>=$SINCE" --jq '.workflow_runs[].id'); do
+            COUNT=$((COUNT+1))
+            if grep -q "$id" KNOWN_ISSUES.md; then
+              echo "· run $id — записан в ОПИСИ РАН (опровержим)"
+            else
+              echo "::error file=KNOWN_ISSUES.md::красный прогон $id не записан в ОПИСИ РАН — молчащий красный (клетка A: 0 молчащих)"
+              FAIL=1
+            fi
+          done
+          {
+            echo "красных прогонов в окне: $COUNT"
+            if [ "$FAIL" = "1" ]; then
+              echo "ВЕРДИКТ: ворота не пройдены — есть молчащие красные; каждый красный обязан иметь свой run-id в KNOWN_ISSUES.md"
+            else
+              echo "ВЕРДИКТ: молчащих красных нет — каждое падение опровержимо записью в ОПИСИ РАН"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$FAIL"
