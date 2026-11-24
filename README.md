@@ -48,13 +48,13 @@
 
 | Источник | Живое значение |
 | --- | --- |
-| OpenSSF Scorecard | **7.5** / 10 — [живой замер](https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os) |
+| OpenSSF Scorecard | **6.2** / 10 — [живой замер](https://scorecard.dev/viewer/?uri=github.com/rtynbirf/polymath-os) |
 | Последний релиз | **v3.25.0** (2026-11-06) · 8 артефактов · цепь аттестаций ×4 (cosign + SLSA) |
 | SBOM CycloneDX 1.6 | **37 компонентов** — артефакт релиза скачан и распарсен живьём |
 | OSPS Baseline v2026.08.28 (self-assessed) | L1 22✅/2⚠️/0❌ · L2 19✅/0⚠️/0❌ · L3 9✅/9⚠️/1❌ — [матрица](./OSPS-BASELINE-MATRIX.md) |
-| TTL мандатов (П-74) | 🟡 29 дн. до 2026-12-09 — реестр П-74 (приватный) |
+| TTL мандатов (П-74) | реестр приватен · n/a |
 
-_Замер: 2026-11-10 08:11 UTC · [прогон](https://github.com/rtynbirf/polymath-os/actions/workflows/living-shield.yml) · ручная правка между маркерами перезаписывается._
+_Замер: 2026-11-24 00:36 UTC · [прогон](https://github.com/rtynbirf/polymath-os/actions/runs/45298453968) · ручная правка между маркерами перезаписывается._
 <!-- LIVING-SHIELD:END -->
 
 ---
