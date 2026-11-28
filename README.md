@@ -1,5 +1,7 @@
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
+
+<a href="https://github.com/rtynbirf/polymath-os"><img src="banner.png" width="100%" alt="polymath-os — штандарт мастерской в каноне ORNAMENTAL MYTHO-REALISM"></a>
+
 </div>
 
 <!--ФОРЖ:МУЗА:НАЧАЛО-->
@@ -12,13 +14,23 @@
 
 <!--ФОРЖ:ПАСПОРТ:НАЧАЛО-->
 <div align="center">
-  <img src="revo-page.svg" width="100%" alt="РЕВО-паспорт страницы polymath-os в каноне ORNAMENTAL MYTHO-REALISM: орнаментальная решётка, медальон-миф, строение файлов, лексикон — по фактическому контенту" />
+  <img src="revo-page.svg" width="100%" alt="РЕВО-паспорт страницы polymath-os №45 в каноне ORNAMENTAL MYTHO-REALISM: орнаментальная решётка, медальон-миф, строение файлов, лексикон — по фактическому контенту" />
 </div>
 
 | ФАЙЛОВ | ПАПОК | КОММИТОВ | ОБНОВЛЕНО | РЕЛИЗОВ |
 |---:|---:|---:|---|---:|
-| 488 | 85 | 398 | 2026-11-28 | 30 |
+| 482 | 88 | 1 | 2026-11-28 | 46 |
 <!--ФОРЖ:ПАСПОРТ:КОНЕЦ-->
+
+# polymath-os
+
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/polymath-os@main/banner.png" alt="polymath-os — Суверенная персональная media-OS: 5 слоёв, самосборка" width="100%">
+</div>
+
+
+
+
 
 
 
